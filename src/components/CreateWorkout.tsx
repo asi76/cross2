@@ -1,213 +1,264 @@
 import { useState } from 'react';
-import { Plus, Minus, Save, RotateCcw, ChevronDown, ChevronUp, Check } from 'lucide-react';
-import { useWorkout } from '../hooks/useWorkout';
-import { muscleGroupLabels, muscleGroupColors, getExercisesByMuscleGroup } from '../data/exercises';
-import { Station, MuscleGroup, StationExercise } from '../data/types';
+import { motion } from 'framer-motion';
+import { 
+  Plus, 
+  Trash2, 
+  Save, 
+  Play, 
+  ChevronLeft,
+  Dumbbell
+} from 'lucide-react';
+import { STATIONS, Station, WorkoutExercise } from '../data/types';
+import { getExerciseById } from '../data/exercises';
+import { ExerciseLibrary } from './ExerciseLibrary';
 
-export function CreateWorkout() {
-  const { currentWorkout, setCurrentWorkout, saveWorkout, resetWorkout } = useWorkout();
-  const [expandedStation, setExpandedStation] = useState<number | null>(null);
-  const [workoutName, setWorkoutName] = useState(currentWorkout.name);
-  const [showSaved, setShowSaved] = useState(false);
+interface CreateWorkoutProps {
+  onSave: (workout: any) => void;
+  onStart: (workout: any) => void;
+  onBack: () => void;
+}
 
-  const updateStation = (index: number, updates: Partial<Station>) => {
-    const newStations = [...currentWorkout.stations];
-    newStations[index] = { ...newStations[index], ...updates };
-    setCurrentWorkout({ ...currentWorkout, stations: newStations });
+export const CreateWorkout = ({ onSave, onStart, onBack }: CreateWorkoutProps) => {
+  const [workoutName, setWorkoutName] = useState('My Workout');
+  const [stations, setStations] = useState<Station[]>(
+    STATIONS.map((name, index) => ({
+      id: `station-${index}`,
+      name,
+      exercises: []
+    }))
+  );
+  const [selectedStationIndex, setSelectedStationIndex] = useState(0);
+  const [showExerciseLibrary, setShowExerciseLibrary] = useState(false);
+
+  const addExerciseToStation = (stationIndex: number, exerciseId: string) => {
+    setStations(prev => prev.map((station, idx) => {
+      if (idx !== stationIndex) return station;
+      
+      const existing = station.exercises.find(e => e.exerciseId === exerciseId);
+      if (existing) return station;
+      
+      return {
+        ...station,
+        exercises: [
+          ...station.exercises,
+          { exerciseId, sets: 3, reps: 10, rest: 60 }
+        ]
+      };
+    }));
   };
 
-  const assignExercise = (stationIndex: number, exercise: StationExercise) => {
-    const station = currentWorkout.stations[stationIndex];
-    updateStation(stationIndex, {
-      exercise: { ...exercise, muscleGroup: station.muscleGroup },
-    });
-    setExpandedStation(null);
+  const removeExerciseFromStation = (stationIndex: number, exerciseId: string) => {
+    setStations(prev => prev.map((station, idx) => {
+      if (idx !== stationIndex) return station;
+      return {
+        ...station,
+        exercises: station.exercises.filter(e => e.exerciseId !== exerciseId)
+      };
+    }));
   };
 
-  const clearExercise = (stationIndex: number) => {
-    updateStation(stationIndex, { exercise: undefined });
+  const updateExercise = (stationIndex: number, exerciseId: string, updates: Partial<WorkoutExercise>) => {
+    setStations(prev => prev.map((station, idx) => {
+      if (idx !== stationIndex) return station;
+      return {
+        ...station,
+        exercises: station.exercises.map(ex => 
+          ex.exerciseId === exerciseId ? { ...ex, ...updates } : ex
+        )
+      };
+    }));
   };
 
   const handleSave = () => {
-    setCurrentWorkout({ ...currentWorkout, name: workoutName });
-    saveWorkout({ ...currentWorkout, name: workoutName });
-    setShowSaved(true);
-    setTimeout(() => setShowSaved(false), 2000);
+    const workout = {
+      id: Date.now().toString(),
+      name: workoutName,
+      stations,
+      createdAt: new Date().toISOString()
+    };
+    onSave(workout);
   };
 
-  const totalExercises = currentWorkout.stations.filter(s => s.exercise).length;
+  const handleStart = () => {
+    const workout = {
+      id: Date.now().toString(),
+      name: workoutName,
+      stations,
+      createdAt: new Date().toISOString()
+    };
+    onStart(workout);
+  };
+
+  const currentStation = stations[selectedStationIndex];
+  const totalExercises = stations.reduce((acc, s) => acc + s.exercises.length, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Workout Name */}
-      <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-        <label className="text-xs text-zinc-400 uppercase tracking-wider font-medium">Workout Name</label>
-        <input
-          type="text"
-          value={workoutName}
-          onChange={e => setWorkoutName(e.target.value)}
-          className="mt-1 w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-          placeholder="My Workout"
-        />
-      </div>
-
-      {/* Workout Settings */}
-      <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="text-xs text-zinc-400 uppercase tracking-wider font-medium">Rounds</label>
-            <div className="mt-1 flex items-center gap-2">
-              <button
-                onClick={() => setCurrentWorkout({ ...currentWorkout, rounds: Math.max(1, currentWorkout.rounds - 1) })}
-                className="w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="text-xl font-bold text-white w-8 text-center">{currentWorkout.rounds}</span>
-              <button
-                onClick={() => setCurrentWorkout({ ...currentWorkout, rounds: Math.min(10, currentWorkout.rounds + 1) })}
-                className="w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-zinc-400 uppercase tracking-wider font-medium">Rest (stations)</label>
-            <div className="mt-1 flex items-center gap-2">
-              <button
-                onClick={() => setCurrentWorkout({ ...currentWorkout, restBetweenStations: Math.max(10, currentWorkout.restBetweenStations - 5) })}
-                className="w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="text-xl font-bold text-white w-10 text-center">{currentWorkout.restBetweenStations}s</span>
-              <button
-                onClick={() => setCurrentWorkout({ ...currentWorkout, restBetweenStations: Math.min(120, currentWorkout.restBetweenStations + 5) })}
-                className="w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-zinc-400 uppercase tracking-wider font-medium">Rest (rounds)</label>
-            <div className="mt-1 flex items-center gap-2">
-              <button
-                onClick={() => setCurrentWorkout({ ...currentWorkout, restBetweenRounds: Math.max(30, currentWorkout.restBetweenRounds - 15) })}
-                className="w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="text-xl font-bold text-white w-10 text-center">{currentWorkout.restBetweenRounds}s</span>
-              <button
-                onClick={() => setCurrentWorkout({ ...currentWorkout, restBetweenRounds: Math.min(180, currentWorkout.restBetweenRounds + 15) })}
-                className="w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stations */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Workout Stations</h2>
-          <span className="text-sm text-zinc-400">{totalExercises}/6 assigned</span>
+    <div className="min-h-screen bg-dark-bg">
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="flex items-center justify-between mb-6">
+          <button 
+            onClick={onBack}
+            className="p-2 hover:bg-dark-hover rounded-lg text-gray-400 hover:text-white"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <input
+            type="text"
+            value={workoutName}
+            onChange={(e) => setWorkoutName(e.target.value)}
+            className="bg-dark-card border border-dark-border rounded-lg px-4 py-2 text-white text-center font-medium focus:outline-none focus:border-blue-500"
+            placeholder="Workout Name"
+          />
+          <div className="w-10" />
         </div>
 
-        {currentWorkout.stations.map((station, index) => (
-          <div key={station.id} className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+        <div className="mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {stations.map((station, idx) => (
+              <button
+                key={station.id}
+                onClick={() => setSelectedStationIndex(idx)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                  selectedStationIndex === idx
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-dark-card border border-dark-border text-gray-400 hover:text-white'
+                }`}
+              >
+                {station.name.replace('Station ', 'S')}
+                {station.exercises.length > 0 && (
+                  <span className="ml-2 px-1.5 py-0.5 bg-white/20 rounded text-xs">
+                    {station.exercises.length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <motion.div
+          key={selectedStationIndex}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="bg-dark-card border border-dark-border rounded-xl p-6 mb-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">{currentStation.name}</h2>
             <button
-              onClick={() => setExpandedStation(expandedStation === index ? null : index)}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
+              onClick={() => setShowExerciseLibrary(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <span className="w-6 h-6 bg-zinc-800 rounded-full flex items-center justify-center text-xs font-bold text-zinc-400">
-                  {index + 1}
-                </span>
-                <span className={`px-2 py-0.5 rounded text-xs font-medium border ${muscleGroupColors[station.muscleGroup]}`}>
-                  {muscleGroupLabels[station.muscleGroup]}
-                </span>
-                {station.exercise && (
-                  <span className="text-sm text-zinc-300">{station.exercise.name}</span>
-                )}
-              </div>
-              {expandedStation === index ? (
-                <ChevronUp className="w-4 h-4 text-zinc-400" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-zinc-400" />
-              )}
+              <Plus className="w-4 h-4" />
+              Add Exercise
             </button>
-
-            {expandedStation === index && (
-              <div className="border-t border-zinc-800">
-                {/* Exercise List */}
-                <div className="max-h-64 overflow-y-auto p-2 space-y-1">
-                  {getExercisesByMuscleGroup(station.muscleGroup).map(exercise => (
-                    <button
-                      key={exercise.id}
-                      onClick={() => assignExercise(index, exercise)}
-                      className="w-full px-3 py-2 rounded-lg flex items-center justify-between hover:bg-zinc-800 transition-colors text-left"
-                    >
-                      <div>
-                        <span className="text-sm font-medium text-white">{exercise.name}</span>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          {exercise.reps && (
-                            <span className="text-xs text-zinc-400">{exercise.reps} reps</span>
-                          )}
-                          {exercise.duration && (
-                            <span className="text-xs text-zinc-400">{exercise.duration}s</span>
-                          )}
-                          <span className={`text-xs px-1.5 py-0.5 rounded ${
-                            exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
-                            exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-red-500/20 text-red-400'
-                          }`}>
-                            {exercise.difficulty}
-                          </span>
-                        </div>
-                      </div>
-                      {station.exercise?.id === exercise.id && (
-                        <Check className="w-4 h-4 text-emerald-400" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                {station.exercise && (
-                  <button
-                    onClick={() => clearExercise(index)}
-                    className="w-full px-4 py-2 border-t border-zinc-800 text-xs text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center gap-1"
-                  >
-                    <RotateCcw className="w-3 h-3" /> Clear exercise
-                  </button>
-                )}
-              </div>
-            )}
           </div>
-        ))}
+
+          {currentStation.exercises.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Dumbbell className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>No exercises added yet</p>
+              <p className="text-sm">Click "Add Exercise" to get started</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentStation.exercises.map((ex) => {
+                const exercise = getExerciseById(ex.exerciseId);
+                if (!exercise) return null;
+                return (
+                  <motion.div
+                    key={ex.exerciseId}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-dark-hover border border-dark-border rounded-lg p-4"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="text-white font-medium">{exercise.name}</h3>
+                        <p className="text-gray-500 text-sm">{exercise.description}</p>
+                      </div>
+                      <button
+                        onClick={() => removeExerciseFromStation(selectedStationIndex, ex.exerciseId)}
+                        className="p-1.5 hover:bg-red-500/20 text-red-500 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-gray-500 text-xs">Sets</label>
+                        <input
+                          type="number"
+                          value={ex.sets}
+                          onChange={(e) => updateExercise(selectedStationIndex, ex.exerciseId, { sets: parseInt(e.target.value) || 1 })}
+                          className="w-full bg-dark-bg border border-dark-border rounded px-3 py-2 text-white"
+                          min="1"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-gray-500 text-xs">Reps</label>
+                        <input
+                          type="number"
+                          value={ex.reps}
+                          onChange={(e) => updateExercise(selectedStationIndex, ex.exerciseId, { reps: parseInt(e.target.value) || 1 })}
+                          className="w-full bg-dark-bg border border-dark-border rounded px-3 py-2 text-white"
+                          min="1"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-gray-500 text-xs">Rest (sec)</label>
+                        <input
+                          type="number"
+                          value={ex.rest}
+                          onChange={(e) => updateExercise(selectedStationIndex, ex.exerciseId, { rest: parseInt(e.target.value) || 0 })}
+                          className="w-full bg-dark-bg border border-dark-border rounded px-3 py-2 text-white"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleSave}
+            disabled={totalExercises === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-dark-hover border border-dark-border text-white rounded-lg font-medium hover:bg-dark-border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Save className="w-5 h-5" />
+            Save Workout
+          </button>
+          <button
+            onClick={handleStart}
+            disabled={totalExercises === 0}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Play className="w-5 h-5" />
+            Start Workout
+          </button>
+        </div>
+
+        <p className="text-center text-gray-500 text-sm mt-4">
+          {totalExercises} exercises across {stations.filter(s => s.exercises.length > 0).length} stations
+        </p>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-3">
-        <button
-          onClick={resetWorkout}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-medium transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Reset
-        </button>
-        <button
-          onClick={handleSave}
-          className="flex-[2] flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-medium transition-colors"
-        >
-          {showSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {showSaved ? 'Saved!' : 'Save Workout'}
-        </button>
-      </div>
+      {showExerciseLibrary && (
+        <div className="fixed inset-0 bg-black/80 z-50 overflow-auto">
+          <div className="max-w-6xl mx-auto my-4">
+            <ExerciseLibrary
+              isModal
+              onSelectExercise={(id) => {
+                addExerciseToStation(selectedStationIndex, id);
+                setShowExerciseLibrary(false);
+              }}
+              onClose={() => setShowExerciseLibrary(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
