@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import cors from 'cors';
+import { google } from 'googleapis';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -15,30 +16,17 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Serve static GIFs from public/gifs
-app.use('/gifs', express.static(path.join(__dirname, '..', 'public', 'gifs')));
+// Serve static files from public (including local GIFs fallback)
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 
-// Multer setup for file uploads — save directly to public/gifs
-const ensureGifsDir = () => {
-  const gifsDir = path.join(__dirname, '..', 'public', 'gifs');
-  if (!fs.existsSync(gifsDir)) {
-    fs.mkdirSync(gifsDir, { recursive: true });
-  }
-  return gifsDir;
-};
-
-const multerUpload = multer({
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'image/gif') {
-      cb(null, true);
-    } else {
-      cb(new Error('Only GIF files are allowed'));
-    }
-  }
+// Multer setup for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-// Path to local GIF mapping file
+// Path to GIF mapping file (stored in public so it can be served)
 const MAPPING_FILE = path.join(__dirname, '..', 'public', 'gif-mapping.json');
 
 // Load existing mapping
@@ -58,13 +46,177 @@ const saveMapping = (mapping) => {
   fs.writeFileSync(MAPPING_FILE, JSON.stringify(mapping, null, 2));
 };
 
+// Google Drive setup
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/oauth2callback'
+);
+
+const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID || '1YRIKZ5HPL76KDOPPzbOt2qIWrlRoGHL0';
+
+// Upload to Google Drive
+const uploadToDrive = async (fileBuffer, fileName, exerciseId) => {
+  try {
+    // Set credentials if provided
+    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
+      oauth2Client.setCredentials({
+        access_token: process.env.GOOGLE_ACCESS_TOKEN,
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+      });
+      
+      // Refresh token if expired
+      try {
+        const { credentials } = await oauth2Client.refreshAccessToken();
+        process.env.GOOGLE_ACCESS_TOKEN = credentials.access_token;
+        oauth2Client.setCredentials(credentials);
+      } catch (refreshError) {
+        console.log('Token refresh failed, trying with current credentials');
+      }
+    }
+
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+    // Find or create the GIFs folder in Drive
+    let folderId = null;
+    
+    // First check if apps folder exists
+    const appsRes = await drive.files.list({
+      q: "name='apps' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+      fields: 'files(id, name)'
+    });
+    
+    let appsFolderId = DRIVE_FOLDER_ID; // Default to root or use the configured folder
+    
+    if (appsRes.data.files.length > 0) {
+      appsFolderId = appsRes.data.files[0].id;
+    }
+    
+    // Check for crosstraining folder
+    const ctRes = await drive.files.list({
+      q: `name='crosstraining' and '${appsFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      fields: 'files(id, name)'
+    });
+    
+    let ctFolderId = null;
+    if (ctRes.data.files.length > 0) {
+      ctFolderId = ctRes.data.files[0].id;
+    } else {
+      // Create crosstraining folder
+      const ctFolder = await drive.files.create({
+        resource: {
+          name: 'crosstraining',
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: [appsFolderId]
+        },
+        fields: 'id'
+      });
+      ctFolderId = ctFolder.data.id;
+    }
+    
+    // Check for or create gif subfolder
+    const gifRes = await drive.files.list({
+      q: `name='gif' and '${ctFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      fields: 'files(id, name)'
+    });
+    
+    if (gifRes.data.files.length > 0) {
+      folderId = gifRes.data.files[0].id;
+    } else {
+      const gifFolder = await drive.files.create({
+        resource: {
+          name: 'gif',
+          mimeType: 'application/vnd.google-apps.folder',
+          parents: [ctFolderId]
+        },
+        fields: 'id'
+      });
+      folderId = gifFolder.data.id;
+    }
+
+    // Delete existing file for this exercise if exists
+    const existingFiles = await drive.files.list({
+      q: `name='${exerciseId}.gif' and '${folderId}' in parents and trashed=false`,
+      fields: 'files(id, name)',
+    });
+
+    for (const existingFile of existingFiles.data.files) {
+      try {
+        await drive.files.delete({ fileId: existingFile.id });
+      } catch (e) {
+        console.log('Could not delete existing file:', e.message);
+      }
+    }
+
+    // Upload new file
+    const fileMeta = {
+      name: `${exerciseId}.gif`,
+      parents: [folderId],
+    };
+
+    const media = {
+      mimeType: 'image/gif',
+      body: Buffer.from(fileBuffer),
+    };
+
+    const response = await drive.files.create({
+      resource: fileMeta,
+      media: media,
+      fields: 'id',
+    });
+
+    // Make the file public with anyone reader permission
+    await drive.permissions.create({
+      fileId: response.data.id,
+      requestBody: {
+        role: 'reader',
+        type: 'anyone',
+      },
+    });
+
+    // Return direct download URL
+    const directUrl = `https://drive.google.com/uc?export=view&id=${response.data.id}`;
+    
+    return {
+      id: response.data.id,
+      url: directUrl,
+    };
+  } catch (error) {
+    console.error('Error uploading to Drive:', error);
+    throw error;
+  }
+};
+
+// Delete from Google Drive
+const deleteFromDrive = async (fileId) => {
+  try {
+    if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
+      oauth2Client.setCredentials({
+        access_token: process.env.GOOGLE_ACCESS_TOKEN,
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+      });
+    }
+
+    const drive = google.drive({ version: 'v3', auth: oauth2Client });
+    await drive.files.delete({ fileId });
+    return true;
+  } catch (error) {
+    console.error('Error deleting from Drive:', error);
+    throw error;
+  }
+};
+
 // Routes
 
-// Upload GIF — saves to public/gifs/ and returns local URL
-app.post('/api/upload-gif', multerUpload.single('gif'), async (req, res) => {
+// Upload GIF to Google Drive
+app.post('/api/upload-gif', upload.single('gif'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    if (req.file.mimetype !== 'image/gif') {
+      return res.status(400).json({ error: 'Only GIF files are allowed' });
     }
 
     const { exerciseId } = req.body;
@@ -72,46 +224,39 @@ app.post('/api/upload-gif', multerUpload.single('gif'), async (req, res) => {
       return res.status(400).json({ error: 'Exercise ID required' });
     }
 
-    const gifsDir = ensureGifsDir();
-    const filename = `${exerciseId}.gif`;
-    const filePath = path.join(gifsDir, filename);
-
-    // Save file locally
-    fs.writeFileSync(filePath, req.file.buffer);
-
-    // Local URL (relative, works on same origin)
-    const localUrl = `/gifs/${filename}`;
+    console.log(`Uploading GIF for exercise: ${exerciseId}`);
+    
+    const result = await uploadToDrive(req.file.buffer, req.file.originalname, exerciseId);
 
     // Update mapping
     const mapping = loadMapping();
-    mapping[exerciseId] = localUrl;
+    mapping[exerciseId] = result.url;
     saveMapping(mapping);
 
-    console.log(`Uploaded ${filename} -> ${localUrl}`);
-    res.json({ success: true, url: localUrl, filename });
+    console.log(`Upload successful: ${exerciseId} -> ${result.url}`);
+    res.json({ success: true, url: result.url, fileId: result.id });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Upload failed', details: error.message });
   }
 });
 
-// Delete GIF — removes from public/gifs and mapping
+// Delete GIF from Google Drive and mapping
 app.delete('/api/delete-gif', async (req, res) => {
   try {
-    const { exerciseId } = req.body;
-
+    const { exerciseId, fileId } = req.body;
+    
     if (!exerciseId) {
       return res.status(400).json({ error: 'Exercise ID required' });
     }
 
-    const gifsDir = ensureGifsDir();
-    const filename = `${exerciseId}.gif`;
-    const filePath = path.join(gifsDir, filename);
-
-    // Delete file if exists
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log(`Deleted ${filename}`);
+    // If fileId provided, delete from Drive
+    if (fileId) {
+      try {
+        await deleteFromDrive(fileId);
+      } catch (e) {
+        console.log('File may not exist in Drive:', e.message);
+      }
     }
 
     // Update mapping
@@ -128,13 +273,18 @@ app.delete('/api/delete-gif', async (req, res) => {
   }
 });
 
-// Get mapping
+// Get current GIF mapping
 app.get('/api/gif-mapping', (req, res) => {
   const mapping = loadMapping();
   res.json(mapping);
 });
 
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`GIFs will be served from: http://localhost:${PORT}/gifs/`);
+  console.log(`Google Drive folder: ${DRIVE_FOLDER_ID}`);
 });

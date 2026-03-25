@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, Play, Clock, Zap, Target, Trash2, Upload, Image, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Play, Clock, Zap, Target, Trash2, Upload, Image, Loader2, Search } from 'lucide-react';
 import { Exercise } from '../data/types';
 
 interface ExerciseDetailModalProps {
@@ -230,6 +230,13 @@ export function ExerciseDetailModal({
     fileInputRef.current?.click();
   };
 
+  // Open Google Images search for this exercise
+  const searchGif = () => {
+    const query = encodeURIComponent(`${exercise.name} exercise gif`);
+    const searchUrl = `https://www.google.com/search?tbs=itp:animated&tbm=isch&q=${query}`;
+    window.open(searchUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
       <div 
@@ -293,46 +300,61 @@ export function ExerciseDetailModal({
               </div>
             )}
 
-            {/* Drag & Drop Area */}
-            <div
-              className={`mt-4 border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
-                isDragging
-                  ? 'border-emerald-400 bg-emerald-500/10'
-                  : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/gif"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              
-              {isUploading ? (
-                <div className="flex flex-col items-center">
-                  <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
-                  <p className="text-sm text-zinc-400">Caricamento...</p>
-                </div>
-              ) : (
-                <>
-                  <Upload className={`w-8 h-8 mx-auto mb-2 ${isDragging ? 'text-emerald-400' : 'text-zinc-500'}`} />
-                  <p className="text-sm text-zinc-400 mb-2">
-                    Trascina qui una GIF oppure
-                  </p>
-                  <button
-                    onClick={openFilePicker}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
-                  >
-                    <Image className="w-4 h-4" />
-                    Sfoglia
-                  </button>
-                  <p className="text-xs text-zinc-600 mt-2">Format: GIF (max 10MB)</p>
-                </>
-              )}
+            {/* Search & Upload Area */}
+            <div className="mt-4 space-y-3">
+              {/* Search GIF Button */}
+              <button
+                onClick={searchGif}
+                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Search className="w-4 h-4" />
+                Cerca GIF su Google Immagini
+              </button>
+
+              {/* Drag & Drop Zone */}
+              <div
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                  isDragging
+                    ? 'border-emerald-400 bg-emerald-500/10'
+                    : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/gif"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
+                {isUploading ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
+                    <p className="text-sm text-zinc-400">Caricamento...</p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className={`w-8 h-8 mx-auto mb-2 ${isDragging ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                    <p className="text-sm text-zinc-400 mb-1">
+                      Trascina qui la GIF scaricata
+                    </p>
+                    <p className="text-xs text-zinc-600 mb-3">
+                      oppure
+                    </p>
+                    <button
+                      onClick={openFilePicker}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                    >
+                      <Image className="w-4 h-4" />
+                      Sfoglia
+                    </button>
+                    <p className="text-xs text-zinc-600 mt-2">Formato: GIF (max 10MB)</p>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
