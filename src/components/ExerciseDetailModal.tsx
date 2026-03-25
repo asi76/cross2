@@ -17,7 +17,7 @@ interface ExerciseDetailModalProps {
 // Google APIs loaded state
 let googleapisLoaded = false;
 let gapiLoaded = false;
-letpickerLoaded = false;
+let pickerLoaded = false;
 
 // Load Google API scripts
 const loadGoogleApis = (): Promise<void> => {
