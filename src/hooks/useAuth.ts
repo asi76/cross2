@@ -33,18 +33,26 @@ export const useAuth = (): UseAuthReturn => {
       return;
     }
     
+    // Admin always has access
+    if (user.email === ADMIN_EMAIL) {
+      setRole('admin');
+      setLoading(false);
+      return;
+    }
+    
     try {
       const userRole = await getUserRole(user.email!);
       
-      // Admin check - always allow asi.vong@gmail.com
-      if (user.email === ADMIN_EMAIL) {
-        setRole('admin');
+      if (userRole === 'enabled' || userRole === 'admin') {
+        setRole(userRole);
       } else {
-        setRole(userRole as UserRole);
+        // User not enabled - set to pending
+        setRole('pending');
       }
     } catch (error) {
       console.error('Error fetching role:', error);
-      setRole(null);
+      // On error, default to pending
+      setRole('pending');
     }
     setLoading(false);
   };
@@ -63,18 +71,25 @@ export const useAuth = (): UseAuthReturn => {
       const firebaseUser = await signInWithGoogle();
       setUser(firebaseUser);
       
-      // Check if user exists in Firestore
-      const userRole = await getUserRole(firebaseUser.email!);
-      
       // Admin always has access
       if (firebaseUser.email === ADMIN_EMAIL) {
         setRole('admin');
-      } else if (!userRole) {
-        // New user - create pending request
-        await createPendingUser(firebaseUser);
-        setRole('pending');
+        return;
+      }
+      
+      // Check if user exists in Firestore
+      const userRole = await getUserRole(firebaseUser.email!);
+      
+      if (userRole === 'enabled' || userRole === 'admin') {
+        setRole(userRole);
       } else {
-        setRole(userRole as UserRole);
+        // New user - create pending request
+        try {
+          await createPendingUser(firebaseUser);
+        } catch (e) {
+          console.error('Error creating pending user:', e);
+        }
+        setRole('pending');
       }
     } catch (error) {
       console.error('Sign in error:', error);
