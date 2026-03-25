@@ -10,7 +10,7 @@ import {
 import { 
   getFirestore, 
   doc, 
-  getDoc, 
+  getDoc,
   setDoc, 
   deleteDoc,
   collection,
@@ -46,7 +46,7 @@ export const getUserRole = async (email: string): Promise<string | null> => {
   return null;
 };
 
-export const createPendingUser = async (user: User): Promise<void> => {
+export const createPendingUser = async (user: User, message?: string): Promise<void> => {
   const userRef = doc(db, 'users', user.email!);
   const existing = await getDoc(userRef);
   
@@ -55,7 +55,9 @@ export const createPendingUser = async (user: User): Promise<void> => {
       role: 'pending',
       requestedAt: serverTimestamp(),
       name: user.displayName || 'Unknown',
-      photoURL: user.photoURL || null
+      email: user.email,
+      photoURL: user.photoURL || null,
+      message: message || '',
     });
   }
 };

@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion';
-import { Dumbbell, Mail, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Dumbbell, Loader2, X, Send, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 interface LoginProps {
@@ -8,17 +9,36 @@ interface LoginProps {
 
 export const Login = ({ onRetry }: LoginProps) => {
   const { signIn, loading } = useAuth();
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn();
+      if (showRequestModal) {
+        await signIn(requestMessage);
+      } else {
+        await signIn();
+      }
     } catch (error) {
       console.error('Sign in failed:', error);
     }
   };
 
   const handleRequestAccess = () => {
-    window.location.href = 'mailto:asi.vong@gmail.com?subject=Crosstraining App Access Request';
+    setShowRequestModal(true);
+  };
+
+  const handleSubmitRequest = async () => {
+    if (requestMessage.trim()) {
+      await handleGoogleSignIn();
+      setShowRequestModal(false);
+      setRequestMessage('');
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowRequestModal(false);
+    setRequestMessage('');
   };
 
   return (
@@ -52,13 +72,13 @@ export const Login = ({ onRetry }: LoginProps) => {
                 Your account is not yet enabled.
               </p>
               <p className="text-gray-400 text-center text-sm mt-2">
-                Request access by sending an email to the administrator.
+                Request access by sending a message to the administrator.
               </p>
             </motion.div>
           ) : null}
 
           <button
-            onClick={handleGoogleSignIn}
+            onClick={handleRequestAccess}
             disabled={loading}
             className="w-full bg-white text-gray-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-100 transition-colors disabled:opacity-50"
           >
@@ -79,7 +99,7 @@ export const Login = ({ onRetry }: LoginProps) => {
             onClick={handleRequestAccess}
             className="w-full mt-4 bg-dark-hover border border-dark-border text-gray-300 font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-dark-border transition-colors"
           >
-            <Mail className="w-4 h-4" />
+            <Send className="w-4 h-4" />
             Request Access
           </button>
 
@@ -88,6 +108,74 @@ export const Login = ({ onRetry }: LoginProps) => {
           </p>
         </div>
       </motion.div>
+
+      {/* Request Access Modal */}
+      <AnimatePresence>
+        {showRequestModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"
+            onClick={handleCloseModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-dark-card border border-dark-border rounded-2xl p-6 w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <User className="w-5 h-5 text-blue-500" />
+                  Request Access
+                </h2>
+                <button
+                  onClick={handleCloseModal}
+                  className="p-2 hover:bg-dark-border rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+
+              <p className="text-gray-400 mb-4">
+                Write a message to the administrator explaining why you should have access to the Crosstraining app.
+              </p>
+
+              <textarea
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
+                placeholder="Hi, I would like to request access to the Crosstraining app because..."
+                className="w-full bg-dark-hover border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 resize-none h-32 mb-4 focus:outline-none focus:border-blue-500"
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCloseModal}
+                  className="flex-1 py-3 bg-dark-hover border border-dark-border text-gray-300 rounded-lg font-medium hover:bg-dark-border transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitRequest}
+                  disabled={!requestMessage.trim() || loading}
+                  className="flex-1 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Request
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -8,7 +8,9 @@ import {
   RefreshCw,
   Shield,
   Loader2,
-  UserMinus
+  UserMinus,
+  MessageSquare,
+  Mail
 } from 'lucide-react';
 import { 
   getPendingUsers, 
@@ -21,13 +23,17 @@ import {
 interface PendingUser {
   id: string;
   name?: string;
+  email?: string;
   role: string;
+  message?: string;
+  photoURL?: string | null;
   requestedAt?: { toDate: () => Date } | null;
 }
 
 interface EnabledUser {
   id: string;
   name?: string;
+  email?: string;
   role: string;
   approvedAt?: { toDate: () => Date } | null;
 }
@@ -38,6 +44,7 @@ export const AdminPanel = () => {
   const [enabledUsers, setEnabledUsers] = useState<EnabledUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [expandedMessage, setExpandedMessage] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -178,41 +185,58 @@ export const AdminPanel = () => {
                       key={user.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="bg-dark-hover border border-dark-border rounded-lg p-4 flex items-center justify-between"
+                      className="bg-dark-hover border border-dark-border rounded-lg p-4"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="bg-gray-600 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
-                          {user.name?.charAt(0).toUpperCase() || user.id.charAt(0).toUpperCase()}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4">
+                          <div className="bg-gradient-to-br from-blue-500 to-purple-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {user.name?.charAt(0).toUpperCase() || user.id.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-white font-semibold text-lg">{user.name || 'Unknown'}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Mail className="w-4 h-4 text-gray-500" />
+                              <p className="text-gray-400 text-sm">{user.id}</p>
+                            </div>
+                            <p className="text-gray-500 text-xs mt-1">
+                              Requested: {formatDate(user.requestedAt)}
+                            </p>
+                            
+                            {/* Message Section */}
+                            {user.message && (
+                              <div className="mt-3 bg-dark-bg rounded-lg p-3 border border-dark-border">
+                                <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+                                  <MessageSquare className="w-4 h-4" />
+                                  <span className="font-medium">Message:</span>
+                                </div>
+                                <p className="text-gray-300 text-sm italic">"{user.message}"</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-white font-medium">{user.name || 'Unknown'}</p>
-                          <p className="text-gray-400 text-sm">{user.id}</p>
-                          <p className="text-gray-500 text-xs mt-1">
-                            Requested: {formatDate(user.requestedAt)}
-                          </p>
+                        
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleApprove(user.id)}
+                            disabled={actionLoading === user.id}
+                            className="p-3 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg transition-colors disabled:opacity-50"
+                            title="Approve Access"
+                          >
+                            {actionLoading === user.id ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <Check className="w-5 h-5" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleReject(user.id)}
+                            disabled={actionLoading === user.id}
+                            className="p-3 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition-colors disabled:opacity-50"
+                            title="Reject Request"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleApprove(user.id)}
-                          disabled={actionLoading === user.id}
-                          className="p-2 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg transition-colors disabled:opacity-50"
-                          title="Approve"
-                        >
-                          {actionLoading === user.id ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                          ) : (
-                            <Check className="w-5 h-5" />
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleReject(user.id)}
-                          disabled={actionLoading === user.id}
-                          className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition-colors disabled:opacity-50"
-                          title="Reject"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
                       </div>
                     </motion.div>
                   ))}

@@ -16,7 +16,7 @@ interface UseAuthReturn {
   user: User | null;
   role: UserRole;
   loading: boolean;
-  signIn: () => Promise<void>;
+  signIn: (requestMessage?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
 }
@@ -51,7 +51,6 @@ export const useAuth = (): UseAuthReturn => {
       }
     } catch (error) {
       console.error('Error fetching role:', error);
-      // On error, default to pending
       setRole('pending');
     }
     setLoading(false);
@@ -66,7 +65,7 @@ export const useAuth = (): UseAuthReturn => {
     return () => unsubscribe();
   }, []);
 
-  const signIn = async () => {
+  const signIn = async (requestMessage?: string) => {
     try {
       const firebaseUser = await signInWithGoogle();
       setUser(firebaseUser);
@@ -83,9 +82,9 @@ export const useAuth = (): UseAuthReturn => {
       if (userRole === 'enabled' || userRole === 'admin') {
         setRole(userRole);
       } else {
-        // New user - create pending request
+        // New user - create pending request with message
         try {
-          await createPendingUser(firebaseUser);
+          await createPendingUser(firebaseUser, requestMessage);
         } catch (e) {
           console.error('Error creating pending user:', e);
         }
