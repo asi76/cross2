@@ -171,7 +171,12 @@ export function ExerciseDetailModal({
         throw new Error(error.error || 'Upload failed');
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
       
       if (!response.ok) {
         throw new Error(data.error || 'Upload failed');

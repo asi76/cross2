@@ -1,23 +1,23 @@
 {
   "build": {
-    "command": "npm run build",
+    "command": "npm install && npm run build",
     "development": "npm run dev",
     "framework": "node"
   },
+  "start": {
+    "command": "node server/index.js",
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
   "routes": {
     "/": {
-      "path": "dist/index.html",
-      "headers": {
-        "Content-Type": "text/html"
-      }
+      "use": "server/index.js"
     }
   },
   "env": {
-    "NODE_ENV": {
-      "value": "production"
-    },
     "GITHUB_TOKEN": {
-      "description": "GitHub Personal Access Token for auto-committing GIFs"
+      "description": "GitHub Personal Access Token"
     },
     "GITHUB_REPO": {
       "description": "GitHub repository (default: asi76/crosstraining)"
