@@ -157,7 +157,11 @@ export function ExerciseDetailModal({
       formData.append('gif', file);
       formData.append('exerciseId', exercise.id);
 
-      const response = await fetch('http://localhost:3001/api/upload-gif', {
+      // Use API URL from environment or fallback to relative URL
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const uploadUrl = apiUrl ? `${apiUrl}/api/upload-gif` : '/api/upload-gif';
+
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
       });
@@ -199,7 +203,10 @@ export function ExerciseDetailModal({
         fileId = match[1];
       }
 
-      const response = await fetch('http://localhost:3001/api/delete-gif', {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const deleteUrl = apiUrl ? `${apiUrl}/api/delete-gif` : '/api/delete-gif';
+
+      const response = await fetch(deleteUrl, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ exerciseId: exercise.id, fileId }),
