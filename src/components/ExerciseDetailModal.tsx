@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, Play, Clock, Zap, Target, Trash2, Upload, Image, Loader2, Search } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Play, Clock, Zap, Target, Trash2, Upload, Image, Loader2, Search, FolderOpen } from 'lucide-react';
 import { Exercise } from '../data/types';
-import { storage } from '../firebase/auth';
+import { GOOGLE_CLIENT_ID, DRIVE_FOLDER_ID } from '../data/gdriveConfig';
 
 interface ExerciseDetailModalProps {
   exercise: Exercise;
@@ -13,6 +13,43 @@ interface ExerciseDetailModalProps {
   hasNext?: boolean;
   onGifUpdated?: (exerciseId: string, newUrl: string | null) => void;
 }
+
+// Google APIs loaded state
+let googleapisLoaded = false;
+let gapiLoaded = false;
+letpickerLoaded = false;
+
+// Load Google API scripts
+const loadGoogleApis = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (googleapisLoaded && gapiLoaded && pickerLoaded) {
+      resolve();
+      return;
+    }
+
+    // Load gapi
+    const gapiScript = document.createElement('script');
+    gapiScript.src = 'https://apis.google.com/js/api.js';
+    gapiScript.onload = () => {
+      gapiLoaded = true;
+      // Load picker
+      const pickerScript = document.createElement('script');
+      pickerScript.src = 'https://apis.google.com/js/picker.js';
+      pickerScript.onload = () => {
+        pickerLoaded = true;
+        googleapisLoaded = true;
+        resolve();
+      };
+      pickerScript.onerror = reject;
+      document.body.appendChild(pickerScript);
+    };
+    gapiScript.onerror = reject;
+    document.body.appendChild(gapiScript);
+  });
+};
+
+// OAuth2 token storage
+let currentToken: string | null = null;
 
 export function ExerciseDetailModal({
   exercise,
@@ -29,6 +66,7 @@ export function ExerciseDetailModal({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -60,7 +98,7 @@ export function ExerciseDetailModal({
       'Arnold Press': 'Partendo con i palmi verso di te, ruota e spingi i manubri verso l\'alto. Esercizio completo per le spalle inventato da Arnold Schwarzenegger.',
       'Cable Chest Fly': 'In piedi tra i cavi, porta le braccia avanti al petto aprendo i gomiti. Esercizio di isolamento per il petto.',
       'Wall Handstand Push-Ups': 'In verticale contro il muro, abbassa la testa verso il pavimento e spingi verso l\'alto. Esercizio avanzato per spalle e tricipiti.',
-      'Pull-Ups': 'Afferra la sbarra con presa prona, più larga delle spalle. Tira il petto verso la sbarra mantenendo il corpo rigido. Esercizio top per dorsali e bicipiti.',
+      'Pull-Ups': 'Afferra la sbarra con presa prona, più larga delle spalle. Tirati fino al petto verso la sbarra mantenendo il corpo rigido. Esercizio top per dorsali e bicipiti.',
       'Chin-Ups': 'Afferra la sbarra con i palmi verso di te. Tirati fino al mento. Maggiore attivazione dei bicipiti rispetto ai pull-up.',
       'Bent Over Rows': 'Busto avanti, schiena dritta, tira i manubri verso l\'addome. Esercizio base per la schiena.',
       'Lat Pulldown': 'Seduto alla macchina, abbassa la barra dietro la nuca verso il petto. Simula il movimento dei pull-up.',
@@ -99,20 +137,20 @@ export function ExerciseDetailModal({
       'Lateral Jumps': 'Salta di lato da un punto all\'altro. Lavoro per i glutei e l\'equilibrio.',
       'Jump Lunges': 'Esegui un lunge esplosivo saltando e alternando le gambe in aria.',
       'Tuck Jumps': 'Salta in alto portando le ginocchia al petto. Alta intensità per il plyometrics.',
-      'Squat Thrusts': 'Come un burpee ma senza il push-up e il salto finale. base per i plyometrics.',
+      'Squat Thrusts': 'Come un burpee ma senza il push-up e il salto finale. Base per i plyometrics.',
       'Skater Jumps': 'Salta lateralmente atterrando su una gamba, l\'altra dietro. Imita il movimento del pattinaggio.',
-      'Clap Push-Ups': 'Push-up esplosivo con ilpalmo stacco delle mani per un applauso in aria.',
+      'Clap Push-Ups': 'Push-up esplosivo con stacco delle mani per un applauso in aria.',
       'Plyo Push-Ups': 'Push-up esplosivo con stacco delle mani dal suolo. Livello intermedio tra push-up e clap push-up.',
       'Explosive Mountain Climbers': 'Mountain climbers eseguiti alla massima velocità. Cardio ad alta intensità.',
       'Jumping Jacks': 'Da fermo, salta aprendo gambe e braccia, poi torna alla posizione. Cardio classico.',
       'High Knees': 'Corri sul posto portando le ginocchia alte. Cardio e warm-up.',
       'Butt Kicks': 'Corri sul posto toccando i glutei con i talloni. Cardio e attivazione hamstrings.',
-      'Sprint in Place': 'Sprinta sul posto::massima intensità per breve durata.',
+      'Sprint in Place': 'Sprinta sul posto: massima intensità per breve durata.',
       'Burpees (Cardio)': 'Come i burpees normali ma contati come esercizio cardio ad alta intensità.',
       'Mountain Climbers (Fast)': 'Mountain climbers eseguiti velocemente per il cardio.',
-      'Jump Rope': 'Salta la corda. Esercizio cardio eccellente per coordination and calves.',
+      'Jump Rope': 'Salta la corda. Esercizio cardio eccellente per coordinazione e polpacci.',
       'Squat Jumps (Cardio)': 'Come jump squats ma contati nel contesto cardio. Stesso movimento.',
-      'Shadow Boxing': 'Boxi simulato senza avversario. Ottimo per cardio e coordinazione.',
+      'Shadow Boxing': 'Boxe simulata senza avversario. Ottimo per cardio e coordinazione.',
       'Fast Feet': 'Movimento rapido dei piedi sul posto. Agilità e cardio.',
       'Plank Jacks': 'In plank, salta aprendo e chiudendo le gambe come un jumping jack. Cardio e core.',
     };
@@ -149,55 +187,148 @@ export function ExerciseDetailModal({
     }
   }, [exercise.id]);
 
+  // Upload file to Google Drive via Picker
   const uploadFile = async (file: File) => {
     setIsUploading(true);
-    setUploadProgress('Caricamento in corso...');
+    setUploadProgress('Preparazione upload...');
 
     try {
-      // Upload directly to Firebase Storage
+      await loadGoogleApis();
+
+      // Get OAuth token
+      const token = await getOAuthToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      setUploadProgress('Caricamento su Google Drive...');
+
+      // Upload to Google Drive using fetch directly
       const filename = `${exercise.id}.gif`;
-      const storageRef = ref(storage, `gifs/${filename}`);
-      
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      
-      // Wait for upload to complete
-      await new Promise<void>((resolve, reject) => {
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setUploadProgress(`Caricamento... ${Math.round(progress)}%`);
-          },
-          (error) => {
-            console.error('Upload error:', error);
-            reject(error);
-          },
-          async () => {
-            // Upload completed successfully
-            resolve();
-          }
-        );
+      const uploadUrl = `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true`;
+
+      const metadata = {
+        name: filename,
+        parents: [DRIVE_FOLDER_ID],
+        mimeType: 'image/gif',
+      };
+
+      const formData = new FormData();
+      formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      formData.append('file', file);
+
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
       });
 
-      // Get download URL
-      const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Upload failed');
+      }
+
+      const result = await response.json();
+      
+      // Construct direct URL
+      const directUrl = `https://drive.google.com/uc?export=view&id=${result.id}`;
       
       setUploadProgress('Caricamento completato!');
       
       if (onGifUpdated) {
-        onGifUpdated(exercise.id, downloadURL);
+        onGifUpdated(exercise.id, directUrl);
       }
 
       setTimeout(() => {
         setUploadProgress(null);
         setIsUploading(false);
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
-      setUploadProgress('Errore nel caricamento');
-      setTimeout(() => setUploadProgress(null), 2000);
-      setIsUploading(false);
+      setUploadProgress(`Errore: ${error.message}`);
+      setTimeout(() => {
+        setUploadProgress(null);
+        setIsUploading(false);
+      }, 3000);
     }
+  };
+
+  // Get OAuth token using Google's identity services (no popup needed)
+  const getOAuthToken = (): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: (response: any) => {
+          if (response.access_token) {
+            currentToken = response.access_token;
+            resolve(response.access_token);
+          } else {
+            resolve(null);
+          }
+        },
+        error_callback: (error: any) => {
+          console.error('OAuth error:', error);
+          resolve(null);
+        }
+      });
+      client.requestAccessToken();
+    });
+  };
+
+  // Open Google Drive Picker
+  const openDrivePicker = async () => {
+    setIsPickerOpen(true);
+    try {
+      await loadGoogleApis();
+
+      const token = await getOAuthToken();
+      if (!token) {
+        setIsPickerOpen(false);
+        return;
+      }
+
+      if (typeof google === 'undefined' || !google.picker) {
+        console.error('Google Picker not loaded');
+        setIsPickerOpen(false);
+        return;
+      }
+
+      const picker = new google.picker.PickerBuilder()
+        .addView(google.picker.ViewId.DOCS)
+        .addView(new google.picker.DocsUploadView()
+          .setParent(DRIVE_FOLDER_ID)
+          .setIncludeFolders(true))
+        .setOAuthToken(token)
+        .setDeveloperKey('AIzaSyD-RZL4Ckhl3V6bKR_GnDXD0P-9K-qZGMU')
+        .setCallback((data: any) => {
+          setIsPickerOpen(false);
+          if (data.action === google.picker.Action.PICKED) {
+            const file = data.docs[0];
+            const fileId = file.id;
+            const directUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
+            
+            if (onGifUpdated) {
+              onGifUpdated(exercise.id, directUrl);
+            }
+          }
+        })
+        .build();
+      
+      picker.setVisible(true);
+    } catch (error) {
+      console.error('Picker error:', error);
+      setIsPickerOpen(false);
+    }
+  };
+
+  // Open Google Images search for this exercise
+  const searchGif = () => {
+    const query = encodeURIComponent(`${exercise.name} exercise gif`);
+    const searchUrl = `https://www.google.com/search?tbs=itp:animated&tbm=isch&q=${query}`;
+    window.open(searchUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
   };
 
   const handleDeleteGif = async () => {
@@ -207,15 +338,32 @@ export function ExerciseDetailModal({
     setUploadProgress('Eliminazione in corso...');
 
     try {
-      // Extract the path from Firebase Storage URL
-      // URL format: https://firebasestorage.googleapis.com/.../gifs/filename.gif?alt=media&token=...
-      const urlObj = new URL(gifUrl);
-      const pathMatch = urlObj.pathname.match(/\/o\/(.+)\?/);
-      const fullPath = pathMatch ? decodeURIComponent(pathMatch[1]) : null;
-      
-      if (fullPath) {
-        const desertRef = ref(storage, fullPath);
-        await deleteObject(desertRef);
+      // Extract file ID from Google Drive URL
+      let fileId = null;
+      const match = gifUrl.match(/[?&]id=([^&]+)/);
+      if (match) {
+        fileId = match[1];
+      }
+
+      if (!fileId) {
+        throw new Error('File ID not found');
+      }
+
+      const token = await getOAuthToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?supportsAllDrives=true`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok && response.status !== 204) {
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Delete failed');
       }
 
       if (onGifUpdated) {
@@ -227,23 +375,18 @@ export function ExerciseDetailModal({
         setUploadProgress(null);
         setIsDeleting(false);
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete error:', error);
-      setUploadProgress('Errore nell\'eliminazione');
-      setTimeout(() => setUploadProgress(null), 2000);
-      setIsDeleting(false);
+      setUploadProgress(`Errore: ${error.message}`);
+      setTimeout(() => {
+        setUploadProgress(null);
+        setIsDeleting(false);
+      }, 3000);
     }
   };
 
   const openFilePicker = () => {
     fileInputRef.current?.click();
-  };
-
-  // Open Google Images search for this exercise
-  const searchGif = () => {
-    const query = encodeURIComponent(`${exercise.name} exercise gif`);
-    const searchUrl = `https://www.google.com/search?tbs=itp:animated&tbm=isch&q=${query}`;
-    window.open(searchUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
   };
 
   return (
@@ -320,6 +463,20 @@ export function ExerciseDetailModal({
                 Cerca GIF su Google Immagini
               </button>
 
+              {/* Open Drive Picker Button */}
+              <button
+                onClick={openDrivePicker}
+                disabled={isPickerOpen}
+                className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                {isPickerOpen ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FolderOpen className="w-4 h-4" />
+                )}
+                Apri Google Drive
+              </button>
+
               {/* Drag & Drop Zone */}
               <div
                 className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
@@ -355,7 +512,7 @@ export function ExerciseDetailModal({
                     </p>
                     <button
                       onClick={openFilePicker}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                      className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
                     >
                       <Image className="w-4 h-4" />
                       Sfoglia
