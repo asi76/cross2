@@ -16,6 +16,11 @@ const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const GIFS_DIR = path.join(PUBLIC_DIR, 'gifs');
 const MAPPING_FILE = path.join(PUBLIC_DIR, 'gif-mapping.json');
 
+// GitHub config
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPO = process.env.GITHUB_REPO || 'asi76/crosstraining';
+const GIT_BRANCH = 'main';
+
 // Ensure directories exist
 if (!fs.existsSync(GIFS_DIR)) {
   fs.mkdirSync(GIFS_DIR, { recursive: true });
@@ -53,6 +58,62 @@ const saveMapping = (mapping) => {
   fs.writeFileSync(MAPPING_FILE, JSON.stringify(mapping, null, 2));
 };
 
+// Commit file to GitHub via API
+const commitToGitHub = async (filePath, repoPath) => {
+  if (!GITHUB_TOKEN) {
+    console.log('GitHub token not configured, skipping git commit');
+    return;
+  }
+
+  try {
+    const fileContent = fs.readFileSync(filePath);
+    const contentBase64 = fileContent.toString('base64');
+
+    const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${repoPath}`;
+    
+    // Check if file exists first (to get SHA)
+    let sha = null;
+    const getResponse = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    
+    if (getResponse.ok) {
+      const data = await getResponse.json();
+      sha = data.sha;
+    }
+
+    // Create or update file
+    const body = {
+      message: `chore: add GIF ${path.basename(filePath)}`,
+      content: contentBase64,
+      branch: GIT_BRANCH,
+      ...(sha && { sha })
+    };
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (response.ok) {
+      console.log(`Committed to GitHub: ${repoPath}`);
+    } else {
+      const error = await response.json();
+      console.error('GitHub commit failed:', error);
+    }
+  } catch (error) {
+    console.error('Error committing to GitHub:', error);
+  }
+};
+
 // Multer config — save to public/gifs/
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -77,7 +138,7 @@ const upload = multer({
 });
 
 // Upload GIF
-app.post('/api/upload-gif', upload.single('gif'), (req, res) => {
+app.post('/api/upload-gif', upload.single('gif'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -93,23 +154,24 @@ app.post('/api/upload-gif', upload.single('gif'), (req, res) => {
     const destPath = path.join(GIFS_DIR, filename);
     
     // Delete existing file if different
-    if (fs.existsSync(destPath) && fs.readFileSync(destPath).toString('hex') !== fs.readFileSync(req.file.path).toString('hex')) {
+    if (fs.existsSync(destPath)) {
       fs.unlinkSync(destPath);
     }
     
-    // Move to final location
-    if (req.file.path !== destPath) {
-      fs.copyFileSync(req.file.path, destPath);
-      fs.unlinkSync(req.file.path);
-    }
+    // Copy to final location
+    fs.copyFileSync(req.file.path, destPath);
+    fs.unlinkSync(req.file.path);
 
-    // Generate URL (relative or absolute based on host)
+    // Generate URL
     const gifUrl = `/gifs/${filename}`;
 
     // Update mapping
     const mapping = loadMapping();
     mapping[exerciseId] = gifUrl;
     saveMapping(mapping);
+
+    // Commit to GitHub
+    await commitToGitHub(destPath, `public/gifs/${filename}`);
 
     console.log(`Uploaded: ${filename} -> ${gifUrl}`);
     res.json({ success: true, url: gifUrl, filename });
@@ -120,7 +182,7 @@ app.post('/api/upload-gif', upload.single('gif'), (req, res) => {
 });
 
 // Delete GIF
-app.delete('/api/delete-gif', (req, res) => {
+app.delete('/api/delete-gif', async (req, res) => {
   try {
     const { exerciseId } = req.body;
     if (!exerciseId) {
@@ -130,7 +192,7 @@ app.delete('/api/delete-gif', (req, res) => {
     const filename = `${exerciseId}.gif`;
     const filePath = path.join(GIFS_DIR, filename);
 
-    // Delete file
+    // Delete local file
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
@@ -141,6 +203,9 @@ app.delete('/api/delete-gif', (req, res) => {
       delete mapping[exerciseId];
       saveMapping(mapping);
     }
+
+    // Note: Deleting from GitHub would require additional API call
+    // For now, we just delete locally and the file stays in git history
 
     res.json({ success: true });
   } catch (error) {
@@ -171,4 +236,5 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`GIFs directory: ${GIFS_DIR}`);
   console.log(`Mode: ${IS_PRODUCTION ? 'production' : 'development'}`);
+  console.log(`GitHub sync: ${GITHUB_TOKEN ? 'enabled' : 'disabled (set GITHUB_TOKEN env var)'}`);
 });
