@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -28,55 +27,43 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // GitHub API helper
-async function githubCommit(path, contentBase64, message) {
+async function githubRequest(method, apiPath, body = null) {
   if (!GITHUB_TOKEN) {
     throw new Error('GitHub token not configured');
   }
 
-  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`;
+  const url = `https://api.github.com${apiPath}`;
   
-  let sha = null;
-  try {
-    const getRes = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    if (getRes.ok) {
-      const data = await getRes.json();
-      sha = data.sha;
-    }
-  } catch (e) {
-    // File doesn't exist yet, that's fine
-  }
-
-  const body = {
-    message,
-    content: contentBase64,
-    branch: GIT_BRANCH,
-    ...(sha && { sha })
-  };
-
-  const response = await fetch(url, {
-    method: 'PUT',
+  const options = {
+    method,
     headers: {
       'Authorization': `Bearer ${GITHUB_TOKEN}`,
       'Accept': 'application/vnd.github.v3+json',
       'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'GitHub commit failed');
+    }
+  };
+  
+  if (body) {
+    options.body = JSON.stringify(body);
   }
-
-  return response.json();
+  
+  const response = await fetch(url, options);
+  
+  // For DELETE, 204 No Content is success
+  if (method === 'DELETE' && response.status === 204) {
+    return { success: true };
+  }
+  
+  const data = await response.json();
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'GitHub API error');
+  }
+  
+  return data;
 }
 
-// Upload GIF — commits directly to GitHub
+// Upload GIF — commits to GitHub
 app.post('/api/upload-gif', async (req, res) => {
   try {
     const { exerciseId, gifData } = req.body;
@@ -85,36 +72,71 @@ app.post('/api/upload-gif', async (req, res) => {
       return res.status(400).json({ error: 'exerciseId and gifData required' });
     }
 
-    if (!gifData.startsWith('data:image/gif;base64,')) {
-      return res.status(400).json({ error: 'Invalid GIF format' });
-    }
-
     const filename = `${exerciseId}.gif`;
-    const base64Data = gifData.replace(/^data:image\/gif;base64,/, '');
     const repoPath = `${GIFS_REPO_PATH}/${filename}`;
 
-    console.log(`Uploading ${filename} to GitHub...`);
+    // Get current file SHA if exists
+    let sha = null;
+    try {
+      const existing = await githubRequest('GET', `/repos/${GITHUB_REPO}/contents/${repoPath}?ref=${GIT_BRANCH}`);
+      sha = existing.sha;
+    } catch (e) {
+      // File doesn't exist, that's fine
+    }
+
+    // Commit new file
+    const base64Data = gifData.replace(/^data:image\/gif;base64,/, '');
     
-    await githubCommit(
-      repoPath,
-      base64Data,
-      `chore: add GIF ${filename}`
-    );
+    await githubRequest('PUT', `/repos/${GITHUB_REPO}/contents/${repoPath}`, {
+      message: `chore: update GIF ${filename}`,
+      content: base64Data,
+      branch: GIT_BRANCH,
+      ...(sha && { sha })
+    });
 
     // Return GitHub raw URL
     const rawUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GIT_BRANCH}/${repoPath}`;
     
-    console.log(`Uploaded: ${filename} -> ${rawUrl}`);
     res.json({ success: true, url: rawUrl, filename });
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Upload error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Delete GIF — not implemented since we'd need to delete from git history
+// Delete GIF — removes from GitHub
 app.delete('/api/delete-gif', async (req, res) => {
-  res.status(501).json({ error: 'Delete not implemented — GIFs persist in git history' });
+  try {
+    const { exerciseId } = req.body;
+    
+    if (!exerciseId) {
+      return res.status(400).json({ error: 'exerciseId required' });
+    }
+
+    const filename = `${exerciseId}.gif`;
+    const repoPath = `${GIFS_REPO_PATH}/${filename}`;
+
+    // Get current file SHA
+    let sha = null;
+    try {
+      const existing = await githubRequest('GET', `/repos/${GITHUB_REPO}/contents/${repoPath}?ref=${GIT_BRANCH}`);
+      sha = existing.sha;
+    } catch (e) {
+      return res.status(404).json({ error: 'File not found in repository' });
+    }
+
+    // Delete via GitHub API
+    await githubRequest('DELETE', `/repos/${GITHUB_REPO}/contents/${repoPath}`, {
+      message: `chore: delete GIF ${filename}`,
+      branch: GIT_BRANCH,
+      sha
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Delete error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Health check

@@ -171,12 +171,16 @@ export function ExerciseDetailModal({
         throw new Error(error.error || 'Upload failed');
       }
 
-      const result = await response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
       
       setUploadProgress('Caricamento completato!');
       
       if (onGifUpdated) {
-        onGifUpdated(exercise.id, result.url);
+        onGifUpdated(exercise.id, data.url);
       }
 
       setTimeout(() => {
@@ -216,8 +220,10 @@ export function ExerciseDetailModal({
         body: JSON.stringify({ exerciseId: exercise.id }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Delete failed');
+        throw new Error(data.error || 'Delete failed');
       }
 
       if (onGifUpdated) {
