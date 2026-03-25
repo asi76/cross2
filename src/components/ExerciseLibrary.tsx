@@ -1,17 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { exercises, muscleGroupLabels, muscleGroupColors, getExercisesByMuscleGroup } from '../data/exercises';
-import { MuscleGroup } from '../data/types';
+import { MuscleGroup, Exercise } from '../data/types';
+import { ExerciseDetailModal } from './ExerciseDetailModal';
 
 const muscleGroups: MuscleGroup[] = ['upper-push', 'upper-pull', 'lower-body', 'core', 'plyometric', 'cardio'];
 
 export function ExerciseLibrary() {
   const [expandedGroup, setExpandedGroup] = useState<MuscleGroup | null>('upper-push');
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [gifMapping, setGifMapping] = useState<Record<string, string>>({});
+
+  // Get all exercises in order for navigation
+  const allExercises = exercises;
+  
+  const getExerciseIndex = (exercise: Exercise) => {
+    return allExercises.findIndex(e => e.id === exercise.id);
+  };
+
+  const handlePrevExercise = () => {
+    if (!selectedExercise) return;
+    const currentIndex = getExerciseIndex(selectedExercise);
+    if (currentIndex > 0) {
+      setSelectedExercise(allExercises[currentIndex - 1]);
+    }
+  };
+
+  const handleNextExercise = () => {
+    if (!selectedExercise) return;
+    const currentIndex = getExerciseIndex(selectedExercise);
+    if (currentIndex < allExercises.length - 1) {
+      setSelectedExercise(allExercises[currentIndex + 1]);
+    }
+  };
+
+  const handleExerciseClick = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+  };
+
+  // Load GIF mapping from file on mount
+  useEffect(() => {
+    fetch('/gif-mapping.json')
+      .then(res => res.ok ? res.json() : {})
+      .catch(() => ({}))
+      .then(data => setGifMapping(data));
+  }, []);
+
+  // Update GIF mapping when a GIF is uploaded/deleted
+  const handleGifUpdated = (exerciseId: string, newUrl: string | null) => {
+    setGifMapping(prev => {
+      const updated = { ...prev };
+      if (newUrl) {
+        updated[exerciseId] = newUrl;
+      } else {
+        delete updated[exerciseId];
+      }
+      return updated;
+    });
+  };
+
+  const getGifUrl = (exerciseId: string): string | null => {
+    if (gifMapping[exerciseId]) {
+      return gifMapping[exerciseId];
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-white">Exercise Library</h2>
-      <p className="text-sm text-zinc-400">Browse all exercises by muscle group</p>
+      <p className="text-sm text-zinc-400">Clicca sul nome di un esercizio per vedere i dettagli</p>
 
       <div className="space-y-3">
         {muscleGroups.map(group => (
@@ -25,7 +83,7 @@ export function ExerciseLibrary() {
                   {muscleGroupLabels[group]}
                 </span>
                 <span className="text-sm text-zinc-400">
-                  {getExercisesByMuscleGroup(group).length} exercises
+                  {getExercisesByMuscleGroup(group).length} esercizi
                 </span>
               </div>
               {expandedGroup === group ? (
@@ -44,7 +102,12 @@ export function ExerciseLibrary() {
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-sm font-medium text-white">{exercise.name}</h3>
+                        <button
+                          onClick={() => handleExerciseClick(exercise)}
+                          className="text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer transition-colors"
+                        >
+                          {exercise.name}
+                        </button>
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
                           {exercise.muscles.map(muscle => (
                             <span key={muscle} className="text-xs text-zinc-500">{muscle}</span>
@@ -78,6 +141,19 @@ export function ExerciseLibrary() {
           </div>
         ))}
       </div>
+
+      {selectedExercise && (
+        <ExerciseDetailModal
+          exercise={selectedExercise}
+          gifUrl={getGifUrl(selectedExercise.id)}
+          onClose={() => setSelectedExercise(null)}
+          onPrev={handlePrevExercise}
+          onNext={handleNextExercise}
+          hasPrev={getExerciseIndex(selectedExercise) > 0}
+          hasNext={getExerciseIndex(selectedExercise) < allExercises.length - 1}
+          onGifUpdated={handleGifUpdated}
+        />
+      )}
     </div>
   );
 }
