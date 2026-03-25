@@ -39,7 +39,7 @@ export const SavedWorkouts = ({ workouts, onLoad, onDelete, onBack }: SavedWorko
           >
             <ChevronLeft className="w-6 h-6 text-gray-400" />
           </button>
-          <h1 className="text-xl font-bold text-white">Saved Workouts</h1>
+          <h1 className="text-2xl font-bold text-white">Saved Workouts</h1>
         </div>
 
         {workouts.length === 0 ? (
@@ -66,8 +66,8 @@ export const SavedWorkouts = ({ workouts, onLoad, onDelete, onBack }: SavedWorko
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-white font-medium text-lg mb-1">{workout.name}</h3>
-                    <div className="flex items-center gap-4 text-gray-400 text-sm">
+                    <h3 className="text-white font-semibold text-xl mb-2">{workout.name}</h3>
+                    <div className="flex items-center gap-4 text-gray-400 text-base">
                       <span className="flex items-center gap-1">
                         <Dumbbell className="w-4 h-4" />
                         {getTotalExercises(workout)} exercises
@@ -80,7 +80,7 @@ export const SavedWorkouts = ({ workouts, onLoad, onDelete, onBack }: SavedWorko
                     </div>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {workout.stations.filter(s => s.exercises.length > 0).map(station => (
-                        <span key={station.id} className="px-2 py-1 bg-dark-hover rounded text-xs text-gray-400">
+                        <span key={station.id} className="px-2 py-1 bg-dark-hover rounded text-sm text-gray-400">
                           {station.name.replace('Station ', '')} ({station.exercises.length})
                         </span>
                       ))}

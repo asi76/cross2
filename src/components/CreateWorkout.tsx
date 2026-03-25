@@ -172,8 +172,8 @@ export const CreateWorkout = ({ onSave, onStart, onBack }: CreateWorkoutProps) =
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="text-white font-medium">{exercise.name}</h3>
-                        <p className="text-gray-500 text-sm">{exercise.description}</p>
+                        <h3 className="text-white font-semibold text-lg">{exercise.name}</h3>
+                        <p className="text-gray-500 text-base mt-1">{exercise.description}</p>
                       </div>
                       <button
                         onClick={() => removeExerciseFromStation(selectedStationIndex, ex.exerciseId)}

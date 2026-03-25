@@ -368,16 +368,16 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
         )}
 
         <div className="mt-6">
-          <h3 className="text-gray-400 text-sm mb-3">Up Next</h3>
+          <h3 className="text-gray-400 text-base mb-3">Up Next</h3>
           <div className="space-y-2">
             {station?.exercises.slice(timer.exerciseIndex + 1).map((ex) => {
               const exData = getExerciseById(ex.exerciseId);
               return (
-                <div key={ex.exerciseId} className="flex items-center gap-3 text-gray-500">
-                  <Dumbbell className="w-4 h-4" />
-                  <span>{exData?.name}</span>
+                <div key={ex.exerciseId} className="flex items-center gap-3 text-gray-400">
+                  <Dumbbell className="w-5 h-5" />
+                  <span className="text-base font-medium">{exData?.name}</span>
                   <span className="text-gray-600">•</span>
-                  <span>{ex.sets} × {ex.reps}</span>
+                  <span className="text-base">{ex.sets} × {ex.reps}</span>
                 </div>
               );
             })}

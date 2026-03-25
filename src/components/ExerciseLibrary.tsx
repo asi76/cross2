@@ -66,28 +66,28 @@ export function ExerciseLibrary() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-white">Exercise Library</h2>
-      <p className="text-sm text-zinc-400">Clicca sul nome di un esercizio per vedere i dettagli</p>
+      <h2 className="text-2xl font-bold text-white">Exercise Library</h2>
+      <p className="text-base text-zinc-400">Clicca sul nome di un esercizio per vedere i dettagli</p>
 
       <div className="space-y-3">
         {muscleGroups.map(group => (
           <div key={group} className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
             <button
               onClick={() => setExpandedGroup(expandedGroup === group ? null : group)}
-              className="w-full px-4 py-3 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
+              className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <span className={`px-2 py-0.5 rounded text-xs font-medium border ${muscleGroupColors[group]}`}>
+                <span className={`px-3 py-1 rounded text-sm font-semibold border ${muscleGroupColors[group]}`}>
                   {muscleGroupLabels[group]}
                 </span>
-                <span className="text-sm text-zinc-400">
+                <span className="text-base text-zinc-400">
                   {getExercisesByMuscleGroup(group).length} esercizi
                 </span>
               </div>
               {expandedGroup === group ? (
-                <ChevronUp className="w-4 h-4 text-zinc-400" />
+                <ChevronUp className="w-5 h-5 text-zinc-400" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-zinc-400" />
+                <ChevronDown className="w-5 h-5 text-zinc-400" />
               )}
             </button>
 
@@ -96,34 +96,34 @@ export function ExerciseLibrary() {
                 {getExercisesByMuscleGroup(group).map(exercise => (
                   <div
                     key={exercise.id}
-                    className="px-4 py-3 border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors"
+                    className="px-5 py-4 border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div>
                         <button
                           onClick={() => handleExerciseClick(exercise)}
-                          className="text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer transition-colors"
+                          className="text-lg font-semibold text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer transition-colors"
                         >
                           {exercise.name}
                         </button>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
                           {exercise.muscles.map(muscle => (
-                            <span key={muscle} className="text-xs text-zinc-500">{muscle}</span>
+                            <span key={muscle} className="text-sm text-zinc-500">{muscle}</span>
                           ))}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {exercise.reps && (
-                          <span className="text-xs bg-zinc-800 text-zinc-300 px-2 py-1 rounded">
+                          <span className="text-sm bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded">
                             {exercise.reps} reps
                           </span>
                         )}
                         {exercise.duration && (
-                          <span className="text-xs bg-zinc-800 text-zinc-300 px-2 py-1 rounded">
+                          <span className="text-sm bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded">
                             {exercise.duration}s
                           </span>
                         )}
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${
+                        <span className={`text-sm px-2 py-1 rounded ${
                           exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
                           exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
                           'bg-red-500/20 text-red-400'
