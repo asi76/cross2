@@ -1,7 +1,7 @@
 {
   "build": {
-    "command": "npm ci && npm run build",
-    "development": "npm run dev",
+    "command": "pnpm install && pnpm build",
+    "development": "pnpm dev",
     "framework": "vite"
   }
 }
