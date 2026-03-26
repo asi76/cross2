@@ -549,29 +549,29 @@ export function ExerciseDetailModal({
                 </div>
               </div>
             ) : (
-              /* View Mode - compact */
-              <div className="space-y-4">
+              /* View Mode - larger 22% */
+              <div className="space-y-5">
                 {/* Tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${difficultyColor}`}>
+                <div className="flex flex-wrap gap-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${difficultyColor}`}>
                     {difficultyLabel}
                   </span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${
                     exercise.tipo === 'aerobico' 
-                      ? 'bg-emerald-500/20 text-blue-400 border-emerald-500/30' 
+                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
                       : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
                   }`}>
                     {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
                   </span>
                   {exercise.reps && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-zinc-800 text-zinc-300 flex items-center gap-1.5">
+                      <Zap className="w-4 h-4" />
                       {exercise.reps} reps
                     </span>
                   )}
                   {exercise.duration && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-zinc-800 text-zinc-300 flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
                       {exercise.duration}s
                     </span>
                   )}
@@ -579,12 +579,12 @@ export function ExerciseDetailModal({
 
                 {/* Muscles */}
                 <div>
-                  <h3 className="text-xs font-medium text-zinc-400 mb-1">Muscoli</h3>
-                  <div className="flex flex-wrap gap-1.5">
+                  <h3 className="text-sm font-medium text-zinc-400 mb-2">Muscoli</h3>
+                  <div className="flex flex-wrap gap-2">
                     {exercise.muscles?.map((muscle) => (
                       <span
                         key={muscle}
-                        className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        className="px-3 py-1 rounded-full text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                       >
                         {muscle}
                       </span>
@@ -594,22 +594,22 @@ export function ExerciseDetailModal({
 
                 {/* Description */}
                 <div>
-                  <h3 className="text-xs font-medium text-zinc-400 mb-1">Descrizione</h3>
-                  <p className="text-zinc-300 text-xs leading-relaxed">{editDescription || getDescription(exercise.name)}</p>
+                  <h3 className="text-sm font-medium text-zinc-400 mb-2">Descrizione</h3>
+                  <p className="text-zinc-200 text-sm leading-relaxed">{editDescription || getDescription(exercise.name)}</p>
                 </div>
 
                 {/* Navigation and Edit */}
-                <div className="flex items-center justify-between pt-2 border-t border-zinc-800">
+                <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
                   <button
                     onClick={onPrev}
                     disabled={!hasPrev}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs transition-colors ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
                       hasPrev
                         ? 'bg-zinc-800 hover:bg-zinc-700 text-white'
                         : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
                     }`}
                   >
-                    <ChevronLeft className="w-3 h-3" />
+                    <ChevronLeft className="w-4 h-4" />
                     Precedente
                   </button>
                   <div className="flex gap-2">
@@ -618,15 +618,15 @@ export function ExerciseDetailModal({
                         setIsEditing(true);
                         if (onEdit) onEdit();
                       }}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm transition-colors"
                     >
-                      <Edit3 className="w-3 h-3" />
+                      <Edit3 className="w-4 h-4" />
                       Modifica
                     </button>
                     <button
                       onClick={onNext}
                       disabled={!hasNext}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
                         hasNext
                           ? 'bg-zinc-800 hover:bg-zinc-700 text-white'
                           : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
