@@ -412,7 +412,7 @@ export function ExerciseDetailModal({
               {/* Search GIF Button */}
               <button
                 onClick={searchGif}
-                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 <Search className="w-4 h-4" />
                 Cerca GIF su Google Immagini
@@ -558,7 +558,7 @@ export function ExerciseDetailModal({
                   </span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
                     exercise.tipo === 'aerobico' 
-                      ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
+                      ? 'bg-emerald-500/20 text-blue-400 border-emerald-500/30' 
                       : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
                   }`}>
                     {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
