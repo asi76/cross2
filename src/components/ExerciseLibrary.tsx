@@ -121,11 +121,12 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     setModalMode('view');
   };
 
-  // Close modal
+  // Close modal - reload exercises to show updated data
   const handleCloseModal = () => {
     setSelectedExercise(null);
     setCreateGroupId(null);
     setModalMode('view');
+    loadExercises();
   };
 
   // Save exercise (create or update)
