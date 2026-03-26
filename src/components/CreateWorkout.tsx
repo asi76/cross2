@@ -243,7 +243,7 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
         <div className="space-y-3">
           {groups.map(group => (
             <div key={group.id} className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-              {/* Group Header */}
+              {/* Group Header - click anywhere to expand/collapse */}
               <button
                 onClick={() => toggleGroup(group.id)}
                 className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
