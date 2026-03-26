@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
+import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image } from 'lucide-react';
 import { supabase } from '../supabase';
 import { getGifUrl } from '../data/gifMapping';
-import { ExerciseDetailModal } from './ExerciseDetailModal';
 
 interface ExerciseGroup {
   id: string;
@@ -40,6 +39,8 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [selectedExerciseGif, setSelectedExerciseGif] = useState<string | null>(null);
+  const [viewingExercise, setViewingExercise] = useState<Exercise | null>(null);
+  const [viewingExerciseGif, setViewingExerciseGif] = useState<string | null>(null);
 
   const currentStation = stations[selectedStationIndex];
 
@@ -77,21 +78,7 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
     });
   };
 
-  const handleOpenExercise = async (exercise: Exercise) => {
-    setSelectedExercise(exercise);
-    try {
-      const gifUrl = await getGifUrl(exercise.id);
-      setSelectedExerciseGif(gifUrl);
-    } catch {
-      setSelectedExerciseGif(null);
-    }
-  };
 
-  const handleGifUpdated = (exerciseId: string, newUrl: string | null) => {
-    if (selectedExercise?.id === exerciseId) {
-      setSelectedExerciseGif(newUrl);
-    }
-  };
 
   const handleAddStation = () => {
     const newStation = {
@@ -297,7 +284,12 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
                       >
                         <div className="flex items-center justify-between">
                           <button
-                            onClick={() => handleOpenExercise(exercise)}
+                            onClick={async () => {
+                              setViewingExerciseGif(null);
+                              setViewingExercise(exercise);
+                              const gifUrl = await getGifUrl(exercise.id);
+                              setViewingExerciseGif(gifUrl);
+                            }}
                             className="flex-1 text-left"
                           >
                             <div className="flex items-center justify-between">
@@ -343,46 +335,59 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
         </div>
       </div>
 
-      {/* Exercise Detail Modal */}
-      {selectedExercise && (
-        <ExerciseDetailModal
-          exercise={selectedExercise}
-          gifUrl={selectedExerciseGif}
-          onClose={() => setSelectedExercise(null)}
-          onSave={async (data) => {
-            const { error } = await supabase
-              .from('exercises')
-              .update({
-                name: data.name,
-                muscles: data.muscles,
-                reps: data.reps || null,
-                duration: data.duration || null,
-                difficulty: data.difficulty,
-                tipo: data.tipo,
-                description: data.description || ''
-              })
-              .eq('id', selectedExercise.id);
-            
-            if (error) {
-              alert('Errore: ' + error.message);
-            } else {
-              // Reload exercise data and update selectedExercise with new data
-              const { data: updated } = await supabase
-                .from('exercises')
-                .select('*')
-                .eq('id', selectedExercise.id)
-                .single();
-              
-              if (updated) {
-                setSelectedExercise(updated);
-                // Also update in exercises list
-                setExercises(prev => prev.map(e => e.id === updated.id ? updated : e));
-              }
-            }
-          }}
-          onGifUpdated={handleGifUpdated}
-          showUpload={true}
-        />
+      {/* View-Only Exercise Modal for CreateWorkout */}
+      {viewingExercise && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setViewingExercise(null)}>
+          <div 
+            className="bg-zinc-900 rounded-2xl border border-zinc-700 w-full max-w-2xl max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+              <div className="flex items-center gap-3">
+                <Target className="w-5 h-5 text-blue-500" />
+                <h2 className="text-xl font-bold text-white">{viewingExercise.name}</h2>
+              </div>
+              <button
+                onClick={() => setViewingExercise(null)}
+                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-zinc-400" />
+              </button>
+            </div>
+
+            {/* Content - Image and Description only */}
+            <div className="flex flex-col md:flex-row max-h-[calc(80vh-70px)]">
+              {/* Left - GIF */}
+              <div className="md:w-1/2 bg-zinc-950 flex items-center justify-center p-4 min-h-[200px]">
+                {viewingExerciseGif ? (
+                  <img 
+                    src={viewingExerciseGif} 
+                    alt={viewingExercise.name} 
+                    className="max-w-full max-h-full object-contain rounded-lg"
+                  />
+                ) : (
+                  <div className="text-zinc-500 text-center">
+                    <Image className="w-16 h-16 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Nessuna immagine</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right - Description */}
+              <div className="md:w-1/2 p-6 overflow-y-auto">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-zinc-400 mb-2">Descrizione</h3>
+                    <p className="text-zinc-200 text-sm leading-relaxed">
+                      {viewingExercise.description || 'Nessuna descrizione disponibile.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
