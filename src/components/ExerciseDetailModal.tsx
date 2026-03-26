@@ -337,12 +337,31 @@ export function ExerciseDetailModal({
               {isEditing ? (propMode === 'create' ? 'Nuovo Esercizio' : 'Modifica Esercizio') : exercise.name}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5 text-zinc-400" />
-          </button>
+          <div className="flex items-center gap-2">
+            {isEditing && (
+              <>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1"
+                >
+                  <Save className="w-4 h-4" />
+                  Salva
+                </button>
+              </>
+            )}
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-zinc-400" />
+            </button>
+          </div>
         </div>
 
         {/* Content - Two columns */}
@@ -447,7 +466,7 @@ export function ExerciseDetailModal({
           </div>
 
           {/* Right - Description / Edit Form */}
-          <div className="md:w-1/2 p-6 overflow-y-auto">
+          <div className="md:w-1/2 p-6 overflow-y-auto modal-scroll">
             {isEditing ? (
               /* Edit/Create Form - compact version */
               <div className="modal-edit-form space-y-3">
@@ -527,21 +546,6 @@ export function ExerciseDetailModal({
                     className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 resize-none text-sm"
                     placeholder="Descrizione..."
                   />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="flex-1 px-4 py-3 bg-zinc-700 hover:bg-zinc-600 text-white font-medium rounded-lg transition-colors"
-                  >
-                    Annulla
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    Salva
-                  </button>
                 </div>
               </div>
             ) : (
