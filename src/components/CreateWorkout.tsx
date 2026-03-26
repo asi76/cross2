@@ -374,12 +374,49 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
                 )}
               </div>
 
-              {/* Right - Description */}
-              <div className="md:w-1/2 p-6 overflow-y-auto">
+              {/* Right - Info */}
+              <div className="md:w-1/2 p-6 overflow-y-auto modal-scroll">
                 <div className="space-y-4">
+                  {/* Muscoli */}
                   <div>
-                    <h3 className="text-sm font-medium text-zinc-400 mb-2">Descrizione</h3>
-                    <p className="text-zinc-200 text-sm leading-relaxed">
+                    <h3 className="text-xs font-medium text-zinc-500 mb-1.5">Muscoli</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {viewingExercise.muscles?.map((muscle, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded text-xs bg-blue-500/20 text-blue-400">
+                          {muscle}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tipo e Difficolta */}
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      viewingExercise.tipo === 'aerobico' 
+                        ? 'bg-blue-500/20 text-blue-400' 
+                        : 'bg-orange-500/20 text-orange-400'
+                    }`}>
+                      {viewingExercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      viewingExercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                      viewingExercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {viewingExercise.difficulty === 'beginner' ? 'Principiante' :
+                       viewingExercise.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
+                    </span>
+                    {(viewingExercise.reps || viewingExercise.duration) && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">
+                        {viewingExercise.reps ? `${viewingExercise.reps} reps` : `${viewingExercise.duration}s`}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Descrizione */}
+                  <div>
+                    <h3 className="text-xs font-medium text-zinc-500 mb-1.5">Descrizione</h3>
+                    <p className="text-zinc-300 text-xs leading-relaxed">
                       {viewingExercise.description || 'Nessuna descrizione disponibile.'}
                     </p>
                   </div>
