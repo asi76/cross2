@@ -85,9 +85,8 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
     });
   };
 
-
-
-  const handleAddExerciseToCategory = (exercise: Exercise) => {
+  // Add exercise to current category
+  const handleAddExercise = (exercise: Exercise) => {
     const newExercise = {
       exerciseId: exercise.id,
       sets: exercise.reps ? 3 : 4,
@@ -102,34 +101,6 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
       newCategories[catIndex].exercises.push(newExercise);
       setWorkoutCategories(newCategories);
     }
-
-    setAddExerciseModal(null);
-  };
-
-  const handleAddGroupExercise = (groupId: string, exercise: Exercise) => {
-    const newExercise = {
-      exerciseId: exercise.id,
-      sets: exercise.reps ? 3 : 4,
-      reps: exercise.reps || 10,
-      rest: 60,
-      exerciseName: exercise.name
-    };
-
-    const newCategories = [...workoutCategories];
-    const catIndex = newCategories.findIndex(c => c.id === selectedCategoryId);
-    if (catIndex !== -1) {
-      newCategories[catIndex].exercises.push(newExercise);
-      setWorkoutCategories(newCategories);
-    }
-
-    // Collapse the group after adding
-    setExpandedGroups(prev => {
-      const next = new Set(prev);
-      next.delete(groupId);
-      return next;
-    });
-
-    setAddExerciseModal(null);
   };
 
   const handleRemoveExercise = (categoryId: string, exerciseIndex: number) => {
@@ -138,6 +109,18 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
     if (catIndex !== -1) {
       newCategories[catIndex].exercises.splice(exerciseIndex, 1);
       setWorkoutCategories(newCategories);
+    }
+  };
+
+  // View exercise
+  const handleViewExercise = async (exercise: Exercise) => {
+    setViewingExerciseGif(null);
+    setViewingExercise(exercise);
+    try {
+      const gifUrl = await getGifUrl(exercise.id);
+      setViewingExerciseGif(gifUrl);
+    } catch {
+      setViewingExerciseGif(null);
     }
   };
 
@@ -154,13 +137,14 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
       createdAt: new Date().toISOString()
     };
 
-    // Save to Supabase
     await supabase.from('workouts').insert(workout);
 
     onSave(workout);
     setWorkoutName('');
     setWorkoutCategories(WORKOUT_CATEGORIES.map(c => ({ ...c, exercises: [] })));
   };
+
+  const getExerciseById = (id: string) => exercises.find(e => e.id === id);
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
@@ -189,19 +173,22 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
 
       {/* Category Tabs - Fixed Forza, Cardio 1, Cardio 2 */}
       <div className="flex gap-2">
-        {WORKOUT_CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategoryId(cat.id)}
-            className={`px-6 py-3 rounded-lg text-sm font-semibold transition-colors ${
-              selectedCategoryId === cat.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-            }`}
-          >
-            {cat.name}
-          </button>
-        ))}
+        {WORKOUT_CATEGORIES.map((cat) => {
+          const catData = workoutCategories.find(c => c.id === cat.id);
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategoryId(cat.id)}
+              className={`px-6 py-3 rounded-lg text-sm font-semibold transition-colors ${
+                selectedCategoryId === cat.id
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+              }`}
+            >
+              {cat.name} ({catData?.exercises.length || 0})
+            </button>
+          );
+        })}
       </div>
 
       {/* Current Category Exercises */}
@@ -212,31 +199,31 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
           <p className="text-zinc-500 text-sm">Nessun esercizio. Aggiungi dalla lista sotto.</p>
         ) : (
           <div className="space-y-2">
-            {currentCategory.exercises.map((ex: any, index: number) => (
-              <div key={index} className="flex items-center justify-between bg-zinc-800 rounded-lg p-3">
-                <button
-                  onClick={() => {
-                    const exData = exercises.find(e => e.id === ex.exerciseId);
-                    if (exData) handleOpenExercise(exData);
-                  }}
-                  className="flex items-center gap-3 flex-1 text-left"
-                >
-                  <Dumbbell className="w-5 h-5 text-white" />
-                  <span className="text-white font-medium">{ex.exerciseName || ex.exerciseId}</span>
-                </button>
-                <div className="flex items-center gap-4">
-                  <span className="text-zinc-400 text-sm">
-                    {ex.sets} × {ex.reps}
-                  </span>
+            {currentCategory.exercises.map((ex: any, index: number) => {
+              const exerciseData = getExerciseById(ex.exerciseId);
+              return (
+                <div key={index} className="flex items-center justify-between bg-zinc-800 rounded-lg p-3">
                   <button
-                    onClick={() => handleRemoveExercise(selectedCategoryId, index)}
-                    className="p-1 text-zinc-500 hover:text-red-400"
+                    onClick={() => exerciseData && handleViewExercise(exerciseData)}
+                    className="flex items-center gap-3 flex-1 text-left"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Dumbbell className="w-5 h-5 text-blue-400" />
+                    <span className="text-white font-medium">{ex.exerciseName || ex.exerciseId}</span>
                   </button>
+                  <div className="flex items-center gap-4">
+                    <span className="text-zinc-400 text-sm">
+                      {ex.sets} x {ex.reps}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveExercise(selectedCategoryId, index)}
+                      className="p-1 text-zinc-500 hover:text-red-400"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -249,7 +236,7 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
         Salva Workout
       </button>
 
-      {/* Exercise Library - Same style as ExerciseLibrary */}
+      {/* Exercise Library - Groups collapsible */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white">Libreria Esercizi</h3>
         
@@ -276,9 +263,9 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
                 )}
               </button>
 
-              {/* Exercises List */}
+              {/* Exercises List - shown when expanded */}
               {expandedGroups.has(group.id) && (
-                <div className="border-t border-zinc-800 max-h-96 overflow-y-auto scrollbar-dark">
+                <div className="border-t border-zinc-800">
                   {getExercisesByGroup(group.id).length === 0 ? (
                     <div className="px-5 py-8 text-center text-zinc-500">
                       Nessun esercizio
@@ -287,47 +274,38 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
                     getExercisesByGroup(group.id).map(exercise => (
                       <div
                         key={exercise.id}
-                        className="px-5 py-4 border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors"
+                        className="px-5 py-3 border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors"
                       >
                         <div className="flex items-center justify-between">
-                          <button
-                            onClick={async () => {
-                              setViewingExerciseGif(null);
-                              setViewingExercise(exercise);
-                              const gifUrl = await getGifUrl(exercise.id);
-                              setViewingExerciseGif(gifUrl);
-                            }}
-                            className="flex-1 text-left"
-                          >
-                            <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <button
+                              onClick={() => handleViewExercise(exercise)}
+                              className="text-left w-full"
+                            >
                               <span className="text-white font-medium">{exercise.name}</span>
-                              <span className={`text-xs px-1.5 py-0.5 rounded ml-2 ${
-                                exercise.tipo === 'aerobico' 
-                                  ? 'bg-blue-500/20 text-blue-400' 
-                                  : 'bg-orange-500/20 text-orange-400'
-                              }`}>
-                                {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <div className="flex flex-wrap gap-x-2">
-                                {exercise.muscles?.map((muscle: string, idx: number) => (
-                                  <span key={idx} className="text-xs text-zinc-500">{muscle}</span>
-                                ))}
+                              <div className="flex items-center gap-1 mt-1">
+                                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                  exercise.tipo === 'aerobico' 
+                                    ? 'bg-blue-500/20 text-blue-400' 
+                                    : 'bg-orange-500/20 text-orange-400'
+                                }`}>
+                                  {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                                </span>
+                                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                  exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                                  exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                                  'bg-red-500/20 text-red-400'
+                                }`}>
+                                  {exercise.difficulty === 'beginner' ? 'Principiante' :
+                                   exercise.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
+                                </span>
                               </div>
-                              <span className={`text-xs px-1.5 py-0.5 rounded ml-2 ${
-                                exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
-                                exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-                                'bg-red-500/20 text-red-400'
-                              }`}>
-                                {exercise.difficulty === 'beginner' ? 'Principiante' :
-                                 exercise.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
-                              </span>
-                            </div>
-                          </button>
+                            </button>
+                          </div>
                           <button
                             onClick={() => handleAddExercise(exercise)}
                             className="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors ml-2"
+                            title="Aggiungi"
                           >
                             <Plus className="w-5 h-5 text-white" />
                           </button>
@@ -342,7 +320,7 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
         </div>
       </div>
 
-      {/* View-Only Exercise Modal for CreateWorkout */}
+      {/* View-Only Exercise Modal */}
       {viewingExercise && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setViewingExercise(null)}>
           <div 
@@ -363,7 +341,7 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
               </button>
             </div>
 
-            {/* Content - Image and Description only */}
+            {/* Content */}
             <div className="flex flex-col md:flex-row max-h-[calc(80vh-70px)]">
               {/* Left - GIF */}
               <div className="md:w-1/2 bg-zinc-950 flex items-center justify-center p-4 min-h-[200px]">
