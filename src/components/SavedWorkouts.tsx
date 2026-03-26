@@ -145,12 +145,12 @@ export function SavedWorkouts({ onLoadWorkout }: SavedWorkoutsProps) {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onLoadWorkout(workout);
+                      setExpandedWorkout(expandedWorkout === workout.id ? null : workout.id);
                     }}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
                   >
                     <Play className="w-4 h-4" />
-                    Avvia
+                    Mostra
                   </button>
                   <button
                     onClick={(e) => handleDelete(workout.id, e)}
