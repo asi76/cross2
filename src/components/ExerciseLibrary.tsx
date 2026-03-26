@@ -546,9 +546,9 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                             </span>
                           </div>
                           <div className="flex items-center justify-between mt-1">
-                            <div className="flex flex-wrap gap-x-2">
+                            <div className="flex flex-wrap gap-1">
                               {exercise.muscles.map((muscle, idx) => (
-                                <span key={idx} className="text-xs text-zinc-500">{muscle}</span>
+                                <span key={idx} className="px-2 py-0.5 rounded text-xs bg-white/20 text-white border border-white/30">{muscle}</span>
                               ))}
                             </div>
                             <span className={`text-xs px-1.5 py-0.5 rounded ml-2 ${

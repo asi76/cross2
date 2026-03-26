@@ -221,17 +221,12 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                     <Dumbbell className="w-5 h-5 text-blue-400" />
                     <span className="text-white font-medium">{ex.exerciseName || ex.exerciseId}</span>
                   </button>
-                  <div className="flex items-center gap-4">
-                    <span className="text-zinc-400 text-sm">
-                      {ex.sets} x {ex.reps}
-                    </span>
-                    <button
-                      onClick={() => handleRemoveExercise(selectedCategoryId, index)}
-                      className="p-1 text-zinc-500 hover:text-red-400"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleRemoveExercise(selectedCategoryId, index)}
+                    className="p-1 text-zinc-500 hover:text-red-400"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               );
             })}
@@ -305,9 +300,9 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                               </span>
                             </div>
                             <div className="flex items-center justify-between mt-1">
-                              <div className="flex flex-wrap gap-x-2">
+                              <div className="flex flex-wrap gap-1">
                                 {exercise.muscles.map((muscle, idx) => (
-                                  <span key={idx} className="text-xs text-zinc-500">{muscle}</span>
+                                  <span key={idx} className="px-2 py-0.5 rounded text-xs bg-white/20 text-white border border-white/30">{muscle}</span>
                                 ))}
                               </div>
                               <span className={`text-xs px-1.5 py-0.5 rounded ml-2 ${

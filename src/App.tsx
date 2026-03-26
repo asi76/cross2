@@ -11,7 +11,8 @@ import {
   X,
   ChevronDown,
   ChevronUp,
-  Pencil
+  Pencil,
+  Target
 } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useWorkout } from './hooks/useWorkout';
@@ -22,6 +23,7 @@ import { ExerciseLibrary } from './components/ExerciseLibrary';
 import { WorkoutDisplay } from './components/WorkoutDisplay';
 import { Workout } from './data/types';
 import { supabase } from './supabase';
+import { getGifUrl } from './data/gifMapping';
 
 type View = 'home' | 'create' | 'library' | 'workout' | 'admin';
 
@@ -44,6 +46,8 @@ function App() {
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('forza');
   const [viewingExercise, setViewingExercise] = useState<any>(null);
+  const [viewingExerciseData, setViewingExerciseData] = useState<any>(null);
+  const [viewingExerciseGif, setViewingExerciseGif] = useState<string | null>(null);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
   const [allExercises, setAllExercises] = useState<any[]>([]);
 
@@ -287,6 +291,20 @@ function App() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (confirm('Eliminare questo workout?')) {
+                          if (confirm('Conferma eliminazione definitiva?')) {
+                            deleteWorkout(workout.id);
+                          }
+                        }
+                      }}
+                      className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-colors"
+                      title="Elimina"
+                    >
+                      <LogOut className="w-5 h-5 text-red-400" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingWorkout(workout);
                         setCurrentView('create');
                       }}
@@ -350,7 +368,15 @@ function App() {
                           return (
                             <div 
                               key={index}
-                              onClick={() => setViewingExercise(ex)}
+                              onClick={async () => {
+                                setViewingExercise(ex);
+                                setViewingExerciseData(exerciseData);
+                                setViewingExerciseGif(null);
+                                try {
+                                  const gifUrl = await getGifUrl(ex.exerciseId);
+                                  setViewingExerciseGif(gifUrl);
+                                } catch {}
+                              }}
                               className="bg-dark-bg rounded-lg p-3 cursor-pointer hover:bg-zinc-800/50 transition-colors w-full mb-2 last:mb-0"
                             >
                               <div className="flex items-center justify-between w-full">
@@ -370,24 +396,6 @@ function App() {
                           );
                         })}
                       </div>
-
-                      {/* Rimuovi Button */}
-                      <div className="p-4 border-t border-dark-border">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm('Eliminare questo workout?')) {
-                              if (confirm('Conferma eliminazione definitiva?')) {
-                                deleteWorkout(workout.id);
-                              }
-                            }
-                          }}
-                          className="w-full py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
-                        >
-                          <LogOut className="w-5 h-5" />
-                          Rimuovi Workout
-                        </button>
-                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -397,52 +405,87 @@ function App() {
         )}
       </div>
 
-      {/* Exercise Info Modal */}
+      {/* Exercise Info Modal - same style as CreateWorkout */}
       {viewingExercise && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
           onClick={() => setViewingExercise(null)}
         >
           <div 
-            className="bg-dark-card rounded-2xl border border-dark-border w-full max-w-md overflow-hidden"
+            className="bg-zinc-900 rounded-2xl border border-zinc-700 w-full max-w-2xl max-h-[80vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-dark-border">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
               <div className="flex items-center gap-3">
-                <Dumbbell className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-bold text-white">
+                <Target className="w-5 h-5 text-blue-500" />
+                <h2 className="text-xl font-bold text-white">
                   {viewingExercise.exerciseName || viewingExercise.exerciseId}
                 </h2>
               </div>
               <button
                 onClick={() => setViewingExercise(null)}
-                className="p-2 hover:bg-dark-bg rounded-lg transition-colors"
+                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5 text-gray-400" />
+                <X className="w-5 h-5 text-zinc-400" />
               </button>
             </div>
-            <div className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <span className="text-white font-semibold text-xl">
-                  {viewingExercise.sets} x {viewingExercise.reps}
-                </span>
-                {viewingExercise.rest && (
-                  <span className="text-gray-400 text-sm">
-                    {viewingExercise.rest}s pausa
-                  </span>
+            <div className="flex flex-col md:flex-row max-h-[calc(80vh-70px)]">
+              <div className="md:w-1/2 bg-zinc-950 flex items-center justify-center p-4 min-h-[200px]">
+                {viewingExerciseGif ? (
+                  <img 
+                    src={viewingExerciseGif} 
+                    alt={viewingExercise.exerciseName} 
+                    className="max-w-full max-h-full object-contain rounded-lg"
+                  />
+                ) : (
+                  <div className="text-zinc-500 text-center">
+                    <Dumbbell className="w-16 h-16 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Nessuna immagine</p>
+                  </div>
                 )}
               </div>
-              <button
-                onClick={() => {
-                  setViewingExercise(null);
-                  setExpandedWorkoutId(null);
-                  handleStartWorkout(viewingExercise);
-                }}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
-              >
-                <Play className="w-5 h-5" />
-                Avvia Esercizio
-              </button>
+              <div className="md:w-1/2 p-6 overflow-y-auto modal-scroll">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-xs font-medium text-zinc-500 mb-1.5">Descrizione</h3>
+                    <p className="text-zinc-300 text-sm leading-relaxed">
+                      {viewingExerciseData?.description || 'Nessuna descrizione disponibile.'}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-medium text-zinc-500 mb-1.5">Muscoli</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {viewingExerciseData?.muscles?.map((muscle: string, idx: number) => (
+                        <span key={idx} className="px-2 py-0.5 rounded text-xs bg-white/20 text-white border border-white/30">
+                          {muscle}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      viewingExerciseData?.tipo === 'aerobico' 
+                        ? 'bg-blue-500/20 text-blue-400' 
+                        : 'bg-orange-500/20 text-orange-400'
+                    }`}>
+                      {viewingExerciseData?.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      viewingExerciseData?.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                      viewingExerciseData?.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {viewingExerciseData?.difficulty === 'beginner' ? 'Principiante' :
+                       viewingExerciseData?.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
+                    </span>
+                    {(viewingExerciseData?.reps || viewingExerciseData?.duration) && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">
+                        {viewingExerciseData?.reps ? `${viewingExerciseData.reps} reps` : `${viewingExerciseData?.duration}s`}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

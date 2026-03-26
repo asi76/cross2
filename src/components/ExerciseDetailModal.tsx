@@ -342,15 +342,15 @@ export function ExerciseDetailModal({
               <>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-2 py-1 bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-medium rounded-lg transition-colors"
+                  className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors"
                 >
                   Annulla
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
                 >
-                  <Save className="w-3 h-3" />
+                  <Save className="w-4 h-4" />
                   Salva
                 </button>
               </>
