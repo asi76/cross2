@@ -68,9 +68,11 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     loadExercises();
   }, [loadGroups, loadExercises]);
 
-  // Get exercises for a specific group
+  // Get exercises for a specific group (sorted alphabetically)
   const getExercisesByGroup = (groupId: string): Exercise[] => {
-    return exercises.filter(e => e.group_id === groupId);
+    return exercises
+      .filter(e => e.group_id === groupId)
+      .sort((a, b) => a.name.localeCompare(b.name));
   };
 
   // Toggle group expansion
@@ -300,7 +302,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
       {/* Groups List */}
       <div className="space-y-3">
         {groups.map(group => (
-          <div key={group.id} className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+          <div key={group.id} className="bg-zinc-900 rounded-xl border border-zinc-800">
             {/* Group Header */}
             <button
               onClick={() => toggleGroup(group.id)}
@@ -335,7 +337,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
             {/* Expanded Content */}
             {expandedGroups.has(group.id) && (
-              <div className="border-t border-zinc-800">
+              <div className="border-t border-zinc-800 h-auto">
                 {getExercisesByGroup(group.id).length === 0 ? (
                   <div className="px-5 py-8 text-center text-zinc-500">
                     Nessun esercizio in questo gruppo
