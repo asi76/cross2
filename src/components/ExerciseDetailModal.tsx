@@ -260,12 +260,10 @@ export function ExerciseDetailModal({
   const searchGif = () => {
     const query = encodeURIComponent(`${exercise.name} exercise gif`);
     const searchUrl = `https://www.google.com/search?tbs=itp:animated&tbm=isch&q=${query}`;
-    // Position popup top-left aligned with modal's top-left corner
-    // Modal is centered, so popup will also be centered with same alignment
     const width = 680;
     const height = 500;
     const left = Math.round((window.innerWidth - width) / 2);
-    const top = Math.round((window.innerHeight - height) / 2);
+    const top = Math.round((window.innerHeight - height) / 2) - 40;
     window.open(searchUrl, 'gifsearch', `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`);
   };
 
