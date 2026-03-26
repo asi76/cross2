@@ -6,7 +6,6 @@ import { setGifUrl, removeGifUrl } from '../data/gifMapping';
 
 interface ExerciseDetailModalProps {
   exercise: Exercise;
-  mode?: 'view' | 'edit' | 'create';
   gifUrl?: string | null;
   onClose: () => void;
   onSave?: (exerciseData: Partial<Exercise>) => void;
@@ -16,11 +15,11 @@ interface ExerciseDetailModalProps {
   hasNext?: boolean;
   onGifUpdated?: (exerciseId: string, newUrl: string | null) => void;
   showUpload?: boolean;
+  mode?: 'view' | 'edit' | 'create';
 }
 
 export function ExerciseDetailModal({
   exercise,
-  mode: propMode = 'view',
   gifUrl = null,
   onClose,
   onSave,
@@ -30,17 +29,17 @@ export function ExerciseDetailModal({
   hasNext,
   onGifUpdated,
   showUpload = true,
+  mode: propMode = 'view',
 }: ExerciseDetailModalProps) {
   const [imageError, setImageError] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isEditing, setIsEditing] = useState(propMode === 'create');
+  const [isEditing, setIsEditing] = useState(propMode === 'edit' || propMode === 'create');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Form state for edit/create mode
-  const [editName, setEditName] = useState(exercise.name);
+  // Form state for edit mode
   const [editMuscles, setEditMuscles] = useState(exercise.muscles?.join(', ') || '');
   const [editReps, setEditReps] = useState(exercise.reps?.toString() || '');
   const [editDuration, setEditDuration] = useState(exercise.duration?.toString() || '');
@@ -49,28 +48,25 @@ export function ExerciseDetailModal({
 
   useEffect(() => {
     setImageError(false);
-    setEditName(exercise.name);
     setEditMuscles(exercise.muscles?.join(', ') || '');
     setEditReps(exercise.reps?.toString() || '');
     setEditDuration(exercise.duration?.toString() || '');
     setEditDifficulty(exercise.difficulty || 'intermediate');
     setEditDescription(exercise.description || '');
-    setIsEditing(propMode === 'create');
+    setIsEditing(propMode === 'edit' || propMode === 'create');
   }, [exercise, propMode]);
-
-  const isCreateMode = propMode === 'create';
 
   const difficultyColor = {
     beginner: 'bg-green-500/20 text-green-400 border-green-500/30',
     intermediate: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
     advanced: 'bg-red-500/20 text-red-400 border-red-500/30',
-  }[exercise.difficulty] || 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+  }[exercise.difficulty];
 
   const difficultyLabel = {
     beginner: 'Principiante',
     intermediate: 'Intermedio',
     advanced: 'Avanzato',
-  }[exercise.difficulty] || 'Intermedio';
+  }[exercise.difficulty];
 
   const getDescription = (name: string): string => {
     const descriptions: Record<string, string> = {
@@ -127,36 +123,21 @@ export function ExerciseDetailModal({
       'Squat Thrusts': 'Come un burpee ma senza il push-up e il salto finale. Base per i plyometrics.',
       'Skater Jumps': 'Salta lateralmente atterrando su una gamba, l\'altra dietro. Imita il movimento del pattinaggio.',
       'Clap Push-Ups': 'Push-up esplosivo con stacco delle mani per un applauso in aria.',
-      'Plyo Push-Ups': 'Push-up esplosivo senza applauso. Stacco leggero delle mani da terra.',
-      'Explosive Mountain Climbers': 'Mountain climbers eseguiti alla massima velocità. Alta intensita cardio.',
-      'Jumping Jacks': 'In piedi, salta aprendo gambe e braccia contemporaneamente. Cardio classico.',
-      'High Knees': 'Corri sul posto portando le ginocchia alte. Cardio e lavoro per hip flexors.',
-      'Butt Kicks': 'Corri sul posto cercando di toccare i glutei con i talloni. Cardio per hamstrings.',
-      'Sprint in Place': 'Corri sul posto alla massima intensità. Interval training.',
-      'Burpees (Cardio)': 'Versione cardio dei burpees senza push-up. Alta intensità full body.',
-      'Mountain Climbers (Fast)': 'Mountain climbers eseguiti velocemente. Cardio e core.',
-      'Jump Rope': 'Salto con la corda. Eccellente per cardio e polpacci.',
-      'Squat Jumps (Cardio)': 'Squat con salto esplosivo. Cardio e lower body.',
-      'Shadow Boxing': 'Boxe simulata senza avversario. Cardio e coordinazione.',
-      'Fast Feet': 'Movimento rapido dei piedi sul posto. Cardio e agilità.',
-      'Plank Jacks': 'Jumping jacks eseguiti in posizione planck. Cardio e core.',
+      'Plyo Push-Ups': 'Push-up esplosivo con stacco delle mani dal suolo. Livello intermedio tra push-up e clap push-up.',
+      'Explosive Mountain Climbers': 'Mountain climbers eseguiti alla massima velocità. Cardio ad alta intensità.',
+      'Jumping Jacks': 'Da fermo, salta aprendo gambe e braccia, poi torna alla posizione. Cardio classico.',
+      'High Knees': 'Corri sul posto portando le ginocchia alte. Cardio e warm-up.',
+      'Butt Kicks': 'Corri sul posto toccando i glutei con i talloni. Cardio e attivazione hamstrings.',
+      'Sprint in Place': 'Sprinta sul posto: massima intensità per breve durata.',
+      'Burpees (Cardio)': 'Come i burpees normali ma contati come esercizio cardio ad alta intensità.',
+      'Mountain Climbers (Fast)': 'Mountain climbers eseguiti velocemente per il cardio.',
+      'Jump Rope': 'Salta la corda. Esercizio cardio eccellente per coordinazione e polpacci.',
+      'Squat Jumps (Cardio)': 'Come jump squats ma contati nel contesto cardio. Stesso movimento.',
+      'Shadow Boxing': 'Boxe simulata senza avversario. Ottimo per cardio e coordinazione.',
+      'Fast Feet': 'Movimento rapido dei piedi sul posto. Agilità e cardio.',
+      'Plank Jacks': 'In plank, salta aprendo e chiudendo le gambe come un jumping jack. Cardio e core.',
     };
-    return descriptions[name] || 'Esercizio versatile per allenamento funzionale.';
-  };
-
-  const handleSave = () => {
-    if (!onSave) return;
-    
-    const musclesArray = editMuscles.split(',').map(m => m.trim()).filter(m => m);
-    
-    onSave({
-      name: editName,
-      muscles: musclesArray,
-      reps: editReps ? parseInt(editReps) : null,
-      duration: editDuration ? parseInt(editDuration) : null,
-      difficulty: editDifficulty,
-      description: editDescription
-    });
+    return descriptions[exercise.name] || `Esercizio per ${exercise.muscles.join(', ')}. Mantieni una forma corretta durante l'esecuzione.`;
   };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -175,70 +156,78 @@ export function ExerciseDetailModal({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      await uploadFile(file);
-    }
-  }, []);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await uploadFile(file);
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && files[0].type.startsWith('image/')) {
+      await uploadFile(files[0]);
     }
-  };
+  }, [exercise.id]);
 
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0 && files[0].type.startsWith('image/')) {
+      await uploadFile(files[0]);
+    }
+  }, [exercise.id]);
+
+  // Upload file to Supabase storage
   const uploadFile = async (file: File) => {
-    if (!exercise?.id) return;
-    
     setIsUploading(true);
-    setUploadProgress('Caricamento...');
-    
+    setUploadProgress('Caricamento in corso...');
+
     try {
-      // Delete old GIF first if exists
-      if (gifUrl) {
-        await removeGifUrl(exercise.id);
-      }
+      // Use timestamp in filename to avoid conflicts
+      const timestamp = Date.now();
+      const ext = file.name.split('.').pop() || 'gif';
+      const filename = `${exercise.id}_${timestamp}.${ext}`;
       
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${exercise.id}_${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
+      // First delete any existing file for this exercise
+      const { data: existingFiles } = await supabase.storage
         .from('gifs')
-        .upload(fileName, file, {
-          cacheControl: '0',
-          upsert: true
-        });
+        .list('', { search: exercise.id });
       
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        setUploadProgress('Errore: ' + uploadError.message);
-        setTimeout(() => setUploadProgress(null), 3000);
-        setIsUploading(false);
-        return;
+      if (existingFiles && existingFiles.length > 0) {
+        const filesToDelete = existingFiles.map(f => f.name);
+        await supabase.storage.from('gifs').remove(filesToDelete);
       }
       
+      // Then upload new file with timestamp name
+      const { data, error } = await supabase.storage
+        .from('gifs')
+        .upload(filename, file, {
+          cacheControl: '0',
+          upsert: false
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Get public URL
       const { data: urlData } = supabase.storage
         .from('gifs')
-        .getPublicUrl(fileName);
+        .getPublicUrl(filename);
+
+      // Add timestamp to bust browser cache
+      const cachedUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      setUploadProgress('Caricamento completato!');
       
-      const publicUrl = urlData.publicUrl;
+      // Save to database with timestamp filename
+      await setGifUrl(exercise.id, cachedUrl);
       
-      await setGifUrl(exercise.id, publicUrl);
-      
+      // Notify parent with cache-busted URL
       if (onGifUpdated) {
-        onGifUpdated(exercise.id, publicUrl + '?t=' + Date.now());
+        onGifUpdated(exercise.id, cachedUrl);
       }
-      
-      setUploadProgress('Caricata!');
+
       setTimeout(() => {
         setUploadProgress(null);
         setIsUploading(false);
       }, 1500);
     } catch (error: any) {
       console.error('Upload error:', error);
-      setUploadProgress('Errore: ' + error.message);
+      setUploadProgress(`Errore: ${error.message}`);
       setTimeout(() => {
         setUploadProgress(null);
         setIsUploading(false);
@@ -247,22 +236,25 @@ export function ExerciseDetailModal({
   };
 
   const handleDeleteGif = async () => {
-    if (!exercise?.id || !confirm('Eliminare questa GIF?')) return;
-    
+    if (!gifUrl) return;
+
     setIsDeleting(true);
+    setUploadProgress('Eliminazione in corso...');
+
     try {
-      if (gifUrl) {
-        // Extract filename from URL
-        const urlParts = gifUrl.split('/');
-        const fileName = urlParts[urlParts.length - 1].split('?')[0];
-        
-        await supabase.storage
-          .from('gifs')
-          .remove([fileName]);
+      const filename = `${exercise.id}.gif`;
+      
+      const { error } = await supabase.storage
+        .from('gifs')
+        .remove([filename]);
+
+      if (error) {
+        throw new Error(error.message);
       }
-      
+
+      // Remove from database
       await removeGifUrl(exercise.id);
-      
+
       if (onGifUpdated) {
         onGifUpdated(exercise.id, null);
       }
@@ -282,90 +274,31 @@ export function ExerciseDetailModal({
     }
   };
 
+  const handleSave = () => {
+    if (!onSave) return;
+    
+    const musclesArray = editMuscles.split(',').map(m => m.trim()).filter(m => m);
+    
+    onSave({
+      name: exercise.name,
+      muscles: musclesArray,
+      reps: editReps ? parseInt(editReps) : null,
+      duration: editDuration ? parseInt(editDuration) : null,
+      difficulty: editDifficulty,
+      description: editDescription
+    });
+  };
+
   // Open Google Images search for this exercise
   const searchGif = () => {
     const query = encodeURIComponent(`${exercise.name} exercise gif`);
     const searchUrl = `https://www.google.com/search?tbs=itp:animated&tbm=isch&q=${query}`;
-    const width = 680;
-    const height = 500;
-    const left = Math.round((window.innerWidth - width) / 2);
-    const top = Math.round((window.innerHeight - height) / 2) - 40;
-    window.open(searchUrl, 'gifsearch', `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+    window.open(searchUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
   };
 
   const openFilePicker = () => {
     fileInputRef.current?.click();
   };
-
-  // Edit/Create form content
-  const renderEditForm = () => (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">Nome</label>
-        <input
-          type="text"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
-          placeholder="Nome esercizio"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">Muscoli (separati da virgola)</label>
-        <input
-          type="text"
-          value={editMuscles}
-          onChange={(e) => setEditMuscles(e.target.value)}
-          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
-          placeholder="Chest, Shoulders, Triceps"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-zinc-400 mb-1">Reps</label>
-          <input
-            type="number"
-            value={editReps}
-            onChange={(e) => setEditReps(e.target.value)}
-            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
-            placeholder="12"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-zinc-400 mb-1">Durata (secondi)</label>
-          <input
-            type="number"
-            value={editDuration}
-            onChange={(e) => setEditDuration(e.target.value)}
-            className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
-            placeholder="30"
-          />
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">Difficolta</label>
-        <select
-          value={editDifficulty}
-          onChange={(e) => setEditDifficulty(e.target.value)}
-          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
-        >
-          <option value="beginner">Principiante</option>
-          <option value="intermediate">Intermedio</option>
-          <option value="advanced">Avanzato</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-zinc-400 mb-1">Descrizione</label>
-        <textarea
-          value={editDescription}
-          onChange={(e) => setEditDescription(e.target.value)}
-          rows={4}
-          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 resize-none"
-          placeholder="Descrizione dell'esercizio..."
-        />
-      </div>
-    </div>
-  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
@@ -378,7 +311,7 @@ export function ExerciseDetailModal({
           <div className="flex items-center gap-3">
             <Target className="w-5 h-5 text-emerald-400" />
             <h2 className="text-xl font-bold text-white">
-              {isCreateMode ? 'Nuovo Esercizio' : isEditing ? 'Modifica Esercizio' : exercise.name}
+              {isEditing ? (propMode === 'create' ? 'Nuovo Esercizio' : 'Modifica Esercizio') : exercise.name}
             </h2>
           </div>
           <button
@@ -389,85 +322,71 @@ export function ExerciseDetailModal({
           </button>
         </div>
 
-        {/* Content */}
-        {isEditing ? (
-          <div className="flex flex-col md:flex-row h-[calc(85vh-80px)]">
-            {/* Left - GIF + Upload Area (only in create if has image) */}
-            {showUpload && (
-              <div className="md:w-1/2 bg-zinc-950 flex flex-col p-4">
-                <div className="flex-1 flex items-center justify-center min-h-[200px]">
-                  {gifUrl && !imageError ? (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <img
-                        src={gifUrl}
-                        alt={`${exercise.name} animation`}
-                        className="max-w-full max-h-full object-contain rounded-lg"
-                        onError={() => setImageError(true)}
-                      />
-                      <button
-                        onClick={handleDeleteGif}
-                        disabled={isDeleting}
-                        className="absolute top-2 right-2 p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors"
-                        title="Elimina GIF"
-                      >
-                        {isDeleting ? (
-                          <Loader2 className="w-4 h-4 text-white animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4 text-white" />
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <div
-                      className={`w-full h-48 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                        isDragging
-                          ? 'border-emerald-500 bg-emerald-500/10'
-                          : 'border-zinc-700 hover:border-zinc-500'
-                      }`}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      onClick={openFilePicker}
-                    >
-                      <Image className="w-10 h-10 text-zinc-500 mb-2" />
-                      <p className="text-zinc-400 text-sm text-center">
-                        Trascina un'immagine qui<br />oppure clicca per selezionare
-                      </p>
-                      <p className="text-zinc-500 text-xs mt-2">PNG, JPG, GIF, WebP</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Upload progress */}
-                {uploadProgress && (
-                  <div className="mt-2 text-center text-sm text-emerald-400">
-                    {uploadProgress}
-                  </div>
-                )}
-
-                {/* Upload/Download buttons */}
-                <div className="flex gap-2 mt-4">
+        {/* Content - Two columns */}
+        <div className="flex flex-col md:flex-row h-[calc(85vh-80px)]">
+          {/* Left - GIF + Upload Area */}
+          <div className="md:w-1/2 bg-zinc-950 flex flex-col p-4">
+            {/* GIF Display */}
+            <div className="flex-1 flex items-center justify-center min-h-[200px]">
+              {gifUrl && !imageError ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <img
+                    src={gifUrl}
+                    alt={`${exercise.name} animation`}
+                    className="max-w-full max-h-full object-contain rounded-lg"
+                    onError={() => setImageError(true)}
+                  />
+                  {/* Delete Button */}
                   <button
-                    onClick={openFilePicker}
-                    disabled={isUploading}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+                    onClick={handleDeleteGif}
+                    disabled={isDeleting}
+                    className="absolute top-2 right-2 p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors"
+                    title="Elimina GIF"
                   >
-                    {isUploading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                    {isDeleting ? (
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
                     ) : (
-                      <Upload className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 text-white" />
                     )}
-                    Carica
-                  </button>
-                  <button
-                    onClick={searchGif}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-                  >
-                    <Search className="w-4 h-4" />
-                    Cerca su Google
                   </button>
                 </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center text-zinc-500">
+                  <Play className="w-16 h-16 mb-4 opacity-50" />
+                  <p>GIF non disponibile</p>
+                </div>
+              )}
+            </div>
 
+            {/* Upload Status */}
+            {uploadProgress && (
+              <div className="text-center py-2 text-sm text-emerald-400">
+                {uploadProgress}
+              </div>
+            )}
+
+            {/* Search & Upload Area */}
+            <div className="mt-4 space-y-3">
+              {/* Search GIF Button */}
+              <button
+                onClick={searchGif}
+                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Search className="w-4 h-4" />
+                Cerca GIF su Google Immagini
+              </button>
+
+              {/* Drag & Drop Zone */}
+              <div
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                  isDragging
+                    ? 'border-emerald-400 bg-emerald-500/10'
+                    : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -475,178 +394,193 @@ export function ExerciseDetailModal({
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-              </div>
-            )}
-
-            {/* Right - Edit Form */}
-            <div className="md:w-1/2 p-6 overflow-y-auto">
-              {renderEditForm()}
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  onClick={onClose}
-                  className="px-6 py-3 bg-zinc-700 hover:bg-zinc-600 text-white font-medium rounded-lg transition-colors"
-                >
-                  Annulla
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  Salva
-                </button>
+                
+                {isUploading ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mb-2" />
+                    <p className="text-sm text-zinc-400">Caricamento...</p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className={`w-8 h-8 mx-auto mb-2 ${isDragging ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                    <p className="text-sm text-zinc-400 mb-1">
+                      Trascina qui la GIF scaricata
+                    </p>
+                    <p className="text-xs text-zinc-600 mb-3">
+                      oppure
+                    </p>
+                    <button
+                      onClick={openFilePicker}
+                      className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                    >
+                      <Image className="w-4 h-4" />
+                      Sfoglia
+                    </button>
+                    <p className="text-xs text-zinc-600 mt-2">Formato: immagini (max 10MB)</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col md:flex-row h-[calc(85vh-80px)]">
-            {/* Left - GIF + Upload Area */}
-            {showUpload && (
-              <div className="md:w-1/2 bg-zinc-950 flex flex-col p-4">
-                <div className="flex-1 flex items-center justify-center min-h-[200px]">
-                  {gifUrl && !imageError ? (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <img
-                        src={gifUrl}
-                        alt={`${exercise.name} animation`}
-                        className="max-w-full max-h-full object-contain rounded-lg"
-                        onError={() => setImageError(true)}
-                      />
-                      <button
-                        onClick={handleDeleteGif}
-                        disabled={isDeleting}
-                        className="absolute top-2 right-2 p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors"
-                        title="Elimina GIF"
-                      >
-                        {isDeleting ? (
-                          <Loader2 className="w-4 h-4 text-white animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4 text-white" />
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="text-zinc-500 text-center">
-                      <Image className="w-16 h-16 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">Nessuna immagine</p>
-                    </div>
-                  )}
-                </div>
 
-                {/* Upload/Download buttons */}
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={openFilePicker}
-                    disabled={isUploading}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-                  >
-                    {isUploading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4" />
-                    )}
-                    Carica
-                  </button>
-                  <button
-                    onClick={searchGif}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-                  >
-                    <Search className="w-4 h-4" />
-                    Cerca su Google
-                  </button>
-                </div>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-              </div>
-            )}
-
-            {/* Right - Exercise Info */}
-            <div className="md:w-1/2 p-6 overflow-y-auto">
+          {/* Right - Description / Edit Form */}
+          <div className="md:w-1/2 p-6 overflow-y-auto">
+            {isEditing ? (
+              /* Edit/Create Form */
               <div className="space-y-4">
-                {/* Difficulty badge */}
-                <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded text-sm font-medium border ${difficultyColor}`}>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Muscoli (separati da virgola)</label>
+                  <input
+                    type="text"
+                    value={editMuscles}
+                    onChange={(e) => setEditMuscles(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                    placeholder="Chest, Shoulders, Triceps"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-1">Reps</label>
+                    <input
+                      type="number"
+                      value={editReps}
+                      onChange={(e) => setEditReps(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                      placeholder="12"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-400 mb-1">Durata (secondi)</label>
+                    <input
+                      type="number"
+                      value={editDuration}
+                      onChange={(e) => setEditDuration(e.target.value)}
+                      className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                      placeholder="30"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Difficolta</label>
+                  <select
+                    value={editDifficulty}
+                    onChange={(e) => setEditDifficulty(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="beginner">Principiante</option>
+                    <option value="intermediate">Intermedio</option>
+                    <option value="advanced">Avanzato</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Descrizione</label>
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 resize-none"
+                    placeholder="Descrizione dell'esercizio..."
+                  />
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="flex-1 px-4 py-3 bg-zinc-700 hover:bg-zinc-600 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Annulla
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    Salva
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* View Mode */
+              <div className="space-y-6">
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${difficultyColor}`}>
                     {difficultyLabel}
                   </span>
+                  {exercise.reps && (
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-zinc-800 text-zinc-300 flex items-center gap-1">
+                      <Zap className="w-4 h-4" />
+                      {exercise.reps} reps
+                    </span>
+                  )}
+                  {exercise.duration && (
+                    <span className="px-3 py-1 rounded-full text-sm font-medium bg-zinc-800 text-zinc-300 flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {exercise.duration}s
+                    </span>
+                  )}
                 </div>
 
                 {/* Muscles */}
                 <div>
-                  <h4 className="text-sm font-medium text-zinc-400 mb-2">Muscoli</h4>
+                  <h3 className="text-sm font-medium text-zinc-400 mb-2">Muscoli coinvolti</h3>
                   <div className="flex flex-wrap gap-2">
-                    {exercise.muscles?.map((muscle, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-zinc-800 rounded-lg text-white text-sm">
+                    {exercise.muscles?.map((muscle) => (
+                      <span
+                        key={muscle}
+                        className="px-3 py-1 rounded-full text-sm bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                      >
                         {muscle}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                {/* Reps or Duration */}
-                <div className="flex gap-4">
-                  {exercise.reps && (
-                    <div className="flex items-center gap-2">
-                      <Play className="w-5 h-5 text-emerald-400" />
-                      <span className="text-white font-medium">{exercise.reps} reps</span>
-                    </div>
-                  )}
-                  {exercise.duration && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-emerald-400" />
-                      <span className="text-white font-medium">{exercise.duration} secondi</span>
-                    </div>
-                  )}
-                </div>
-
                 {/* Description */}
                 <div>
-                  <h4 className="text-sm font-medium text-zinc-400 mb-2">Descrizione</h4>
-                  <p className="text-zinc-300 leading-relaxed">
-                    {editDescription || getDescription(exercise.name)}
-                  </p>
+                  <h3 className="text-sm font-medium text-zinc-400 mb-2">Descrizione</h3>
+                  <p className="text-zinc-200 leading-relaxed">{editDescription || getDescription(exercise.name)}</p>
                 </div>
-              </div>
 
-              {/* Navigation and Edit buttons */}
-              <div className="mt-6 flex justify-between items-center">
-                <div className="flex gap-2">
-                  {hasPrev && (
+                {/* Navigation and Edit */}
+                <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+                  <button
+                    onClick={onPrev}
+                    disabled={!hasPrev}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                      hasPrev
+                        ? 'bg-zinc-800 hover:bg-zinc-700 text-white'
+                        : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
+                    }`}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Precedente
+                  </button>
+                  <div className="flex gap-2">
                     <button
-                      onClick={onPrev}
-                      className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors"
                     >
-                      <ChevronLeft className="w-5 h-5 text-white" />
+                      <Edit3 className="w-4 h-4" />
+                      Modifica
                     </button>
-                  )}
-                  {hasNext && (
                     <button
                       onClick={onNext}
-                      className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+                      disabled={!hasNext}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                        hasNext
+                          ? 'bg-zinc-800 hover:bg-zinc-700 text-white'
+                          : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
+                      }`}
                     >
-                      <ChevronRight className="w-5 h-5 text-white" />
+                      Successivo
+                      <ChevronRight className="w-4 h-4" />
                     </button>
-                  )}
+                  </div>
                 </div>
-                
-                {!isCreateMode && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    Modifica
-                  </button>
-                )}
               </div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
