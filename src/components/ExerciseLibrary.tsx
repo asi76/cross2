@@ -531,32 +531,29 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                         <div className="flex-1">
                           <button
                             onClick={() => handleViewExercise(exercise)}
-                            className="text-lg font-semibold text-white hover:text-blue-400 hover:underline cursor-pointer transition-colors"
+                            className="text-base font-medium text-white hover:text-blue-400 hover:underline cursor-pointer transition-colors"
                           >
                             {exercise.name}
                           </button>
-                          <div className="flex items-center gap-2 mt-2 flex-wrap">
-                            {exercise.muscles.map((muscle, idx) => (
-                              <span key={idx} className="text-sm text-zinc-500">{muscle}</span>
-                            ))}
+                          <div className="flex items-center gap-1 mt-1">
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${
+                              exercise.tipo === 'aerobico' 
+                                ? 'bg-blue-500/20 text-blue-400' 
+                                : 'bg-orange-500/20 text-orange-400'
+                            }`}>
+                              {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                            </span>
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${
+                              exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                              exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-red-500/20 text-red-400'
+                            }`}>
+                              {exercise.difficulty === 'beginner' ? 'Principiante' :
+                               exercise.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs px-2 py-0.5 rounded ${
-                            exercise.tipo === 'aerobico' 
-                              ? 'bg-blue-500/20 text-blue-400' 
-                              : 'bg-orange-500/20 text-orange-400'
-                          }`}>
-                            {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
-                          </span>
-                          <span className={`text-xs px-2 py-0.5 rounded ${
-                            exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
-                            exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-red-500/20 text-red-400'
-                          }`}>
-                            {exercise.difficulty === 'beginner' ? 'Principiante' :
-                             exercise.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
-                          </span>
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={() => {
                               setMoveExerciseId(exercise.id);

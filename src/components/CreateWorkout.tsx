@@ -301,10 +301,22 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
                             className="flex-1 text-left"
                           >
                             <span className="text-white font-medium">{exercise.name}</span>
-                            <div className="flex gap-2 mt-1">
-                              {exercise.muscles?.map((muscle: string, idx: number) => (
-                                <span key={idx} className="text-xs text-zinc-500">{muscle}</span>
-                              ))}
+                            <div className="flex items-center gap-1 mt-1">
+                              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                exercise.tipo === 'aerobico' 
+                                  ? 'bg-blue-500/20 text-blue-400' 
+                                  : 'bg-orange-500/20 text-orange-400'
+                              }`}>
+                                {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                              </span>
+                              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                                exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                                'bg-red-500/20 text-red-400'
+                              }`}>
+                                {exercise.difficulty === 'beginner' ? 'Principiante' :
+                                 exercise.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
+                              </span>
                             </div>
                           </button>
                           <button
