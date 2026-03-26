@@ -256,11 +256,12 @@ export function ExerciseDetailModal({
     }
   };
 
-  // Open Google Images search for this exercise
+  // Open Google Images search for this exercise - small popup covering GIF area only
   const searchGif = () => {
     const query = encodeURIComponent(`${exercise.name} exercise gif`);
     const searchUrl = `https://www.google.com/search?tbs=itp:animated&tbm=isch&q=${query}`;
-    window.open(searchUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+    // Small popup positioned at top, covering only GIF area (320px wide + 40px padding = 360px)
+    window.open(searchUrl, 'gifsearch', 'width=400,height=600,top=50,left=100,scrollbars=yes,resizable=yes');
   };
 
   const openFilePicker = () => {
