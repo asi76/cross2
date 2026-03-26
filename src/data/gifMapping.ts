@@ -1,4 +1,4 @@
-// GIF storage — Supabase + database table
+// GIF storage — Supabase + database table with user tracking
 // URL format: https://[project].supabase.co/storage/v1/object/public/gifs/[exerciseId].gif
 
 import { supabase } from '../supabase';
@@ -38,11 +38,15 @@ export function getGifUrl(exerciseId: string): string | null {
 
 export async function setGifUrl(exerciseId: string, url: string): Promise<void> {
   try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
     const { error } = await supabase
       .from('gif_mappings')
       .upsert({ 
         exercise_id: exerciseId, 
-        gif_url: url
+        gif_url: url,
+        user_id: user?.id || null
       });
     
     if (error) {
