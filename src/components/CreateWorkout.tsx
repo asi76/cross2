@@ -87,7 +87,26 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
 
 
 
-  const handleAddExercise = (groupId: string, exercise: Exercise) => {
+  const handleAddExerciseToCategory = (exercise: Exercise) => {
+    const newExercise = {
+      exerciseId: exercise.id,
+      sets: exercise.reps ? 3 : 4,
+      reps: exercise.reps || 10,
+      rest: 60,
+      exerciseName: exercise.name
+    };
+
+    const newCategories = [...workoutCategories];
+    const catIndex = newCategories.findIndex(c => c.id === selectedCategoryId);
+    if (catIndex !== -1) {
+      newCategories[catIndex].exercises.push(newExercise);
+      setWorkoutCategories(newCategories);
+    }
+
+    setAddExerciseModal(null);
+  };
+
+  const handleAddGroupExercise = (groupId: string, exercise: Exercise) => {
     const newExercise = {
       exerciseId: exercise.id,
       sets: exercise.reps ? 3 : 4,
@@ -109,6 +128,8 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
       next.delete(groupId);
       return next;
     });
+
+    setAddExerciseModal(null);
   };
 
   const handleRemoveExercise = (categoryId: string, exerciseIndex: number) => {

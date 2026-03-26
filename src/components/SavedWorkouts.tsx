@@ -195,14 +195,25 @@ export function SavedWorkouts({ onLoadWorkout }: SavedWorkoutsProps) {
                           {/* Exercise List */}
                           <div className="space-y-2">
                             {exercises.map((ex: any, idx: number) => (
-                              <div key={idx} className="bg-zinc-800/50 rounded-lg p-2">
+                              <div key={idx} className="bg-zinc-800/50 rounded-lg p-2 flex items-center justify-between">
                                 <button
                                   onClick={() => handleViewExercise(ex)}
-                                  className="w-full text-left"
+                                  className="text-left flex-1"
                                 >
                                   <span className="text-white text-sm font-medium hover:text-blue-400 transition-colors">
                                     {ex.exerciseName || ex.exerciseId}
                                   </span>
+                                  <div className="text-zinc-500 text-xs mt-0.5">
+                                    {ex.sets} x {ex.reps}
+                                  </div>
+                                </button>
+                                <button
+                                  onClick={() => onLoadWorkout(workout)}
+                                  className="p-1.5 bg-blue-600 hover:bg-blue-500 rounded transition-colors ml-2"
+                                  title="Avvia esercizio"
+                                >
+                                  <Play className="w-4 h-4 text-white" />
+                                </button>
                                   <div className="text-zinc-500 text-xs mt-0.5">
                                     {ex.sets} x {ex.reps}
                                   </div>
