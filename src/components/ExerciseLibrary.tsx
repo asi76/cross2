@@ -111,6 +111,16 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     setModalMode('create');
   };
 
+  // Delete a group
+  const deleteGroup = async (groupId: string) => {
+    // First delete all exercises in the group
+    await supabase.from('exercises').delete().eq('group_id', groupId);
+    // Then delete the group
+    await supabase.from('exercise_groups').delete().eq('id', groupId);
+    loadGroups();
+    loadExercises();
+  };
+
   // Edit exercise - load GIF too
   const handleEditExercise = async (exercise: Exercise) => {
     setSelectedExercise(exercise);
@@ -341,7 +351,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                   {getExercisesByGroup(group.id).length} esercizi
                 </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -351,6 +361,18 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                   title="Aggiungi esercizio"
                 >
                   <Plus className="w-4 h-4 text-white" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm('Sei sicuro di voler eliminare questo gruppo?') && confirm('Conferma eliminazione gruppo?')) {
+                      deleteGroup(group.id);
+                    }
+                  }}
+                  className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-colors"
+                  title="Elimina gruppo"
+                >
+                  <Trash2 className="w-4 h-4 text-red-400" />
                 </button>
                 {expandedGroups.has(group.id) ? (
                   <ChevronUp className="w-5 h-5 text-zinc-400" />
@@ -388,17 +410,14 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {exercise.reps && (
-                            <span className="text-sm bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded">
-                              {exercise.reps} reps
-                            </span>
-                          )}
-                          {exercise.duration && (
-                            <span className="text-sm bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded">
-                              {exercise.duration}s
-                            </span>
-                          )}
-                          <span className={`text-sm px-2 py-1 rounded ${
+                          <span className={`text-xs px-2 py-0.5 rounded ${
+                            exercise.tipo === 'aerobico' 
+                              ? 'bg-blue-500/20 text-blue-400' 
+                              : 'bg-orange-500/20 text-orange-400'
+                          }`}>
+                            {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded ${
                             exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
                             exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
                             'bg-red-500/20 text-red-400'
