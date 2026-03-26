@@ -4,25 +4,26 @@
 import { supabase } from '../supabase';
 
 export async function setGifUrl(exerciseId: string, url: string): Promise<void> {
-  console.log('setGifUrl called:', exerciseId, url);
-  
   try {
-    const { data, error } = await supabase
+    // First try to delete any existing
+    await supabase
       .from('gif_mappings')
-      .upsert({ 
+      .delete()
+      .eq('exercise_id', exerciseId);
+    
+    // Then insert new
+    const { error } = await supabase
+      .from('gif_mappings')
+      .insert({ 
         exercise_id: exerciseId, 
         gif_url: url
       });
     
-    console.log('setGifUrl result:', data, error);
-    
     if (error) {
       console.error('Error saving GIF URL:', error);
-      alert('Errore salvataggio URL: ' + error.message);
     }
   } catch (err) {
     console.error('Error:', err);
-    alert('Errore: ' + err);
   }
 }
 
