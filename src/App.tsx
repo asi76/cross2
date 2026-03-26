@@ -349,6 +349,24 @@ function App() {
                           );
                         })}
                       </div>
+
+                      {/* Rimuovi Button */}
+                      <div className="p-4 border-t border-dark-border">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm('Eliminare questo workout?')) {
+                              if (confirm('Conferma eliminazione definitiva?')) {
+                                deleteWorkout(workout.id);
+                              }
+                            }
+                          }}
+                          className="w-full py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                        >
+                          <LogOut className="w-5 h-5" />
+                          Rimuovi Workout
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
