@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import { Plus, X, Dumbbell, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { exercises, muscleGroupLabels, muscleGroupColors, getExercisesByMuscleGroup } from '../data/exercises';
-import { MuscleGroup, Workout, Station, WorkoutExercise } from '../data/types';
+import { MuscleGroup, Workout, Station, WorkoutExercise, Exercise } from '../data/types';
 import { supabase } from '../supabase';
+import { getGifUrl } from '../data/gifMapping';
+import { ExerciseDetailModal } from './ExerciseDetailModal';
 
 const muscleGroups: MuscleGroup[] = ['upper-push', 'upper-pull', 'lower-body', 'core', 'plyometric', 'cardio'];
 
@@ -16,10 +18,24 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
     { id: '1', name: 'Station 1', exercises: [] }
   ]);
   const [selectedStationIndex, setSelectedStationIndex] = useState(0);
-  // All groups expanded by default
-  const [expandedGroups] = useState<Set<MuscleGroup>>(new Set(muscleGroups));
+  // All groups collapsed by default
+  const [expandedGroups, setExpandedGroups] = useState<Set<MuscleGroup>>(new Set());
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [selectedExerciseGif, setSelectedExerciseGif] = useState<string | null>(null);
 
   const currentStation = stations[selectedStationIndex];
+
+  const toggleGroup = (group: MuscleGroup) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(group)) {
+        next.delete(group);
+      } else {
+        next.add(group);
+      }
+      return next;
+    });
+  };
 
   const handleAddStation = () => {
     const newStation: Station = {
@@ -62,6 +78,22 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
     setStations(newStations);
   };
 
+  const handleOpenExercise = async (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+    try {
+      const gifUrl = await getGifUrl(exercise.id);
+      setSelectedExerciseGif(gifUrl);
+    } catch {
+      setSelectedExerciseGif(null);
+    }
+  };
+
+  const handleGifUpdated = (exerciseId: string, newUrl: string | null) => {
+    if (selectedExercise?.id === exerciseId) {
+      setSelectedExerciseGif(newUrl);
+    }
+  };
+
   const handleSave = async () => {
     if (!workoutName.trim() || stations.every(s => s.exercises.length === 0)) {
       alert('Inserisci un nome e aggiungi almeno un esercizio');
@@ -75,9 +107,8 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
       createdAt: new Date()
     };
 
-    // Save to Supabase for cross-browser persistence
     try {
-      const { error } = await supabase
+      await supabase
         .from('workouts')
         .insert({
           id: workout.id,
@@ -85,10 +116,6 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
           stations: workout.stations,
           created_at: workout.createdAt.toISOString()
         });
-      
-      if (error) {
-        console.error('Error saving workout:', error);
-      }
     } catch (err) {
       console.error('Error:', err);
     }
@@ -159,10 +186,13 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
               const exerciseData = getExerciseById(ex.exerciseId);
               return (
                 <div key={index} className="flex items-center justify-between bg-zinc-800 rounded-lg p-3">
-                  <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => exerciseData && handleOpenExercise(exerciseData)}
+                    className="flex items-center gap-3 flex-1 text-left"
+                  >
                     <Dumbbell className="w-5 h-5 text-emerald-400" />
                     <span className="text-white font-medium">{exerciseData?.name}</span>
-                  </div>
+                  </button>
                   <div className="flex items-center gap-4">
                     <span className="text-zinc-400 text-sm">
                       {ex.sets} × {ex.reps}
@@ -189,7 +219,7 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
         Salva Workout
       </button>
 
-      {/* Exercise Library - All groups expanded */}
+      {/* Exercise Library - Groups collapsed by default */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-white">Libreria Esercizi</h3>
         
@@ -197,11 +227,19 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
           {muscleGroups.map(group => (
             <div key={group} className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
               {/* Group Header */}
-              <div className="px-4 py-3 bg-zinc-800/30">
+              <button
+                onClick={() => toggleGroup(group)}
+                className="w-full px-4 py-3 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
+              >
                 <span className={`px-2 py-0.5 rounded text-xs font-medium border ${muscleGroupColors[group]}`}>
                   {muscleGroupLabels[group]}
                 </span>
-              </div>
+                {expandedGroups.has(group) ? (
+                  <ChevronUp className="w-4 h-4 text-zinc-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-zinc-400" />
+                )}
+              </button>
 
               {/* Exercises List */}
               {expandedGroups.has(group) && (
@@ -211,17 +249,23 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
                       key={exercise.id}
                       className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors"
                     >
-                      <div>
+                      <button
+                        onClick={() => handleOpenExercise(exercise)}
+                        className="flex-1 text-left"
+                      >
                         <span className="text-white font-medium">{exercise.name}</span>
                         <div className="flex gap-2 mt-1">
                           {exercise.muscles.map(m => (
                             <span key={m} className="text-xs text-zinc-500">{m}</span>
                           ))}
                         </div>
-                      </div>
+                      </button>
                       <button
-                        onClick={() => handleAddExercise(exercise.id)}
-                        className="p-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddExercise(exercise.id);
+                        }}
+                        className="p-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors ml-2"
                       >
                         <Plus className="w-5 h-5 text-white" />
                       </button>
@@ -233,6 +277,17 @@ export function CreateWorkout({ onSave }: CreateWorkoutProps) {
           ))}
         </div>
       </div>
+
+      {/* Exercise Detail Modal */}
+      {selectedExercise && (
+        <ExerciseDetailModal
+          exercise={selectedExercise}
+          gifUrl={selectedExerciseGif}
+          onClose={() => setSelectedExercise(null)}
+          onGifUpdated={handleGifUpdated}
+          showUpload={true}
+        />
+      )}
     </div>
   );
 }
