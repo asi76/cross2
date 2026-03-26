@@ -331,23 +331,25 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
           gifUrl={selectedExerciseGif}
           onClose={() => setSelectedExercise(null)}
           onSave={async (data) => {
-            // Save exercise to Supabase
+            console.log('Saving exercise:', selectedExercise.id, data);
             const { error } = await supabase
               .from('exercises')
               .update({
                 name: data.name,
                 muscles: data.muscles,
-                reps: data.reps,
-                duration: data.duration,
+                reps: data.reps || null,
+                duration: data.duration || null,
                 difficulty: data.difficulty,
                 tipo: data.tipo,
-                description: data.description
+                description: data.description || ''
               })
               .eq('id', selectedExercise.id);
             
             if (error) {
+              console.error('Save error:', error);
               alert('Errore: ' + error.message);
             } else {
+              console.log('Saved successfully');
               setSelectedExercise(null);
             }
           }}
