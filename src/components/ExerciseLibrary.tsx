@@ -33,6 +33,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [selectedExerciseGif, setSelectedExerciseGif] = useState<string | null>(null);
   const [modalMode, setModalMode] = useState<'view' | 'edit' | 'create'>('view');
   const [createGroupId, setCreateGroupId] = useState<string | null>(null);
   const [showGroupSelector, setShowGroupSelector] = useState<string | null>(null);
@@ -109,18 +110,32 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     setModalMode('create');
   };
 
-  // Edit exercise
-  const handleEditExercise = (exercise: Exercise) => {
+  // Edit exercise - load GIF too
+  const handleEditExercise = async (exercise: Exercise) => {
     setSelectedExercise(exercise);
     setCreateGroupId(null);
     setModalMode('edit');
+    // Load GIF
+    try {
+      const gifUrl = await getGifUrl(exercise.id);
+      setSelectedExerciseGif(gifUrl);
+    } catch {
+      setSelectedExerciseGif(null);
+    }
   };
 
-  // View exercise
-  const handleViewExercise = (exercise: Exercise) => {
+  // View exercise - load GIF too
+  const handleViewExercise = async (exercise: Exercise) => {
     setSelectedExercise(exercise);
     setCreateGroupId(null);
     setModalMode('view');
+    // Load GIF
+    try {
+      const gifUrl = await getGifUrl(exercise.id);
+      setSelectedExerciseGif(gifUrl);
+    } catch {
+      setSelectedExerciseGif(null);
+    }
   };
 
   // Close modal - reload exercises to show updated data
@@ -433,8 +448,10 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
         <ExerciseDetailModal
           exercise={modalMode === 'create' ? defaultExercise : selectedExercise!}
           mode={modalMode}
+          gifUrl={selectedExerciseGif}
           onClose={handleCloseModal}
           onSave={handleSaveExercise}
+          onGifUpdated={(id, url) => setSelectedExerciseGif(url)}
         />
       )}
 

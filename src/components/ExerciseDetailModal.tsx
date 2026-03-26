@@ -40,6 +40,7 @@ export function ExerciseDetailModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state for edit mode
+  const [editName, setEditName] = useState(exercise.name || '');
   const [editMuscles, setEditMuscles] = useState(exercise.muscles?.join(', ') || '');
   const [editReps, setEditReps] = useState(exercise.reps?.toString() || '');
   const [editDuration, setEditDuration] = useState(exercise.duration?.toString() || '');
@@ -48,6 +49,7 @@ export function ExerciseDetailModal({
 
   useEffect(() => {
     setImageError(false);
+    setEditName(exercise.name || '');
     setEditMuscles(exercise.muscles?.join(', ') || '');
     setEditReps(exercise.reps?.toString() || '');
     setEditDuration(exercise.duration?.toString() || '');
@@ -280,7 +282,7 @@ export function ExerciseDetailModal({
     const musclesArray = editMuscles.split(',').map(m => m.trim()).filter(m => m);
     
     onSave({
-      name: exercise.name,
+      name: editName,
       muscles: musclesArray,
       reps: editReps ? parseInt(editReps) : null,
       duration: editDuration ? parseInt(editDuration) : null,
@@ -428,6 +430,16 @@ export function ExerciseDetailModal({
             {isEditing ? (
               /* Edit/Create Form */
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Nome</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                    placeholder="Nome esercizio"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-400 mb-1">Muscoli (separati da virgola)</label>
                   <input
