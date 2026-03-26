@@ -300,7 +300,7 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
                             onClick={() => handleOpenExercise(exercise)}
                             className="flex-1 text-left"
                           >
-                            <span className="text-white font-medium">{exercise.name}</span>
+                            <span className="text-emerald-400 font-medium">{exercise.name}</span>
                             <div className="flex gap-2 mt-1">
                               {exercise.muscles?.map((muscle: string, idx: number) => (
                                 <span key={idx} className="text-xs text-zinc-500">{muscle}</span>
@@ -330,6 +330,27 @@ export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
           exercise={selectedExercise}
           gifUrl={selectedExerciseGif}
           onClose={() => setSelectedExercise(null)}
+          onSave={async (data) => {
+            // Save exercise to Supabase
+            const { error } = await supabase
+              .from('exercises')
+              .update({
+                name: data.name,
+                muscles: data.muscles,
+                reps: data.reps,
+                duration: data.duration,
+                difficulty: data.difficulty,
+                tipo: data.tipo,
+                description: data.description
+              })
+              .eq('id', selectedExercise.id);
+            
+            if (error) {
+              alert('Errore: ' + error.message);
+            } else {
+              setSelectedExercise(null);
+            }
+          }}
           onGifUpdated={handleGifUpdated}
           showUpload={true}
         />
