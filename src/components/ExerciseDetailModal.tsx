@@ -138,14 +138,14 @@ export function ExerciseDetailModal({
     setIsDragging(false);
 
     const files = e.dataTransfer.files;
-    if (files.length > 0 && files[0].type === 'image/gif') {
+    if (files.length > 0 && files[0].type.startsWith('image/')) {
       await uploadFile(files[0]);
     }
   }, [exercise.id]);
 
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files && files.length > 0 && files[0].type === 'image/gif') {
+    if (files && files.length > 0 && files[0].type.startsWith('image/')) {
       await uploadFile(files[0]);
     }
   }, [exercise.id]);
@@ -156,15 +156,22 @@ export function ExerciseDetailModal({
     setUploadProgress('Caricamento in corso...');
 
     try {
-      const filename = `${exercise.id}.gif`;
+      // Use timestamp in filename to avoid conflicts
+      const timestamp = Date.now();
+      const ext = file.name.split('.').pop() || 'gif';
+      const filename = `${exercise.id}_${timestamp}.${ext}`;
       
-      // First delete any existing file
-      await supabase.storage.from('gifs').remove([filename]);
+      // First delete any existing file for this exercise
+      const { data: existingFiles } = await supabase.storage
+        .from('gifs')
+        .list('', { search: exercise.id });
       
-      // Small delay to ensure delete completes
-      await new Promise(r => setTimeout(r, 100));
+      if (existingFiles && existingFiles.length > 0) {
+        const filesToDelete = existingFiles.map(f => f.name);
+        await supabase.storage.from('gifs').remove(filesToDelete);
+      }
       
-      // Then upload new file
+      // Then upload new file with timestamp name
       const { data, error } = await supabase.storage
         .from('gifs')
         .upload(filename, file, {
@@ -186,7 +193,7 @@ export function ExerciseDetailModal({
 
       setUploadProgress('Caricamento completato!');
       
-      // Save to database
+      // Save to database with timestamp filename
       await setGifUrl(exercise.id, cachedUrl);
       
       // Notify parent with cache-busted URL
@@ -346,7 +353,7 @@ export function ExerciseDetailModal({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/gif"
+                  accept="image/*"
                   onChange={handleFileSelect}
                   className="hidden"
                 />
@@ -372,7 +379,7 @@ export function ExerciseDetailModal({
                       <Image className="w-4 h-4" />
                       Sfoglia
                     </button>
-                    <p className="text-xs text-zinc-600 mt-2">Formato: GIF (max 10MB)</p>
+                    <p className="text-xs text-zinc-600 mt-2">Formato: immagini (max 10MB)</p>
                   </>
                 )}
               </div>
