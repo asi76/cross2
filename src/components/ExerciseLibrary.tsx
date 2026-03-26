@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { exercises, muscleGroupLabels, muscleGroupColors, getExercisesByMuscleGroup } from '../data/exercises';
 import { MuscleGroup, Exercise } from '../data/types';
-import { gifMapping } from '../data/gifMapping';
+import { getGifUrl as getStoredGifUrl } from '../data/gifMapping';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 
 const muscleGroups: MuscleGroup[] = ['upper-push', 'upper-pull', 'lower-body', 'core', 'plyometric', 'cardio'];
@@ -10,11 +10,9 @@ const muscleGroups: MuscleGroup[] = ['upper-push', 'upper-pull', 'lower-body', '
 export function ExerciseLibrary() {
   const [expandedGroup, setExpandedGroup] = useState<MuscleGroup | null>('upper-push');
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const [localGifMapping, setLocalGifMapping] = useState<Record<string, string>>({});
 
-  // Get all exercises in order for navigation
   const allExercises = exercises;
-  
+
   const getExerciseIndex = (exercise: Exercise) => {
     return allExercises.findIndex(e => e.id === exercise.id);
   };
@@ -39,29 +37,13 @@ export function ExerciseLibrary() {
     setSelectedExercise(exercise);
   };
 
-  // Update GIF mapping when a GIF is uploaded/deleted
-  const handleGifUpdated = (exerciseId: string, newUrl: string | null) => {
-    setLocalGifMapping(prev => {
-      const updated = { ...prev };
-      if (newUrl) {
-        updated[exerciseId] = newUrl;
-      } else {
-        delete updated[exerciseId];
-      }
-      return updated;
-    });
+  const handleGifUpdated = () => {
+    // Force re-render to show updated GIF
+    setSelectedExercise(prev => prev ? { ...prev } : null);
   };
 
   const getGifUrl = (exerciseId: string): string | null => {
-    // Check local mapping first (for newly uploaded GIFs)
-    if (localGifMapping[exerciseId]) {
-      return localGifMapping[exerciseId];
-    }
-    // Fall back to static mapping
-    if (gifMapping[exerciseId]) {
-      return gifMapping[exerciseId];
-    }
-    return null;
+    return getStoredGifUrl(exerciseId);
   };
 
   return (

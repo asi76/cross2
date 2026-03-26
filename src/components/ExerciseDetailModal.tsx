@@ -1,26 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Play, Clock, Zap, Target, Trash2, Upload, Image, Loader2, Search } from 'lucide-react';
 import { Exercise } from '../data/types';
-
-// catbox.moe - simple file hosting
-async function uploadToCatbox(file: File): Promise<{ url: string }> {
-  const formData = new FormData();
-  formData.append('reqtype', 'fileupload');
-  formData.append('fileToUpload', file);
-  
-  const response = await fetch('https://catbox.moe/user/api.php', {
-    method: 'POST',
-    body: formData
-  });
-  
-  const text = await response.text();
-  
-  if (text.startsWith('https://')) {
-    return { url: text.trim() };
-  } else {
-    throw new Error(text || 'Upload failed');
-  }
-}
+import { supabase } from '../supabase';
+import { setGifUrl, removeGifUrl } from '../data/gifMapping';
 
 interface ExerciseDetailModalProps {
   exercise: Exercise;
@@ -168,18 +150,37 @@ export function ExerciseDetailModal({
     }
   }, [exercise.id]);
 
-  // Upload file directly to catbox (no server needed)
+  // Upload file to Supabase storage
   const uploadFile = async (file: File) => {
     setIsUploading(true);
     setUploadProgress('Caricamento in corso...');
 
     try {
-      const result = await uploadToCatbox(file);
+      const filename = `${exercise.id}.gif`;
       
+      const { data, error } = await supabase.storage
+        .from('gifs')
+        .upload(filename, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('gifs')
+        .getPublicUrl(filename);
+
       setUploadProgress('Caricamento completato!');
       
+      // Save to localStorage
+      setGifUrl(exercise.id, urlData.publicUrl);
+      
       if (onGifUpdated) {
-        onGifUpdated(exercise.id, result.url);
+        onGifUpdated(exercise.id, urlData.publicUrl);
       }
 
       setTimeout(() => {
@@ -200,20 +201,39 @@ export function ExerciseDetailModal({
     if (!gifUrl) return;
 
     setIsDeleting(true);
-    setUploadProgress('Eliminazione non supportata su imgbb');
+    setUploadProgress('Eliminazione in corso...');
 
-    // imgbb free tier doesn't support deletion via API
-    // The GIF stays in imgbb but we remove it from display
-    setTimeout(() => {
+    try {
+      const filename = `${exercise.id}.gif`;
+      
+      const { error } = await supabase.storage
+        .from('gifs')
+        .remove([filename]);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Remove from localStorage
+      removeGifUrl(exercise.id);
+
       if (onGifUpdated) {
         onGifUpdated(exercise.id, null);
       }
-      setUploadProgress('GIF rimossa dalla lista');
+
+      setUploadProgress('GIF eliminata!');
       setTimeout(() => {
         setUploadProgress(null);
         setIsDeleting(false);
       }, 1500);
-    }, 500);
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      setUploadProgress(`Errore: ${error.message}`);
+      setTimeout(() => {
+        setUploadProgress(null);
+        setIsDeleting(false);
+      }, 3000);
+    }
   };
 
   // Open Google Images search for this exercise

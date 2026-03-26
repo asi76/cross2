@@ -12,6 +12,7 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.100.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "firebase": "^12.11.0",
