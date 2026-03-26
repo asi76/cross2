@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image } from 'lucide-react';
 import { supabase } from '../supabase';
 import { getGifUrl } from '../data/gifMapping';
+import { Workout } from '../data/types';
 
 interface ExerciseGroup {
   id: string;
@@ -26,6 +27,7 @@ interface Exercise {
 interface CreateWorkoutProps {
   onBack: () => void;
   onSave: (workout: any) => void;
+  editWorkout?: Workout | null;
 }
 
 // Fixed workout categories
@@ -35,13 +37,15 @@ const WORKOUT_CATEGORIES = [
   { id: 'cardio2', name: 'Cardio 2' }
 ];
 
-export function CreateWorkout({ onBack, onSave }: CreateWorkoutProps) {
-  const [workoutName, setWorkoutName] = useState('');
-  const [workoutCategories, setWorkoutCategories] = useState<any[]>([
-    { id: 'forza', name: 'Forza', exercises: [] },
-    { id: 'cardio1', name: 'Cardio 1', exercises: [] },
-    { id: 'cardio2', name: 'Cardio 2', exercises: [] }
-  ]);
+export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProps) {
+  const [workoutName, setWorkoutName] = useState(editWorkout?.name || '');
+  const [workoutCategories, setWorkoutCategories] = useState<any[]>(
+    editWorkout?.stations || [
+      { id: 'forza', name: 'Forza', exercises: [] },
+      { id: 'cardio1', name: 'Cardio 1', exercises: [] },
+      { id: 'cardio2', name: 'Cardio 2', exercises: [] }
+    ]
+  );
   const [selectedCategoryId, setSelectedCategoryId] = useState('forza');
   const [groups, setGroups] = useState<ExerciseGroup[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);

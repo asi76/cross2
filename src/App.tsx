@@ -10,7 +10,8 @@ import {
   Play,
   X,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Pencil
 } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useWorkout } from './hooks/useWorkout';
@@ -20,6 +21,7 @@ import { CreateWorkout } from './components/CreateWorkout';
 import { ExerciseLibrary } from './components/ExerciseLibrary';
 import { WorkoutDisplay } from './components/WorkoutDisplay';
 import { Workout } from './data/types';
+import { supabase } from './supabase';
 
 type View = 'home' | 'create' | 'library' | 'workout' | 'admin';
 
@@ -41,6 +43,17 @@ function App() {
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(null);
   const [viewingExercise, setViewingExercise] = useState<any>(null);
+  const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+  const [allExercises, setAllExercises] = useState<any[]>([]);
+
+  // Load all exercises for display (muscles, tipo, difficulty)
+  useEffect(() => {
+    async function loadExercises() {
+      const { data } = await supabase.from('exercises').select('*');
+      if (data) setAllExercises(data);
+    }
+    loadExercises();
+  }, []);
 
   useEffect(() => {
     if (role === 'enabled' || role === 'admin') {
@@ -66,6 +79,10 @@ function App() {
   const getExercisesByCategory = (workout: Workout, categoryId: string) => {
     const category = workout.stations.find((s: any) => s.id === categoryId);
     return category?.exercises || [];
+  };
+
+  const getExerciseById = (id: string) => {
+    return allExercises.find(e => e.id === id);
   };
 
   const formatDate = (date: Date) => {
@@ -127,14 +144,19 @@ function App() {
   if (currentView === 'create') {
     return (
       <CreateWorkout
+        editWorkout={editingWorkout}
         onSave={(workout) => {
           saveWorkout(workout);
+          setEditingWorkout(null);
           setCurrentView('home');
         }}
         onStart={(workout) => {
           handleStartWorkout(workout);
         }}
-        onBack={() => setCurrentView('home')}
+        onBack={() => {
+          setEditingWorkout(null);
+          setCurrentView('home');
+        }}
       />
     );
   }
@@ -283,14 +305,13 @@ function App() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (confirm('Eliminare questo workout?')) {
-                          deleteWorkout(workout.id);
-                        }
+                        setEditingWorkout(workout);
+                        setCurrentView('create');
                       }}
-                      className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-colors"
-                      title="Elimina"
+                      className="p-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                      title="Modifica"
                     >
-                      <LogOut className="w-5 h-5 text-red-400" />
+                      <Pencil className="w-5 h-5 text-blue-400" />
                     </button>
                   </div>
                 </div>
@@ -306,11 +327,12 @@ function App() {
                       className="border-t border-dark-border"
                     >
                       {/* Category Tabs */}
-                      <div className="flex gap-2 p-4 border-b border-dark-border">
+                      <div className="p-4">
                         {WORKOUT_CATEGORIES.map((cat) => {
                           const exercises = getExercisesByCategory(workout, cat.id);
+                          if (exercises.length === 0) return null;
                           return (
-                            <div key={cat.id} className="flex-1">
+                            <div key={cat.id} className="mb-4 last:mb-0">
                               <div className="text-center mb-2">
                                 <span className={`px-4 py-2 rounded-lg text-sm font-semibold ${
                                   exercises.length > 0 
@@ -320,30 +342,47 @@ function App() {
                                   {cat.name} ({exercises.length})
                                 </span>
                               </div>
-                              {/* Exercise List */}
+                              {/* Exercise List - full width, showing muscles/tipo/difficulty */}
                               <div className="space-y-2">
-                                {exercises.map((ex: any, index: number) => (
-                                  <div 
-                                    key={index}
-                                    onClick={() => setViewingExercise(ex)}
-                                    className="bg-dark-bg rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-zinc-800/50 transition-colors"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <Dumbbell className="w-4 h-4 text-blue-400" />
-                                      <span className="text-white text-sm font-medium">
-                                        {ex.exerciseName || ex.exerciseId}
-                                      </span>
+                                {exercises.map((ex: any, index: number) => {
+                                  const exerciseData = getExerciseById(ex.exerciseId);
+                                  return (
+                                    <div 
+                                      key={index}
+                                      onClick={() => setViewingExercise(ex)}
+                                      className="bg-dark-bg rounded-lg p-3 cursor-pointer hover:bg-zinc-800/50 transition-colors w-full"
+                                    >
+                                      <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center gap-3">
+                                          <Dumbbell className="w-4 h-4 text-blue-400" />
+                                          <span className="text-white text-sm font-medium">
+                                            {ex.exerciseName || ex.exerciseId}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          {exerciseData?.muscles?.slice(0, 2).map((m: string, i: number) => (
+                                            <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-zinc-700 text-gray-300">{m}</span>
+                                          ))}
+                                          <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                            exerciseData?.tipo === 'aerobico' 
+                                              ? 'bg-blue-500/20 text-blue-400' 
+                                              : 'bg-orange-500/20 text-orange-400'
+                                          }`}>
+                                            {exerciseData?.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                                          </span>
+                                          <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                            exerciseData?.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                                            exerciseData?.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                                            'bg-red-500/20 text-red-400'
+                                          }`}>
+                                            {exerciseData?.difficulty === 'beginner' ? 'Principiante' :
+                                             exerciseData?.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
+                                          </span>
+                                        </div>
+                                      </div>
                                     </div>
-                                    <span className="text-gray-400 text-sm">
-                                      {ex.sets} x {ex.reps}
-                                    </span>
-                                  </div>
-                                ))}
-                                {exercises.length === 0 && (
-                                  <div className="text-gray-600 text-xs text-center py-2">
-                                    Nessun esercizio
-                                  </div>
-                                )}
+                                  );
+                                })}
                               </div>
                             </div>
                           );
