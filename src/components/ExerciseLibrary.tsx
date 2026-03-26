@@ -124,6 +124,11 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     }
   };
 
+  // Called when user clicks Modifica in the modal
+  const handleOpenEdit = () => {
+    setModalMode('edit');
+  };
+
   // View exercise - load GIF too
   const handleViewExercise = async (exercise: Exercise) => {
     setSelectedExercise(exercise);
@@ -451,6 +456,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
           gifUrl={selectedExerciseGif}
           onClose={handleCloseModal}
           onSave={handleSaveExercise}
+          onEdit={handleOpenEdit}
           onGifUpdated={(id, url) => setSelectedExerciseGif(url)}
         />
       )}

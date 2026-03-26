@@ -9,6 +9,7 @@ interface ExerciseDetailModalProps {
   gifUrl?: string | null;
   onClose: () => void;
   onSave?: (exerciseData: Partial<Exercise>) => void;
+  onEdit?: () => void;
   onPrev?: () => void;
   onNext?: () => void;
   hasPrev?: boolean;
@@ -23,6 +24,7 @@ export function ExerciseDetailModal({
   gifUrl = null,
   onClose,
   onSave,
+  onEdit,
   onPrev,
   onNext,
   hasPrev,
@@ -569,7 +571,10 @@ export function ExerciseDetailModal({
                   </button>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => {
+                        setIsEditing(true);
+                        if (onEdit) onEdit();
+                      }}
                       className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors"
                     >
                       <Edit3 className="w-4 h-4" />
