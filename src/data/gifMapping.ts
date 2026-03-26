@@ -4,19 +4,25 @@
 import { supabase } from '../supabase';
 
 export async function setGifUrl(exerciseId: string, url: string): Promise<void> {
+  console.log('setGifUrl called:', exerciseId, url);
+  
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('gif_mappings')
       .upsert({ 
         exercise_id: exerciseId, 
         gif_url: url
       });
     
+    console.log('setGifUrl result:', data, error);
+    
     if (error) {
       console.error('Error saving GIF URL:', error);
+      alert('Errore salvataggio URL: ' + error.message);
     }
   } catch (err) {
     console.error('Error:', err);
+    alert('Errore: ' + err);
   }
 }
 
