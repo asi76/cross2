@@ -194,11 +194,10 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   const hasChanges = workoutName !== initialName || JSON.stringify(workoutCategories) !== JSON.stringify(initialStations);
 
   const handleUnsavedChanges = (action: () => void) => {
-    if (isHandlingAction) return;
-    if (!hasChanges) {
-      action();
-      return;
-    }
+    console.log('handleUnsavedChanges called, hasChanges:', hasChanges, 'isHandlingAction:', isHandlingAction);
+    if (isHandlingAction) { console.log('Already handling action, returning'); return; }
+    if (!hasChanges) { console.log('No changes, executing action directly'); action(); return; }
+    console.log('About to call showNotification');
     setIsHandlingAction(true);
     showNotification({
       type: 'confirm',
@@ -206,8 +205,8 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       message: 'Ci sono modifiche non salvate. Vuoi salvare prima di uscire?',
       confirmText: 'Salva',
       cancelText: 'Ignora',
-      onConfirm: async () => { await handleSave(); action(); setIsHandlingAction(false); },
-      onCancel: () => { action(); setIsHandlingAction(false); },
+      onConfirm: async () => { console.log('Confirm clicked'); await handleSave(); action(); setIsHandlingAction(false); },
+      onCancel: () => { console.log('Cancel clicked'); action(); setIsHandlingAction(false); },
     });
   };
 

@@ -24,6 +24,7 @@ export function NotificationModal() {
 
   useEffect(() => {
     const handler = (e: Event) => {
+      console.log('NotificationModal received event:', e);
       const customEvent = e as CustomEvent<NotificationData>;
       setNotification(customEvent.detail);
     };
