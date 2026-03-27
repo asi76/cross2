@@ -855,11 +855,14 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               } else {
                 // Reload exercises to reflect changes
                 loadExercises();
+                // Close full edit modal and open read-only modal with updated exercise
+                setFullEditModalExercise(null);
+                setEditingExerciseInModal(false);
+                setViewingExercise(exerciseData);
               }
             } catch (err) {
               console.error('Error saving exercise:', err);
             }
-            setFullEditModalExercise(null);
           }}
           onGifUpdated={async (exerciseId, newUrl) => {
             setViewingExerciseGif(newUrl);
