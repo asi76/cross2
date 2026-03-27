@@ -293,7 +293,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
             type="text"
             value={workoutName}
             onChange={(e) => setWorkoutName(e.target.value)}
-            placeholder="Nome del workout..."
+            placeholder="Nome della scheda"
             className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
           />
           <button
