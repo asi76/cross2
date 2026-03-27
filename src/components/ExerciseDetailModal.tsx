@@ -598,44 +598,18 @@ export function ExerciseDetailModal({
                   <p className="text-zinc-200 text-base leading-relaxed">{editDescription || getDescription(exercise.name)}</p>
                 </div>
 
-                {/* Navigation and Edit */}
-                <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
+                {/* Edit Button Only */}
+                <div className="flex items-center justify-end pt-3 border-t border-zinc-800">
                   <button
-                    onClick={onPrev}
-                    disabled={!hasPrev}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-base transition-colors ${
-                      hasPrev
-                        ? 'bg-zinc-800 hover:bg-zinc-700 text-white'
-                        : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
-                    }`}
+                    onClick={() => {
+                      setIsEditing(true);
+                      if (onEdit) onEdit();
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-base transition-colors"
                   >
-                    <ChevronLeft className="w-5 h-5" />
-                    Precedente
+                    <Edit3 className="w-5 h-5" />
+                    Modifica
                   </button>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setIsEditing(true);
-                        if (onEdit) onEdit();
-                      }}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-base transition-colors"
-                    >
-                      <Edit3 className="w-5 h-5" />
-                      Modifica
-                    </button>
-                    <button
-                      onClick={onNext}
-                      disabled={!hasNext}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-base transition-colors ${
-                        hasNext
-                          ? 'bg-zinc-800 hover:bg-zinc-700 text-white'
-                          : 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
-                      }`}
-                    >
-                      Successivo
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </div>
                 </div>
               </div>
             )}
