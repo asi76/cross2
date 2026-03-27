@@ -63,6 +63,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   const [viewingExerciseIndex, setViewingExerciseIndex] = useState<number | null>(null);
   const [editingExerciseInModal, setEditingExerciseInModal] = useState(false);
   const [moveExerciseModal, setMoveExerciseModal] = useState<{ exerciseIndex: number; fromCategory: string } | null>(null);
+  const [fullEditModalExercise, setFullEditModalExercise] = useState<Exercise | null>(null);
 
   const currentCategory = workoutCategories.find(c => c.id === selectedCategoryId)!;
 
@@ -181,7 +182,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               <ArrowRightLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); handleViewExercise(exerciseData!, index); setEditingExerciseInModal(true); }}
+              onClick={(e) => { e.stopPropagation(); setFullEditModalExercise(exerciseData!); }}
               className="p-1.5 text-zinc-500 hover:text-blue-400"
               title="Modifica esercizio"
             >
@@ -756,7 +757,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                     {/* Modifica Button */}
                     <div className="flex justify-end pt-3">
                       <button
-                        onClick={() => setEditingExerciseInModal(true)}
+                        onClick={() => { setViewingExercise(null); setEditingExerciseInModal(false); setFullEditModalExercise(viewingExercise); }}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
                       >
                         Modifica
@@ -810,6 +811,51 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
             </div>
           </div>
         </div>
+      )}
+
+      {/* Full Edit Modal - ExerciseDetailModal like in Library */}
+      {fullEditModalExercise && (
+        <ExerciseDetailModal
+          exercise={fullEditModalExercise}
+          gifUrl={viewingExerciseGif}
+          mode="edit"
+          groups={groups}
+          onClose={() => {
+            setFullEditModalExercise(null);
+            setViewingExercise(null);
+            setEditingExerciseInModal(false);
+          }}
+          onSave={async (exerciseData) => {
+            // Update exercise in database
+            try {
+              const { error } = await supabase
+                .from('exercises')
+                .update({
+                  name: exerciseData.name,
+                  muscles: exerciseData.muscles,
+                  reps: exerciseData.reps,
+                  duration: exerciseData.duration,
+                  difficulty: exerciseData.difficulty,
+                  tipo: exerciseData.tipo,
+                  description: exerciseData.description,
+                })
+                .eq('id', fullEditModalExercise.id);
+
+              if (error) {
+                console.error('Error updating exercise:', error);
+              } else {
+                // Reload exercises to reflect changes
+                loadExercises();
+              }
+            } catch (err) {
+              console.error('Error saving exercise:', err);
+            }
+            setFullEditModalExercise(null);
+          }}
+          onGifUpdated={async (exerciseId, newUrl) => {
+            setViewingExerciseGif(newUrl);
+          }}
+        />
       )}
 
       {/* Duplicate Error Modal */}
