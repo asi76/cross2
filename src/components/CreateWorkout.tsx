@@ -228,7 +228,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
             return (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategoryId(cat.id)}
+                onClick={() => { setSelectedCategoryId(cat.id); window.scrollTo({ top: 0, behavior: 'instant' }); }}
                 className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
                   selectedCategoryId === cat.id
                     ? 'bg-blue-600 text-white'
@@ -245,7 +245,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       </div>
 
       {/* Rest of content - scrolls under sticky header with tabs */}
-      <div className="space-y-6 mt-6">
+      <div className="space-y-6 mt-3">
       {/* Hidden duplicate tabs - 2px invisible version to maintain layout */}
       <div className="flex gap-2 h-[2px]">
         {WORKOUT_CATEGORIES.map((cat) => {
