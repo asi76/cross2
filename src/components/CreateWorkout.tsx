@@ -193,17 +193,20 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   const hasChanges = workoutName !== initialName || JSON.stringify(workoutCategories) !== JSON.stringify(initialStations);
 
   const handleUnsavedChanges = (action: () => void) => {
+    console.log('handleUnsavedChanges called, hasChanges:', hasChanges, 'workoutName:', workoutName);
     if (!hasChanges) {
+      console.log('No changes, executing action directly');
       action();
       return;
     }
+    console.log('Showing unsaved changes notification');
     showNotification({
       type: 'confirm',
       title: 'Modifiche non salvate',
       message: 'Ci sono modifiche non salvate. Vuoi salvare prima di uscire?',
       confirmText: 'Salva',
       cancelText: 'Ignora',
-      onConfirm: () => { handleSave(); action(); },
+      onConfirm: async () => { console.log('Confirm clicked, saving...'); await handleSave(); action(); },
       onCancel: () => action(),
     });
   };
