@@ -201,6 +201,16 @@ function App() {
                 </button>
               )}
               <button
+                onClick={() => {
+                  setExpandedWorkoutId(null);
+                  window.scrollTo({ top: 0, behavior: 'instant' });
+                }}
+                className="p-2 bg-dark-card border border-dark-border rounded-lg text-gray-400 hover:text-white transition-colors"
+                title="Comprimi tutto"
+              >
+                <ChevronUp className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => window.location.reload()}
                 className="p-2 bg-dark-card border border-dark-border rounded-lg text-gray-400 hover:text-white transition-colors"
                 title="Refresh"
