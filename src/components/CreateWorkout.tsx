@@ -320,20 +320,19 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   };
 
   const handleSave = async () => {
-    if (!workoutName.trim()) {
-      showNotification({
-        type: 'alert',
-        title: 'Nome richiesto',
-        message: 'Inserisci un nome per la scheda',
-      });
+    const hasName = workoutName.trim();
+    const hasExercises = !workoutCategories.every(s => s.exercises.length === 0);
+    
+    if (!hasName && !hasExercises) {
+      confirm('Inserisci nome scheda e gli esercizi');
       return;
     }
-    if (workoutCategories.every(s => s.exercises.length === 0)) {
-      showNotification({
-        type: 'alert',
-        title: 'Esercizi richiesti',
-        message: 'Aggiungi almeno un esercizio alla scheda',
-      });
+    if (!hasName) {
+      confirm('Inserisci nome scheda');
+      return;
+    }
+    if (!hasExercises) {
+      confirm('Inserisci esercizi');
       return;
     }
 
