@@ -323,11 +323,19 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   };
 
   const handleSave = async () => {
-    if (!workoutName.trim() || workoutCategories.every(s => s.exercises.length === 0)) {
+    if (!workoutName.trim()) {
       showNotification({
         type: 'alert',
-        title: 'Campi richiesti',
-        message: 'Inserisci un nome e aggiungi almeno un esercizio',
+        title: 'Nome richiesto',
+        message: 'Inserisci un nome per la scheda',
+      });
+      return;
+    }
+    if (workoutCategories.every(s => s.exercises.length === 0)) {
+      showNotification({
+        type: 'alert',
+        title: 'Esercizi richiesti',
+        message: 'Aggiungi almeno un esercizio alla scheda',
       });
       return;
     }
