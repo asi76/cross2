@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image, Shield, RefreshCw, LogOut } from 'lucide-react';
+import { Plus, X, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image, Shield, RefreshCw, LogOut } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -80,7 +80,6 @@ function SortableExerciseItem({
         {...listeners}
         className="flex items-center gap-3 flex-1 cursor-grab active:cursor-grabbing"
       >
-        <Dumbbell className="w-5 h-5 text-blue-400" />
         <button
           onClick={onView}
           className="flex-1 text-left"
