@@ -244,7 +244,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* Header */}
+      {/* Header - minimal, just back button */}
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
@@ -252,12 +252,9 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
-        <div>
-          <h2 className="text-2xl font-bold text-white">
-            {editWorkout ? 'Modifica Workout' : 'Crea Workout'}
-          </h2>
-          <p className="text-base text-zinc-400">Aggiungi esercizi dal database</p>
-        </div>
+        <h2 className="text-xl font-bold text-white">
+          {editWorkout ? 'Modifica Workout' : 'Crea Workout'}
+        </h2>
       </div>
 
       {/* Workout Name */}

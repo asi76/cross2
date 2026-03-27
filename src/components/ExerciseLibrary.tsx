@@ -443,7 +443,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* Header */}
+      {/* Header - minimal, just back button */}
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
@@ -451,10 +451,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
-        <div>
-          <h2 className="text-2xl font-bold text-white">Libreria Esercizi</h2>
-          <p className="text-base text-zinc-400">Gestisci esercizi e gruppi muscolari</p>
-        </div>
+        <h2 className="text-xl font-bold text-white">Libreria Esercizi</h2>
       </div>
 
       {/* Groups List */}
