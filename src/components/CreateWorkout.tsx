@@ -61,7 +61,6 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   const [duplicateError, setDuplicateError] = useState<string | null>(null);
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [viewingExerciseIndex, setViewingExerciseIndex] = useState<number | null>(null);
-  const [isHandlingAction, setIsHandlingAction] = useState(false);
 
   const currentCategory = workoutCategories.find(c => c.id === selectedCategoryId)!;
 
@@ -194,19 +193,34 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   const hasChanges = workoutName !== initialName || JSON.stringify(workoutCategories) !== JSON.stringify(initialStations);
 
   const handleUnsavedChanges = (action: () => void) => {
-    console.log('handleUnsavedChanges called, hasChanges:', hasChanges, 'isHandlingAction:', isHandlingAction);
-    if (isHandlingAction) { console.log('Already handling action, returning'); return; }
-    if (!hasChanges) { console.log('No changes, executing action directly'); action(); return; }
-    console.log('About to call showNotification');
-    setIsHandlingAction(true);
+    // Use a ref to track if we're currently showing a dialog
+    const currentHasChanges = workoutName !== initialName || JSON.stringify(workoutCategories) !== JSON.stringify(initialStations);
+    if (!currentHasChanges) {
+      action();
+      return;
+    }
+    
+    // Prevent multiple dialogs by checking if one is already shown
+    if ((window as any).__unsavedDialogShown) {
+      return;
+    }
+    (window as any).__unsavedDialogShown = true;
+    
     showNotification({
       type: 'confirm',
       title: 'Modifiche non salvate',
       message: 'Ci sono modifiche non salvate. Vuoi salvare prima di uscire?',
       confirmText: 'Salva',
       cancelText: 'Ignora',
-      onConfirm: async () => { console.log('Confirm clicked'); await handleSave(); action(); setIsHandlingAction(false); },
-      onCancel: () => { console.log('Cancel clicked'); action(); setIsHandlingAction(false); },
+      onConfirm: async () => { 
+        (window as any).__unsavedDialogShown = false;
+        await handleSave(); 
+        action(); 
+      },
+      onCancel: () => { 
+        (window as any).__unsavedDialogShown = false;
+        action(); 
+      },
     });
   };
 
