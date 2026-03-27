@@ -16,9 +16,6 @@ import {
   Trash2,
   RefreshCw
 } from 'lucide-react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { useAuth } from './hooks/useAuth';
 import { useWorkout } from './hooks/useWorkout';
 import { Login } from './components/Login';
@@ -37,66 +34,6 @@ const WORKOUT_CATEGORIES = [
   { id: 'cardio1', name: 'Cardio 1' },
   { id: 'cardio2', name: 'Cardio 2' }
 ];
-
-// Sortable exercise item for saved workouts
-function SortableWorkoutExercise({ ex, onClick }: { ex: any; onClick: () => void }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: `workout-${ex.exerciseId}-${Math.random()}` });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 1000 : 1
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      onClick={onClick}
-      className="bg-dark-bg rounded-lg p-3 cursor-pointer hover:bg-zinc-800/50 transition-colors w-full mb-2 last:mb-0"
-    >
-      <div className="flex items-start justify-between w-full">
-        <div>
-          <span className="text-white text-base font-medium block">
-            {ex.exerciseName || ex.exerciseId}
-          </span>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {ex.muscles?.slice(0, 3).map((m: string, i: number) => (
-              <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-zinc-700 text-gray-300">{m}</span>
-            ))}
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-1 cursor-grab active:cursor-grabbing">
-          <span className={`text-xs px-2 py-0.5 rounded ${
-            ex.tipo === 'aerobico' 
-              ? 'bg-blue-500/20 text-blue-400' 
-              : 'bg-orange-500/20 text-orange-400'
-          }`}>
-            {ex.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
-          </span>
-          <span className={`text-xs px-2 py-0.5 rounded ${
-            ex.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
-            ex.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-            'bg-red-500/20 text-red-400'
-          }`}>
-            {ex.difficulty === 'beginner' ? 'Principiante' :
-             ex.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function App() {
   const { user, role, loading, signOut } = useAuth();
