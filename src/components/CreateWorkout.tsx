@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image } from 'lucide-react';
+import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image, Shield, RefreshCw, LogOut } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '../supabase';
 import { getGifUrl } from '../data/gifMapping';
 import { Workout } from '../data/types';
+import { useAuth } from '../hooks/useAuth';
 
 interface ExerciseGroup {
   id: string;
@@ -98,6 +99,7 @@ function SortableExerciseItem({
 }
 
 export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProps) {
+  const { user, role, signOut } = useAuth();
   const [workoutName, setWorkoutName] = useState(editWorkout?.name || '');
   const [workoutCategories, setWorkoutCategories] = useState<any[]>(
     editWorkout?.stations || [
@@ -275,16 +277,32 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               {editWorkout ? 'Modifica Workout' : 'Crea Workout'}
             </h2>
           </div>
-          <button
-            onClick={() => {
-              setExpandedGroups(new Set());
-              window.scrollTo({ top: 0, behavior: 'instant' });
-            }}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-            title="Comprimi tutto"
-          >
-            <ChevronUp className="w-5 h-5 text-white" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setExpandedGroups(new Set());
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }}
+              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              title="Comprimi tutto"
+            >
+              <ChevronUp className="w-5 h-5 text-white" />
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              title="Refresh"
+            >
+              <RefreshCw className="w-5 h-5 text-white" />
+            </button>
+            <button
+              onClick={signOut}
+              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </div>
       </div>
 

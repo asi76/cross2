@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronDown, ChevronUp, Plus, Trash2, ArrowRightLeft, X, ArrowLeft, Edit3 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, Trash2, ArrowRightLeft, X, ArrowLeft, Edit3, RefreshCw, LogOut } from 'lucide-react';
 import { supabase } from '../supabase';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
+import { useAuth } from '../hooks/useAuth';
 
 const SUPABASE_URL = 'https://kdsstxsthxusgcizzmpr.supabase.co';
 
@@ -30,6 +31,7 @@ interface ExerciseLibraryProps {
 }
 
 export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
+  const { signOut } = useAuth();
   const [groups, setGroups] = useState<ExerciseGroup[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -455,16 +457,32 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
             </button>
             <h2 className="text-xl font-bold text-white">Libreria Esercizi</h2>
           </div>
-          <button
-            onClick={() => {
-              setExpandedGroups(new Set());
-              window.scrollTo({ top: 0, behavior: 'instant' });
-            }}
-            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-            title="Comprimi tutto"
-          >
-            <ChevronUp className="w-5 h-5 text-white" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                setExpandedGroups(new Set());
+                window.scrollTo({ top: 0, behavior: 'instant' });
+              }}
+              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              title="Comprimi tutto"
+            >
+              <ChevronUp className="w-5 h-5 text-white" />
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              title="Refresh"
+            >
+              <RefreshCw className="w-5 h-5 text-white" />
+            </button>
+            <button
+              onClick={signOut}
+              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </div>
       </div>
 
