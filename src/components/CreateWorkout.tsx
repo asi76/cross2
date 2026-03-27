@@ -294,7 +294,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       </div>
 
       {/* Current Category Exercises - matching SavedWorkouts style */}
-      <div className="min-h-[200px]">
+      <div>
         {currentCategory.exercises.length === 0 ? (
           <p className="text-zinc-500 text-sm">Nessun esercizio. Trascina dalla lista sotto.</p>
         ) : (
