@@ -251,7 +251,7 @@ function App() {
             <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
               <Plus className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-white font-bold text-xl mb-1">Create Workout</h3>
+            <h3 className="text-white font-bold text-xl mb-1">Crea Scheda</h3>
             <p className="text-blue-200 text-sm">Build a custom crosstraining session</p>
           </motion.button>
 
@@ -264,7 +264,7 @@ function App() {
             <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500/30 transition-colors">
               <Library className="w-6 h-6 text-blue-400" />
             </div>
-            <h3 className="text-white font-bold text-xl mb-1">Exercise Library</h3>
+            <h3 className="text-white font-bold text-xl mb-1">Libreria Esercizi</h3>
             <p className="text-gray-400 text-sm">Browse 65+ exercises across 6 stations</p>
           </motion.button>
         </div>
@@ -272,20 +272,20 @@ function App() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <Save className="w-5 h-5 text-gray-400" />
-            Saved Workouts ({savedWorkouts.length})
+            Schede Salvate ({savedWorkouts.length})
           </h2>
         </div>
 
         {savedWorkouts.length === 0 ? (
           <div className="bg-dark-card border border-dark-border rounded-xl p-8 text-center">
             <Dumbbell className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 mb-2">No saved workouts yet</p>
-            <p className="text-gray-500 text-sm mb-4">Create your first workout to get started</p>
+            <p className="text-gray-400 mb-2">Nessuna scheda salvata</p>
+            <p className="text-gray-500 text-sm mb-4">Crea la tua prima scheda</p>
             <button
               onClick={() => setCurrentView('create')}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
             >
-              Create Workout
+              Crea Scheda
             </button>
           </div>
         ) : (
