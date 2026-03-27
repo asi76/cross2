@@ -182,7 +182,16 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               <ArrowRightLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); setFullEditModalExercise(exerciseData!); }}
+              onClick={async (e) => {
+                e.stopPropagation();
+                // Load GIF first before opening modal
+                setViewingExerciseGif(null);
+                try {
+                  const gifUrl = await getGifUrl(exerciseData!.id);
+                  setViewingExerciseGif(gifUrl);
+                } catch {}
+                setFullEditModalExercise(exerciseData!);
+              }}
               className="p-1.5 text-zinc-500 hover:text-blue-400"
               title="Modifica esercizio"
             >

@@ -253,16 +253,15 @@ export function ExerciseDetailModal({
       
       // Update local GIF URL immediately for instant display
       setLocalGifUrl(cachedUrl);
+      setImageError(false); // Reset error state on new upload
       
       // Notify parent with cache-busted URL
       if (onGifUpdated) {
         onGifUpdated(exercise.id, cachedUrl);
       }
-
-      setTimeout(() => {
-        setUploadProgress(null);
-        setIsUploading(false);
-      }, 1500);
+      
+      // Force re-render by triggering state update
+      setTimeout(() => setIsUploading(false), 100);
     } catch (error: any) {
       console.error('Upload error:', error);
       setUploadProgress(`Errore: ${error.message}`);
@@ -400,6 +399,7 @@ export function ExerciseDetailModal({
               {localGifUrl && !imageError ? (
                 <div className="relative w-full h-full flex items-center justify-center">
                   <img
+                    key={localGifUrl}
                     src={localGifUrl}
                     alt={`${exercise.name} animation`}
                     className="max-w-full max-h-full object-contain rounded-lg"
