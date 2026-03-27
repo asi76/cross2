@@ -197,7 +197,7 @@ function App() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">Crosstraining</h1>
-                <p className="text-gray-400 text-xs">Welcome, {user.displayName?.split(' ')[0] || 'Athlete'}</p>
+                <p className="text-gray-400 text-xs">Benvenuto, {user.displayName?.split(' ')[0] || 'Atleta'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ function App() {
               <Plus className="w-6 h-6 text-white" />
             </div>
             <h3 className="text-white font-bold text-xl mb-1">Crea Scheda</h3>
-            <p className="text-blue-200 text-sm">Build a custom crosstraining session</p>
+            <p className="text-blue-200 text-sm">Planifica una sessione di crosstraining</p>
           </motion.button>
 
           <motion.button
@@ -265,7 +265,7 @@ function App() {
               <Library className="w-6 h-6 text-blue-400" />
             </div>
             <h3 className="text-white font-bold text-xl mb-1">Libreria Esercizi</h3>
-            <p className="text-gray-400 text-sm">Browse 65+ exercises across 6 stations</p>
+            <p className="text-gray-400 text-sm">Consulta, aggiungi e modifica esercizi</p>
           </motion.button>
         </div>
 
