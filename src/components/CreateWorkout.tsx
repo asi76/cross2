@@ -244,7 +244,24 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* Sticky Header */}
+      {/* Workout Name + Save Button Row */}
+      <div className="flex items-center gap-4">
+        <input
+          type="text"
+          value={workoutName}
+          onChange={(e) => setWorkoutName(e.target.value)}
+          placeholder="Nome del workout..."
+          className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+        />
+        <button
+          onClick={handleSave}
+          className="w-[15%] py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-colors whitespace-nowrap"
+        >
+          Salva Workout
+        </button>
+      </div>
+
+      {/* Sticky Header - below name field */}
       <div className="sticky top-0 z-40 bg-dark-bg/95 backdrop-blur-sm -mx-4 px-4 py-4 border-b border-dark-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -270,15 +287,6 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           </button>
         </div>
       </div>
-
-      {/* Workout Name */}
-      <input
-        type="text"
-        value={workoutName}
-        onChange={(e) => setWorkoutName(e.target.value)}
-        placeholder="Nome del workout..."
-        className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
-      />
 
       {/* Category Tabs - Fixed Forza, Cardio 1, Cardio 2 */}
       <div className="flex gap-2">
@@ -331,14 +339,6 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           </DndContext>
         )}
       </div>
-
-      {/* Save Button */}
-      <button
-        onClick={handleSave}
-        className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-colors"
-      >
-        Salva Workout
-      </button>
 
       {/* Exercise Library - Groups collapsible */}
       <div className="space-y-4">
