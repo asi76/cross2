@@ -43,7 +43,7 @@ export const useWorkout = () => {
         .maybeSingle();
       
       if (!existing) {
-        // Only insert if doesn't exist (avoid duplicates)
+        // Insert if doesn't exist
         await supabase
           .from('workouts')
           .insert({
@@ -54,6 +54,15 @@ export const useWorkout = () => {
               ? workout.createdAt.toISOString() 
               : workout.createdAt
           });
+      } else {
+        // Update if exists
+        await supabase
+          .from('workouts')
+          .update({
+            name: workout.name,
+            stations: workout.stations
+          })
+          .eq('id', workout.id);
       }
       
       // Update local state
