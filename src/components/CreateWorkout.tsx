@@ -41,62 +41,6 @@ const WORKOUT_CATEGORIES = [
   { id: 'cardio2', name: 'Cardio 2' }
 ];
 
-// Sortable exercise item component
-function SortableExerciseItem({ 
-  ex, 
-  index, 
-  onRemove,
-  onView 
-}: { 
-  ex: any; 
-  index: number; 
-  onRemove: () => void;
-  onView: () => void;
-}) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: `${ex.exerciseId}-${index}` });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 1000 : 1
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center justify-between bg-zinc-800 rounded-lg p-3 mb-2"
-    >
-      <div 
-        {...attributes}
-        {...listeners}
-        className="flex items-center gap-3 flex-1 cursor-grab active:cursor-grabbing"
-      >
-        <button
-          onClick={onView}
-          className="flex-1 text-left"
-        >
-          <span className="text-white font-medium">{ex.exerciseName || ex.exerciseId}</span>
-        </button>
-      </div>
-      <button
-        onClick={onRemove}
-        className="p-1 text-zinc-500 hover:text-red-400"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
-    </div>
-  );
-}
-
 export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProps) {
   const { user, role, signOut } = useAuth();
   const [workoutName, setWorkoutName] = useState(editWorkout?.name || '');
@@ -314,10 +258,12 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
             <button
               key={cat.id}
               onClick={() => setSelectedCategoryId(cat.id)}
-              className={`px-6 py-3 rounded-lg text-sm font-semibold transition-colors ${
+              className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
                 selectedCategoryId === cat.id
                   ? 'bg-blue-600 text-white'
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                  : catData?.exercises.length > 0
+                    ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
+                    : 'bg-dark-bg text-gray-500'
               }`}
             >
               {cat.name} ({catData?.exercises.length || 0})
@@ -326,10 +272,8 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
         })}
       </div>
 
-      {/* Current Category Exercises - Sortable */}
-      <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
-        <h3 className="text-white font-semibold mb-3">{currentCategory.name}</h3>
-        
+      {/* Current Category Exercises - matching SavedWorkouts style */}
+      <div className="min-h-[200px]">
         {currentCategory.exercises.length === 0 ? (
           <p className="text-zinc-500 text-sm">Nessun esercizio. Trascina dalla lista sotto.</p>
         ) : (
@@ -343,14 +287,51 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
             >
               {currentCategory.exercises.map((ex: any, index: number) => {
                 const exerciseData = getExerciseById(ex.exerciseId);
+                const {
+                  attributes,
+                  listeners,
+                  setNodeRef,
+                  transform,
+                  transition,
+                  isDragging
+                } = useSortable({ id: `${ex.exerciseId}-${index}` });
+
+                const style = {
+                  transform: CSS.Transform.toString(transform),
+                  transition,
+                  opacity: isDragging ? 0.5 : 1,
+                  zIndex: isDragging ? 1000 : 1
+                };
+
                 return (
-                  <SortableExerciseItem
-                    key={`${ex.exerciseId}-${index}`}
-                    ex={ex}
-                    index={index}
-                    onRemove={() => handleRemoveExercise(selectedCategoryId, index)}
-                    onView={() => exerciseData && handleViewExercise(exerciseData)}
-                  />
+                  <div
+                    ref={setNodeRef}
+                    style={style}
+                    {...attributes}
+                    {...listeners}
+                    className="bg-dark-bg rounded-lg p-3 cursor-grab active:cursor-grabbing hover:bg-zinc-800/50 transition-colors w-full mb-2 last:mb-0"
+                  >
+                    <div className="flex items-start justify-between w-full">
+                      <div>
+                        <span className="text-white text-base font-medium block">
+                          {ex.exerciseName || ex.exerciseId}
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {exerciseData?.muscles?.slice(0, 3).map((m: string, i: number) => (
+                            <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-zinc-700 text-gray-300">{m}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleRemoveExercise(selectedCategoryId, index)}
+                          className="p-1.5 text-zinc-500 hover:text-red-400"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
             </SortableContext>
