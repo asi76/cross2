@@ -251,7 +251,7 @@ function App() {
             <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
               <Plus className="w-6 h-6 text-white" />
             </div>
-            <h3 className="text-white font-bold text-xl mb-1">Crea Scheda</h3>
+            <h3 className="text-white font-bold text-xl mb-1">Crea nuova scheda</h3>
             <p className="text-blue-200 text-sm">Pianifica una sessione di crosstraining</p>
           </motion.button>
 
@@ -285,7 +285,7 @@ function App() {
               onClick={() => setCurrentView('create')}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
             >
-              Crea Scheda
+              Crea nuova scheda
             </button>
           </div>
         ) : (
