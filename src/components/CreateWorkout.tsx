@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus, X, Dumbbell, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image } from 'lucide-react';
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '../supabase';
 import { getGifUrl } from '../data/gifMapping';
 import { Workout } from '../data/types';
@@ -36,6 +39,63 @@ const WORKOUT_CATEGORIES = [
   { id: 'cardio1', name: 'Cardio 1' },
   { id: 'cardio2', name: 'Cardio 2' }
 ];
+
+// Sortable exercise item component
+function SortableExerciseItem({ 
+  ex, 
+  index, 
+  onRemove,
+  onView 
+}: { 
+  ex: any; 
+  index: number; 
+  onRemove: () => void;
+  onView: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: `${ex.exerciseId}-${index}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 1
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center justify-between bg-zinc-800 rounded-lg p-3 mb-2"
+    >
+      <div 
+        {...attributes}
+        {...listeners}
+        className="flex items-center gap-3 flex-1 cursor-grab active:cursor-grabbing"
+      >
+        <Dumbbell className="w-5 h-5 text-blue-400" />
+        <button
+          onClick={onView}
+          className="flex-1 text-left"
+        >
+          <span className="text-white font-medium">{ex.exerciseName || ex.exerciseId}</span>
+        </button>
+      </div>
+      <button
+        onClick={onRemove}
+        className="p-1 text-zinc-500 hover:text-red-400"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  );
+}
 
 export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProps) {
   const [workoutName, setWorkoutName] = useState(editWorkout?.name || '');
@@ -123,6 +183,29 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     }
   };
 
+  // Handle drag end for reordering
+  const handleDragEnd = (event: DragEndEvent, categoryId: string) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) return;
+
+    const categoryIndex = workoutCategories.findIndex(c => c.id === categoryId);
+    if (categoryIndex === -1) return;
+
+    const category = workoutCategories[categoryIndex];
+    const oldIndex = category.exercises.findIndex((_, i) => `${category.exercises[i].exerciseId}-${i}` === active.id);
+    const newIndex = category.exercises.findIndex((_, i) => `${category.exercises[i].exerciseId}-${i}` === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const newCategories = [...workoutCategories];
+    const newExercises = [...category.exercises];
+    const [removed] = newExercises.splice(oldIndex, 1);
+    newExercises.splice(newIndex, 0, removed);
+    newCategories[categoryIndex].exercises = newExercises;
+    setWorkoutCategories(newCategories);
+  };
+
   // View exercise
   const handleViewExercise = async (exercise: Exercise) => {
     setViewingExerciseGif(null);
@@ -142,17 +225,19 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     }
 
     const workout = {
-      id: Date.now().toString(),
+      id: editWorkout?.id || Date.now().toString(),
       name: workoutName,
       stations: workoutCategories.filter(s => s.exercises.length > 0),
-      createdAt: new Date().toISOString()
+      createdAt: editWorkout?.createdAt || new Date().toISOString()
     };
 
-    await supabase.from('workouts').insert(workout);
+    if (editWorkout) {
+      await supabase.from('workouts').update(workout).eq('id', editWorkout.id);
+    } else {
+      await supabase.from('workouts').insert(workout);
+    }
 
     onSave(workout);
-    setWorkoutName('');
-    setWorkoutCategories(WORKOUT_CATEGORIES.map(c => ({ ...c, exercises: [] })));
   };
 
   const getExerciseById = (id: string) => exercises.find(e => e.id === id);
@@ -168,7 +253,9 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
         <div>
-          <h2 className="text-2xl font-bold text-white">Crea Workout</h2>
+          <h2 className="text-2xl font-bold text-white">
+            {editWorkout ? 'Modifica Workout' : 'Crea Workout'}
+          </h2>
           <p className="text-base text-zinc-400">Aggiungi esercizi dal database</p>
         </div>
       </div>
@@ -202,34 +289,35 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
         })}
       </div>
 
-      {/* Current Category Exercises */}
+      {/* Current Category Exercises - Sortable */}
       <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-4">
         <h3 className="text-white font-semibold mb-3">{currentCategory.name}</h3>
         
         {currentCategory.exercises.length === 0 ? (
-          <p className="text-zinc-500 text-sm">Nessun esercizio. Aggiungi dalla lista sotto.</p>
+          <p className="text-zinc-500 text-sm">Nessun esercizio. Trascina dalla lista sotto.</p>
         ) : (
-          <div className="space-y-2">
-            {currentCategory.exercises.map((ex: any, index: number) => {
-              const exerciseData = getExerciseById(ex.exerciseId);
-              return (
-                <div key={index} className="flex items-center justify-between bg-zinc-800 rounded-lg p-3">
-                  <button
-                    onClick={() => exerciseData && handleViewExercise(exerciseData)}
-                    className="flex items-center gap-3 flex-1 text-left"
-                  >
-                    <span className="text-white font-medium">{ex.exerciseName || ex.exerciseId}</span>
-                  </button>
-                  <button
-                    onClick={() => handleRemoveExercise(selectedCategoryId, index)}
-                    className="p-1 text-zinc-500 hover:text-red-400"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={(e) => handleDragEnd(e, selectedCategoryId)}
+          >
+            <SortableContext
+              items={currentCategory.exercises.map((_, i) => `${_.exerciseId}-${i}`)}
+              strategy={verticalListSortingStrategy}
+            >
+              {currentCategory.exercises.map((ex: any, index: number) => {
+                const exerciseData = getExerciseById(ex.exerciseId);
+                return (
+                  <SortableExerciseItem
+                    key={`${ex.exerciseId}-${index}`}
+                    ex={ex}
+                    index={index}
+                    onRemove={() => handleRemoveExercise(selectedCategoryId, index)}
+                    onView={() => exerciseData && handleViewExercise(exerciseData)}
+                  />
+                );
+              })}
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 
@@ -247,11 +335,11 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
         
         <div className="space-y-3">
           {groups.map(group => (
-            <div key={group.id} className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-              {/* Group Header - click anywhere to expand/collapse */}
+            <div key={group.id} className="glass-card rounded-xl overflow-hidden">
+              {/* Group Header - glass dark, 30% darker */}
               <button
                 onClick={() => toggleGroup(group.id)}
-                className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
+                className="w-full px-5 py-4 flex items-center justify-between glass-dark hover:brightness-110 transition-all"
               >
                 <div className="flex items-center gap-3">
                   <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class}`}>
@@ -268,9 +356,9 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                 )}
               </button>
 
-              {/* Exercises List - shown when expanded, same style as ExerciseLibrary */}
+              {/* Exercises List - shown when expanded, lighter separators */}
               {expandedGroups.has(group.id) && (
-                <div className="border-t border-zinc-800 max-h-96 overflow-y-auto scrollbar-dark">
+                <div className="border-t border-white/10 max-h-96 overflow-y-auto scrollbar-dark">
                   {getExercisesByGroup(group.id).length === 0 ? (
                     <div className="px-5 py-8 text-center text-zinc-500">
                       Nessun esercizio
@@ -279,40 +367,21 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                     getExercisesByGroup(group.id).map(exercise => (
                       <div
                         key={exercise.id}
-                        className="px-5 py-4 border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors"
+                        className="px-5 py-4 border-b border-white/10 last:border-b-0 hover:bg-white/5 transition-colors"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <button
-                                onClick={() => handleViewExercise(exercise)}
-                                className="text-base font-medium text-white hover:text-blue-400 cursor-pointer transition-colors text-left"
-                              >
-                                {exercise.name}
-                              </button>
-                              <span className={`text-xs px-1.5 py-0.5 rounded ml-2 ${
-                                exercise.tipo === 'aerobico' 
-                                  ? 'bg-blue-500/20 text-blue-400' 
-                                  : 'bg-orange-500/20 text-orange-400'
-                              }`}>
-                                {exercise.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <div className="flex flex-wrap gap-1">
+                            <button
+                              onClick={() => handleViewExercise(exercise)}
+                              className="text-left w-full"
+                            >
+                              <span className="text-white font-medium">{exercise.name}</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
                                 {exercise.muscles.map((muscle, idx) => (
                                   <span key={idx} className="px-2 py-0.5 rounded text-xs bg-white/20 text-white border border-white/30">{muscle}</span>
                                 ))}
                               </div>
-                              <span className={`text-xs px-1.5 py-0.5 rounded ml-2 ${
-                                exercise.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
-                                exercise.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-                                'bg-red-500/20 text-red-400'
-                              }`}>
-                                {exercise.difficulty === 'beginner' ? 'Principiante' :
-                                 exercise.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
-                              </span>
-                            </div>
+                            </button>
                           </div>
                           <button
                             onClick={() => handleAddExercise(exercise, group.id)}
