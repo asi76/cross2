@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, X, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image, Shield, RefreshCw, LogOut } from 'lucide-react';
+import { Plus, X, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image, Shield, RefreshCw, LogOut, GripVertical } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '../supabase';
 import { getGifUrl } from '../data/gifMapping';
 import { Workout } from '../data/types';
@@ -56,6 +59,83 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   const [viewingExerciseGif, setViewingExerciseGif] = useState<string | null>(null);
 
   const currentCategory = workoutCategories.find(c => c.id === selectedCategoryId)!;
+
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end - reorder exercises within same category
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = currentCategory.exercises.findIndex((_: any, i: number) => `${selectedCategoryId}-${i}` === active.id);
+    const newIndex = currentCategory.exercises.findIndex((_: any, i: number) => `${selectedCategoryId}-${i}` === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const newCategories = [...workoutCategories];
+    const catIndex = newCategories.findIndex(c => c.id === selectedCategoryId);
+    if (catIndex === -1) return;
+
+    const [removed] = newCategories[catIndex].exercises.splice(oldIndex, 1);
+    newCategories[catIndex].exercises.splice(newIndex, 0, removed);
+    setWorkoutCategories(newCategories);
+  };
+
+  // Sortable exercise item component
+  function SortableExerciseItem({ ex, index }: { ex: any; index: number }) {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+      id: `${selectedCategoryId}-${index}`,
+    });
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+    const exerciseData = getExerciseById(ex.exerciseId);
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className="bg-dark-bg rounded-lg p-3 cursor-grab active:cursor-grabbing hover:bg-zinc-800/50 transition-colors w-full mb-2 last:mb-0"
+      >
+        <div className="flex items-start justify-between w-full">
+          <div className="flex items-center gap-2">
+            <button
+              {...attributes}
+              {...listeners}
+              className="p-1 text-zinc-500 hover:text-zinc-300 cursor-grab"
+            >
+              <GripVertical className="w-4 h-4" />
+            </button>
+            <div>
+              <span className="text-white text-base font-medium block">
+                {ex.exerciseName || ex.exerciseId}
+              </span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {exerciseData?.muscles?.slice(0, 3).map((m: string, i: number) => (
+                  <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-zinc-700 text-gray-300">{m}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => handleRemoveExercise(selectedCategoryId, index)}
+              className="p-1.5 text-zinc-500 hover:text-red-400"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Check if there are unsaved changes
   const initialName = editWorkout?.name || '';
@@ -289,43 +369,27 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
         })}
       </div>
 
-      {/* Current Category Exercises - matching SavedWorkouts style */}
-      <div>
-        {currentCategory.exercises.length === 0 ? (
-          <p className="text-zinc-500 text-sm">Nessun esercizio. Trascina dalla lista sotto.</p>
-        ) : (
-          currentCategory.exercises.map((ex: any, index: number) => {
-            const exerciseData = getExerciseById(ex.exerciseId);
-            return (
-              <div
-                key={`${selectedCategoryId}-${index}`}
-                className="bg-dark-bg rounded-lg p-3 cursor-pointer hover:bg-zinc-800/50 transition-colors w-full mb-2 last:mb-0"
-              >
-                <div className="flex items-start justify-between w-full">
-                  <div>
-                    <span className="text-white text-base font-medium block">
-                      {ex.exerciseName || ex.exerciseId}
-                    </span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {exerciseData?.muscles?.slice(0, 3).map((m: string, i: number) => (
-                        <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-zinc-700 text-gray-300">{m}</span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleRemoveExercise(selectedCategoryId, index)}
-                      className="p-1.5 text-zinc-500 hover:text-red-400"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+      {/* Current Category Exercises - sortable with DnD */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={currentCategory.exercises.map((_: any, i: number) => `${selectedCategoryId}-${i}`)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div>
+            {currentCategory.exercises.length === 0 ? (
+              <p className="text-zinc-500 text-sm">Nessun esercizio. Trascina dalla lista sotto.</p>
+            ) : (
+              currentCategory.exercises.map((ex: any, index: number) => (
+                <SortableExerciseItem key={`${selectedCategoryId}-${index}`} ex={ex} index={index} />
+              ))
+            )}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Exercise Library - Groups collapsible */}
       <div className="space-y-4">
