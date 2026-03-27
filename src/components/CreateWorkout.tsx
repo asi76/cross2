@@ -101,6 +101,23 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     const exerciseGroup = groups.find(g => g.id === ex.groupId);
     const groupLabel = exerciseGroup?.label || 'Nessun gruppo';
 
+    // Count muscle occurrences in the current category
+    const muscleCount: Record<string, number> = {};
+    if (selectedCategoryId === 'forza') {
+      workoutCategories.find(c => c.id === 'forza')?.exercises.forEach((e: any) => {
+        const data = getExerciseById(e.exerciseId);
+        data?.muscles?.forEach((m: string) => {
+          muscleCount[m] = (muscleCount[m] || 0) + 1;
+        });
+      });
+    }
+    const getMuscleColor = (muscle: string) => {
+      const count = muscleCount[muscle] || 1;
+      if (count >= 3) return 'bg-red-500/40 text-red-300 border border-red-500/50';
+      if (count === 2) return 'bg-yellow-500/40 text-yellow-300 border border-yellow-500/50';
+      return 'bg-zinc-700 text-gray-300';
+    };
+
     // Handle group change
     const handleGroupChange = (newGroupId: string) => {
       const newCategories = [...workoutCategories];
@@ -132,7 +149,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               </span>
               <div className="flex flex-wrap gap-1 mt-1">
                 {exerciseData?.muscles?.slice(0, 3).map((m: string, i: number) => (
-                  <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-zinc-700 text-gray-300">{m}</span>
+                  <span key={i} className={`text-xs px-1.5 py-0.5 rounded ${getMuscleColor(m)}`}>{m}</span>
                 ))}
               </div>
             </div>
@@ -365,7 +382,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               <button
                 key={cat.id}
                 onClick={() => { setSelectedCategoryId(cat.id); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
+                className={`flex-1 px-4 py-3 rounded-lg text-base font-semibold transition-colors ${
                   selectedCategoryId === cat.id
                     ? 'bg-blue-600 text-white'
                     : catData?.exercises.length > 0
