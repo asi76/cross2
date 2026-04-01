@@ -20,7 +20,7 @@ interface ExerciseGroup {
 
 interface Exercise {
   id: string;
-  group_id: string;
+  muscleGroup: string;
   name: string;
   muscles: string[];
   reps: number | null;
@@ -302,7 +302,8 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     const results: {groupId: string; exerciseIds: string[]}[] = [];
     
     groups.forEach(group => {
-      const groupExercises = exercises.filter(e => e.group_id === group.id);
+      const muscleGroupValue = group.name.toLowerCase().replace(/ /g, '-');
+      const groupExercises = exercises.filter(e => e.muscleGroup === muscleGroupValue);
       const matchingExercises = groupExercises.filter(ex => 
         ex.name.toLowerCase().includes(query)
       );
@@ -407,9 +408,9 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     // Set initial editing group from the workout category exercise if available
     if (exerciseIndex !== undefined && exerciseIndex !== null) {
       const ex = currentCategory.exercises[exerciseIndex];
-      setEditingGroupId(ex?.groupId || exercise.group_id || '');
+      setEditingGroupId(ex?.groupId || exercise.muscleGroup || '');
     } else {
-      setEditingGroupId(exercise.group_id || '');
+      setEditingGroupId(exercise.muscleGroup || '');
     }
     try {
       const gifUrl = await getGifUrl(exercise.id);
@@ -529,7 +530,10 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
 
       // Get exercises for a group
       const getGroupExercises = (groupId: string): Exercise[] => {
-        return exercises.filter(e => e.group_id === groupId);
+        const group = groups.find(g => g.id === groupId);
+        if (!group) return [];
+        const muscleGroupValue = group.name.toLowerCase().replace(/ /g, '-');
+        return exercises.filter(e => e.muscleGroup === muscleGroupValue);
       };
 
       // Count muscles in a category
@@ -615,7 +619,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           exercises: shuffledForza.map((ex, idx) => ({
             exerciseId: ex.id,
             exerciseName: ex.name,  // Store name for display
-            groupId: ex.group_id,
+            groupId: ex.muscleGroup,
             muscles: ex.muscles,
             reps: ex.reps || 10,
             sets: 3,
@@ -630,7 +634,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           exercises: cardio1Exercises.map((ex) => ({
             exerciseId: ex.id,
             exerciseName: ex.name,  // Store name for display
-            groupId: ex.group_id,
+            groupId: ex.muscleGroup,
             muscles: ex.muscles,
             time: 45,
             sets: 1,
@@ -645,7 +649,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           exercises: cardio2Exercises.map((ex) => ({
             exerciseId: ex.id,
             exerciseName: ex.name,  // Store name for display
-            groupId: ex.group_id,
+            groupId: ex.muscleGroup,
             muscles: ex.muscles,
             time: 45,
             sets: 1,
@@ -867,7 +871,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                 return searchResult !== undefined;
               })
               .map(exercise => {
-                const group = groups.find(g => g.id === exercise.group_id);
+                const group = groups.find(g => g.name.toLowerCase().replace(/ /g, '-') === exercise.muscleGroup);
                 return (
                   <div
                     key={exercise.id}
@@ -907,7 +911,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                         </div>
                       </div>
                       <button
-                        onClick={() => handleAddExercise(exercise, exercise.group_id)}
+                        onClick={() => handleAddExercise(exercise, exercise.muscleGroup)}
                         className="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors ml-2"
                         title="Aggiungi"
                       >
@@ -1062,7 +1066,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                     <div>
                       <h3 className="text-xs font-medium text-zinc-400 mb-1">Gruppo</h3>
                       <select
-                        value={editingGroupId || viewingExercise.group_id || ''}
+                        value={editingGroupId || viewingExercise.groupId || ''}
                         onChange={(e) => {
                           setEditingGroupId(e.target.value);
                           if (viewingExerciseIndex !== null) {
@@ -1164,7 +1168,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                     <div>
                       <h3 className="text-xs font-medium text-zinc-400 mb-1">Gruppo</h3>
                       <p className="text-white text-sm font-medium">
-                        {groups.find(g => g.id === (editingGroupId || viewingExercise.group_id))?.label || 'Nessun gruppo'}
+                        {groups.find(g => g.id === (editingGroupId || viewingExercise.groupId) || g.name.toLowerCase().replace(/ /g, '-') === (editingGroupId || viewingExercise.groupId))?.label || 'Nessun gruppo'}
                       </p>
                     </div>
 
