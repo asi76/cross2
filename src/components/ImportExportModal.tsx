@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Download, Upload, Image, FileText, Loader2, CheckCircle } from 'lucide-react';
 import JSZip from 'jszip';
-import { getExercises as getFirebaseExercises, createExercise, updateExercise, getGroups as getFirebaseGroups, setGifMapping, uploadGif, getGifUrl } from '../pbService';
+import { getExercises as getFirebaseExercises, createExercise, updateExercise, getGroups as getFirebaseGroups, setGifMapping, uploadGif } from '../pbService';
 import { saveAs } from 'file-saver';
 
 interface ImportExportModalProps {

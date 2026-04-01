@@ -238,8 +238,8 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
       console.log('[ExerciseLibrary] GIF mappings updated:', mappings.length);
       const gifMap: Record<string, boolean> = {};
       mappings.forEach((mapping: any) => {
-        if (mapping.exercise_id) {
-          gifMap[mapping.exercise_id] = true;
+        if (mapping.exerciseId) {
+          gifMap[mapping.exerciseId] = true;
         }
       });
       setExerciseGifs(gifMap);
