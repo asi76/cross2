@@ -11,7 +11,7 @@ interface ExerciseGroup {
 
 interface Exercise {
   id: string;
-  group_id: string;
+  muscleGroup: string;
   name: string;
   muscles: string[];
   reps: number | null;
@@ -80,8 +80,12 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
   }, [refreshGroups, refreshExercises]);
 
   const getExercisesByGroup = useCallback((groupId: string): Exercise[] => {
-    return exercises.filter(e => e.group_id === groupId);
-  }, [exercises]);
+    // Find the group to get its name (which equals muscleGroup value in PocketBase)
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return [];
+    const muscleGroupValue = group.name.toLowerCase().replace(/ /g, '-');
+    return exercises.filter(e => e.muscleGroup === muscleGroupValue);
+  }, [exercises, groups]);
 
   const getGroupById = useCallback((groupId: string): ExerciseGroup | undefined => {
     return groups.find(g => g.id === groupId);
