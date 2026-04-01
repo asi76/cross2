@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Plus, Trash2, ArrowRightLeft, X, ArrowLeft, Edit3, RefreshCw, LogOut, Download, Upload, Image, Search, GripVertical } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { createExercise, updateExercise, deleteExercise as deleteExerciseFromDb, subscribeToGifMappings, createGroup, deleteGroup as deleteGroupFromDb, updateGroup } from '../pbService';
+import { createExercise, updateExercise, deleteExercise as deleteExerciseFromDb, getGifMappings, createGroup, deleteGroup as deleteGroupFromDb, updateGroup } from '../pbService';
 import { getGifUrl } from '../data/gifMapping';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { ImportExportModal } from './ImportExportModal';
@@ -230,12 +230,11 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   const [searchResults, setSearchResults] = useState<{groupId: string; exerciseIds: string[]}[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Subscribe to GIF mappings - real-time updates without repeated reads
+  // Load GIF mappings once (subscription requires PocketBase auth which we don't have)
   useEffect(() => {
-    console.log('[ExerciseLibrary] Setting up GIF mappings listener');
-    
-    const unsubscribe = subscribeToGifMappings((mappings) => {
-      console.log('[ExerciseLibrary] GIF mappings updated:', mappings.length);
+    console.log('[ExerciseLibrary] Loading GIF mappings');
+    getGifMappings().then((mappings) => {
+      console.log('[ExerciseLibrary] GIF mappings loaded:', mappings.length);
       const gifMap: Record<string, boolean> = {};
       mappings.forEach((mapping: any) => {
         if (mapping.exerciseId) {
@@ -243,12 +242,9 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
         }
       });
       setExerciseGifs(gifMap);
+    }).catch((err) => {
+      console.error('[ExerciseLibrary] Error loading GIF mappings:', err);
     });
-
-    return () => {
-      console.log('[ExerciseLibrary] Cleaning up GIF mappings listener');
-      unsubscribe();
-    };
   }, []);
 
   // Load all exercises for GIF counting - uses context (no-op, context handles loading)
