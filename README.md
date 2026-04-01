@@ -1,44 +1,73 @@
-# CrossTraining - Circuit Workout Builder
+# React + TypeScript + Vite
 
-A modern circuit training app for the gym. Build custom workouts with 6 stations, track your rounds with a built-in timer, and save your favourite routines.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
+Currently, two official plugins are available:
 
-- **6 Workout Stations**: Upper Push, Upper Pull, Lower Body, Core, Plyometric, Cardio
-- **Workout Creator**: Assign exercises to each station with custom reps or durations
-- **Circuit Timer**: Full-screen timer with rest periods between stations and rounds
-- **Save & Load**: Store unlimited workouts locally in your browser
-- **Exercise Library**: Browse all 66+ exercises by muscle group
-- **Dark Theme**: Optimised for gym environments with low brightness
-- **Mobile Responsive**: Works great on phone and tablet
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Tech Stack
+## React Compiler
 
-- React 18
-- Vite 5
-- TypeScript 5
-- Tailwind CSS 3
-- lucide-react icons
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Deploy on Zeabur
+## Expanding the ESLint configuration
 
-This app is configured for one-click deployment on Zeabur.
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-1. Push this repo to GitHub
-2. Connect your GitHub account on [zeabur.com](https://zeabur.com)
-3. Click "Deploy" — Zeabur auto-detects Vite/React
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-Or use the AI assistant: "Deploy my crosstraining repo"
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-## Local Development
-
-```bash
-npm install
-npm run dev
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## Build
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```bash
-npm run build
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
