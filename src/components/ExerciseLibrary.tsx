@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Plus, Trash2, ArrowRightLeft, X, ArrowLeft, Edit3, RefreshCw, LogOut } from 'lucide-react';
-import { pb } from '../pbService';
+import { fetchExercises, createExercise, updateExercise as apiUpdateExercise, deleteExercise as apiDeleteExercise, fetchExerciseGroups, createExerciseGroup, deleteExerciseGroup, updateExerciseGroup } from '../pbService';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { useAuth } from '../hooks/useAuth';
 import { showNotification } from './NotificationModal';
@@ -49,7 +49,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   const loadGroups = useCallback(async () => {
     try {
-      const records = await pb.collection('exercise_groups').getFullList({ sort: 'sort_order' });
+      const records = await fetchExerciseGroups();
       const mapped: ExerciseGroup[] = records.map((r: any) => ({
         id: r.id,
         name: r.name,
@@ -65,7 +65,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   const loadExercises = useCallback(async () => {
     try {
-      const records = await pb.collection('exercises').getFullList({ sort: 'name' });
+      const records = await fetchExercises();
       const mapped: Exercise[] = records.map((r: any) => ({
         id: r.id,
         group_id: r.group_id || '',
@@ -92,10 +92,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     if (!newGroupName.trim()) return;
     try {
       const maxOrder = groups.reduce((max, g) => Math.max(max, g.sort_order || 0), 0);
-      await pb.collection('exercise_groups').create({
-        name: newGroupName,
-        sort_order: maxOrder + 1,
-      });
+      await createExerciseGroup({ name: newGroupName, sort_order: maxOrder + 1 });
       setNewGroupName('');
       setShowAddGroup(false);
       loadGroups();
@@ -107,7 +104,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   const deleteGroup = async (groupId: string) => {
     if (!confirm('Eliminare questo gruppo?')) return;
     try {
-      await pb.collection('exercise_groups').delete(groupId);
+      await deleteExerciseGroup(groupId);
       setGroups(prev => prev.filter(g => g.id !== groupId));
     } catch (err) {
       console.error('Error deleting group:', err);
@@ -116,7 +113,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   const updateGroup = async (groupId: string) => {
     try {
-      await pb.collection('exercise_groups').update(groupId, { name: editGroupName });
+      await updateExerciseGroup(groupId, { name: editGroupName });
       setEditingGroup(null);
       loadGroups();
     } catch (err) {
@@ -126,7 +123,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   const addExercise = async (groupId: string) => {
     try {
-      const newEx = await pb.collection('exercises').create({
+      const newEx = await createExercise({
         name: 'Nuovo Esercizio',
         group_id: groupId,
         muscles: [],
@@ -153,7 +150,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   const updateExercise = async (exerciseId: string, data: Partial<Exercise>) => {
     try {
-      await pb.collection('exercises').update(exerciseId, {
+      await apiUpdateExercise(exerciseId, {
         name: data.name,
         description: data.description,
         muscles: data.muscles,
@@ -170,7 +167,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   const deleteExercise = async (exerciseId: string) => {
     try {
-      await pb.collection('exercises').delete(exerciseId);
+      await apiDeleteExercise(exerciseId);
       setExercises(prev => prev.filter(e => e.id !== exerciseId));
     } catch (err) {
       console.error('Error deleting exercise:', err);
@@ -179,7 +176,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
 
   const moveExercise = async (exerciseId: string, newGroupId: string) => {
     try {
-      await pb.collection('exercises').update(exerciseId, { group_id: newGroupId });
+      await apiUpdateExercise(exerciseId, { group_id: newGroupId });
       setExercises(prev => prev.map(e => e.id === exerciseId ? { ...e, group_id: newGroupId } : e));
       setShowGroupSelector(null);
     } catch (err) {

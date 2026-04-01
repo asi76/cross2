@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Play, Clock, Zap, Target, Trash2, Upload, Image, Loader2, Save, Edit3 } from 'lucide-react';
 import { Exercise } from '../data/types';
-import { pb } from '../pbService';
+
 import { getGifUrl, setGifUrl } from '../data/gifMapping';
 
 interface ExerciseDetailModalProps {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Check, X, Trash2, RefreshCw } from 'lucide-react';
-import { pb } from '../pbService';
+import { fetchAllProfiles, updateProfileRole, deleteProfile } from '../pbService';
 
 interface PendingUser {
   id: string;
@@ -22,15 +22,9 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      // Get all users with pending role
-      const pending = await pb.collection('user_profiles').getFullList({
-        filter: `role="pending"`,
-      });
-      setPendingUsers(pending as any);
-
-      // Get all users
-      const all = await pb.collection('user_profiles').getFullList();
-      setAllUsers(all as any);
+      const all = await fetchAllProfiles();
+      setAllUsers(all);
+      setPendingUsers(all.filter((u: any) => u.role === 'pending'));
     } catch (err) {
       console.error('Error loading users:', err);
     } finally {
@@ -42,7 +36,7 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
 
   const updateUserRole = async (userId: string, role: string) => {
     try {
-      await pb.collection('user_profiles').update(userId, { role });
+      await updateProfileRole(userId, role);
       loadUsers();
     } catch (err) {
       console.error('Error updating user:', err);
@@ -56,7 +50,7 @@ export function AdminPanel({ onBack }: AdminPanelProps) {
   const deleteUserProfile = async (userId: string) => {
     if (!confirm('Eliminare questo profilo?')) return;
     try {
-      await pb.collection('user_profiles').delete(userId);
+      await deleteProfile(userId);
       loadUsers();
     } catch (err) {
       console.error('Error deleting user:', err);

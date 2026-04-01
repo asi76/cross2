@@ -61,6 +61,23 @@ export const deleteExercise = async (id: string) => {
     return api(`/collections/exercises/records/${id}`, { method: 'DELETE' });
 };
 
+export const fetchExerciseGroups = async () => {
+    const d = await api('/collections/exercise_groups/records');
+    return d.items || [];
+};
+
+export const createExerciseGroup = async (data: any) => {
+    return api('/collections/exercise_groups/records', { method: 'POST', body: JSON.stringify(data) });
+};
+
+export const deleteExerciseGroup = async (id: string) => {
+    return api(`/collections/exercise_groups/records/${id}`, { method: 'DELETE' });
+};
+
+export const updateExerciseGroup = async (id: string, data: any) => {
+    return api(`/collections/exercise_groups/records/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+};
+
 // ─── Workouts ───────────────────────────────────────────────────────────────
 
 export const fetchWorkouts = async () => {
@@ -144,3 +161,21 @@ export const upsertProfile = async (userId: string, displayName: string, role = 
         body: JSON.stringify({ user_id: userId, display_name: displayName, role })
     });
 };
+
+export const fetchAllProfiles = async () => {
+    const d = await api('/collections/user_profiles/records');
+    return d.items || [];
+};
+
+export const updateProfileRole = async (id: string, role: string) => {
+    return api(`/collections/user_profiles/records/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role })
+    });
+};
+
+export const deleteProfile = async (id: string) => {
+    return api(`/collections/user_profiles/records/${id}`, { method: 'DELETE' });
+};
+
+
