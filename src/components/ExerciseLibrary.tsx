@@ -96,7 +96,7 @@ function SortableGroup({
           >
             <GripVertical className="w-5 h-5 text-zinc-500" />
           </div>
-          <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class}`}>
+          <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class || 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'}`}>
             {group.name}
           </span>
           <span className="text-base text-zinc-400">
@@ -578,7 +578,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                 onClick={() => moveExerciseId && moveExercise(moveExerciseId, group.id)}
                 className="w-full px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-left transition-colors"
               >
-                <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class}`}>
+                <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class || 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'}`}>
                   {group.name}
                 </span>
               </button>
