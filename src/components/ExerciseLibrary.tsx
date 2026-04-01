@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Plus, Trash2, ArrowRightLeft, X, ArrowLeft, Edit3, RefreshCw, LogOut, Download, Upload, Image, Search, GripVertical } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { createExercise, updateExercise, deleteExercise as deleteExerciseFromDb, subscribeToGifMappings, createGroup, deleteGroup as deleteGroupFromDb, updateGroup } from '../firebase';
+import { createExercise, updateExercise, deleteExercise as deleteExerciseFromDb, subscribeToGifMappings, createGroup, deleteGroup as deleteGroupFromDb, updateGroup } from '../pbService';
 import { getGifUrl } from '../data/gifMapping';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { ImportExportModal } from './ImportExportModal';

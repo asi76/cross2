@@ -1,12 +1,12 @@
-// GIF storage — Firebase database
-// Efficient implementation using exercise_id as document ID
+// GIF storage — PocketBase database
+// Efficient implementation using exercise_id as field
 
-import { getGifMapping as getGifMappingFromDb, setGifMapping, clearGifMappingsCache } from '../firebase';
+import { getGifMapping, setGifMapping, clearGifMappingsCache } from '../pbService';
 
 export async function getGifUrl(exerciseId: string): Promise<string | null> {
   try {
-    const mapping = await getGifMappingFromDb(exerciseId);
-    return mapping?.gif_url || null;
+    const mapping = await getGifMapping(exerciseId);
+    return mapping?.gifUrl || null;
   } catch (err) {
     console.error('Error getting GIF URL:', err);
     return null;

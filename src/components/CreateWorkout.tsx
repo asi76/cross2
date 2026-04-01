@@ -3,7 +3,7 @@ import { Plus, X, Trash2, ChevronDown, ChevronUp, ArrowLeft, Target, Image, Shie
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { createWorkout, updateWorkout, updateExercise } from '../firebase';
+import { createWorkout, updateWorkout, updateExercise } from '../pbService';
 import { getGifUrl } from '../data/gifMapping';
 import { Workout } from '../data/types';
 import { useAuth } from '../hooks/useAuth';

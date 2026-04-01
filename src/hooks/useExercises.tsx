@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { getGroups, getExercises } from '../firebase';
+import { getGroups, getExercises } from '../pbService';
 
 interface ExerciseGroup {
   id: string;

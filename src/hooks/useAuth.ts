@@ -4,13 +4,12 @@ import {
   onAuthStateChanged, 
   signInWithGoogle, 
   logOut, 
-  getUserRole, 
   createPendingUser,
   ADMIN_EMAIL,
   auth,
-  db 
+  getUserRole as getUserRoleFromFirebase
 } from '../firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { pb } from '../pbService';
 
 export type UserRole = 'admin' | 'enabled' | 'pending' | null;
 
@@ -21,6 +20,47 @@ interface UseAuthReturn {
   signIn: (requestEmail?: string, requestMessage?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
+}
+
+// Get user role from PocketBase
+async function getUserRole(email: string): Promise<'enabled' | 'pending' | null> {
+  try {
+    const records = await pb.collection('user_profiles').getFullList({
+      filter: `email = '${email.toLowerCase()}'`,
+    });
+    if (records.length > 0) {
+      return records[0].role || 'pending';
+    }
+    return null;
+  } catch {
+    // Fallback to Firebase
+    return getUserRoleFromFirebase(email);
+  }
+}
+
+// Save user to PocketBase
+async function saveUserToPocketBase(email: string, role: string, extraData: any = {}) {
+  try {
+    const existing = await pb.collection('user_profiles').getFullList({
+      filter: `email = '${email.toLowerCase()}'`,
+    });
+    
+    if (existing.length > 0) {
+      await pb.collection('user_profiles').update(existing[0].id, {
+        role,
+        ...extraData
+      });
+    } else {
+      await pb.collection('user_profiles').create({
+        email: email.toLowerCase(),
+        role,
+        name: extraData.name || '',
+        ...extraData
+      });
+    }
+  } catch (e) {
+    console.error('Error saving user to PocketBase:', e);
+  }
 }
 
 export const useAuth = (): UseAuthReturn => {
@@ -69,16 +109,14 @@ export const useAuth = (): UseAuthReturn => {
 
   const signIn = async (requestEmail?: string, requestMessage?: string) => {
     try {
-      // If email and message provided (Request Access flow), save pending request to Firestore BEFORE auth
+      // If email and message provided (Request Access flow), save pending request to PocketBase BEFORE auth
       if (requestEmail && requestMessage) {
         try {
-          const userRef = doc(db, 'users', requestEmail);
-          await setDoc(userRef, {
-            role: 'pending',
-            requestedAt: serverTimestamp(),
-            email: requestEmail,
+          await saveUserToPocketBase(requestEmail, 'pending', {
+            name: requestEmail.split('@')[0],
             message: requestMessage,
-          }, { merge: true });
+            requestedAt: new Date().toISOString()
+          });
         } catch (e) {
           console.error('Error saving pending request:', e);
         }
@@ -93,15 +131,17 @@ export const useAuth = (): UseAuthReturn => {
         return;
       }
       
-      // Check if user exists in Firestore
+      // Check if user exists in PocketBase
       const userRole = await getUserRole(firebaseUser.email!);
       
       if (userRole === 'enabled' || userRole === 'admin') {
         setRole(userRole);
       } else {
-        // New user - create pending request (message was already saved above if provided)
+        // New user - create pending request
         try {
-          await createPendingUser(firebaseUser, requestMessage);
+          await saveUserToPocketBase(firebaseUser.email!, 'pending', {
+            name: firebaseUser.displayName || '',
+          });
         } catch (e) {
           console.error('Error creating pending user:', e);
         }

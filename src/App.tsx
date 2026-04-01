@@ -27,7 +27,7 @@ import { ExerciseLibrary } from './components/ExerciseLibrary';
 import { WorkoutDisplay } from './components/WorkoutDisplay';
 import { NotificationModal } from './components/NotificationModal';
 import { Workout } from './data/types';
-import { createWorkout } from './firebase';
+import { createWorkout } from './pbService';
 import { getGifUrl } from './data/gifMapping';
 
 type View = 'home' | 'create' | 'library' | 'workout' | 'admin';
@@ -44,8 +44,7 @@ function App() {
     savedWorkouts,
     loadSavedWorkouts,
     saveWorkout,
-    deleteWorkout,
-    duplicateWorkout
+    deleteWorkout
   } = useWorkout();
   const { exercises: allExercises } = useExercises();
   const [currentView, setCurrentView] = useState<View>(() => {
