@@ -995,7 +995,17 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
           onEdit={handleOpenEdit}
           onGifUpdated={(id, url) => {
             setSelectedExerciseGif(url);
-            // Note: GIF mapping listener will auto-update badges
+            // Update badge state immediately
+            if (url) {
+              setExerciseGifs(prev => ({ ...prev, [id]: true }));
+            } else {
+              // GIF deleted - remove from badges
+              setExerciseGifs(prev => {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+              });
+            }
           }}
           groups={groups}
           onMoveGroup={(id, groupId) => moveExercise(id, groupId)}
