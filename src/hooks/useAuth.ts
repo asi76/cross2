@@ -83,12 +83,19 @@ export const useAuth = (): UseAuthReturn => {
     }
     
     try {
-      const userRole = await getUserRole(user.email!);
+      // Timeout for role fetch
+      const timeoutPromise = new Promise<'pending'>((resolve) => {
+        setTimeout(() => resolve('pending'), 5000);
+      });
+      
+      const userRole = await Promise.race([
+        getUserRole(user.email!),
+        timeoutPromise
+      ]);
       
       if (userRole === 'enabled' || userRole === 'admin') {
         setRole(userRole);
       } else {
-        // User not enabled - set to pending
         setRole('pending');
       }
     } catch (error) {
@@ -99,12 +106,22 @@ export const useAuth = (): UseAuthReturn => {
   };
 
   useEffect(() => {
+    // Timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.error('[useAuth] Auth timeout - forcing loading false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(timeout);
       setUser(firebaseUser);
       await fetchRole(firebaseUser);
     });
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(timeout);
+      unsubscribe();
+    };
   }, []);
 
   const signIn = async (requestEmail?: string, requestMessage?: string) => {
