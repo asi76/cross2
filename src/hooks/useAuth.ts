@@ -22,10 +22,15 @@ interface UseAuthReturn {
 
 const ADMIN_EMAIL = 'jarvis.vong@gmail.com';
 
+// Get initial user from pbService (guest user - no auth required)
+const getInitialUser = (): User | null => {
+  return getUser() as User | null;
+};
+
 export const useAuth = (): UseAuthReturn => {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<UserRole>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(getInitialUser);
+  const [role, setRole] = useState<UserRole>('enabled');
+  const [loading, setLoading] = useState(false);
 
   const loadRole = useCallback(async (u: User) => {
     if (u.email === ADMIN_EMAIL) {
@@ -37,32 +42,30 @@ export const useAuth = (): UseAuthReturn => {
       if (profile) {
         setRole(profile.role || 'enabled');
       } else {
-        setRole('pending');
+        setRole('enabled');
       }
     } catch {
-      setRole('pending');
+      setRole('enabled');
     }
   }, []);
 
   useEffect(() => {
+    // For guest mode, just load role once on mount
     const currentUser = getUser() as User | null;
     if (currentUser) {
-      setUser(currentUser);
-      loadRole(currentUser).finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+      loadRole(currentUser);
     }
 
-    onAuthChange(async (model) => {
+    // Subscribe to auth changes
+    const unsubscribe = onAuthChange((model) => {
       const u = model as User | null;
       setUser(u);
       if (u) {
-        await loadRole(u);
-        await upsertProfile(u.id, u.email || 'User');
-      } else {
-        setRole(null);
+        loadRole(u);
       }
     });
+
+    return unsubscribe;
   }, [loadRole]);
 
   const signIn = async (email: string, password: string) => {
