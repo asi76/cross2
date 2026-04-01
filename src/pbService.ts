@@ -1,21 +1,25 @@
 /**
- * Cross2 API Service — Sostituisce Firebase/PocketBase
- * Server: http://83.251.67.34:8090/api
+ * Cross2 API Service — PocketBase Direct
+ * Server: http://pb.83.251.67.34.sslip.io/api
+ * Authentication: disabled (public access)
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://83.251.67.34:8090/api';
+const PB_URL = import.meta.env.VITE_POCKETBASE_URL || 'http://pb.83.251.67.34.sslip.io/api';
 
-let authToken: string | null = null;
-export let authUser: { id: string; email: string; displayName?: string } | null = null;
+export let authUser: { id: string; email: string; displayName?: string } | null = {
+    id: 'guest',
+    email: 'guest@cross2.local',
+    displayName: 'Guest'
+};
+export let authToken: string | null = 'guest-token';
 
 function getHeaders() {
     const h: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (authToken) h['Authorization'] = `Bearer ${authToken}`;
     return h;
 }
 
 async function api(path: string, opts: RequestInit = {}) {
-    const r = await fetch(`${API_URL}${path}`, {
+    const r = await fetch(`${PB_URL}${path}`, {
         ...opts,
         headers: { ...getHeaders(), ...(opts.headers as Record<string,string> || {}) }
     });
@@ -24,19 +28,17 @@ async function api(path: string, opts: RequestInit = {}) {
     return d;
 }
 
-// ─── Auth ───────────────────────────────────────────────────────────────────
+// ─── Auth (disabled - always logged in as guest) ──────────────────────────────
 
 export const login = async (email: string, password: string) => {
-    const d = await api('/auth', { method: 'POST', body: JSON.stringify({ email, password }) });
-    authToken = d.token;
-    authUser = d.user;
-    return d;
+    // No-op: always logged in
+    return { user: authUser, token: authToken };
 };
 
 export const register = async (email: string, password: string) => login(email, password);
 export const logout = () => { authToken = null; authUser = null; };
 export const getUser = () => authUser;
-export const isLoggedIn = () => !!authToken;
+export const isLoggedIn = () => true;
 
 export const onAuthChange = (callback: (user: any) => void) => {
     callback(authUser);
@@ -60,6 +62,8 @@ export const updateExercise = async (id: string, data: any) => {
 export const deleteExercise = async (id: string) => {
     return api(`/collections/exercises/records/${id}`, { method: 'DELETE' });
 };
+
+// ─── Exercise Groups ─────────────────────────────────────────────────────────
 
 export const fetchExerciseGroups = async () => {
     const d = await api('/collections/exercise_groups/records');
@@ -177,5 +181,3 @@ export const updateProfileRole = async (id: string, role: string) => {
 export const deleteProfile = async (id: string) => {
     return api(`/collections/user_profiles/records/${id}`, { method: 'DELETE' });
 };
-
-
