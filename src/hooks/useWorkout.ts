@@ -7,13 +7,28 @@ export const useWorkout = () => {
   const [savedWorkouts, setSavedWorkouts] = useState<Workout[]>([]);
   const [currentStationIndex, setCurrentStationIndex] = useState(0);
 
-  // Set up real-time listener for workouts - only reads once, then updates automatically
+  // Load workouts initially + set up listener for updates
   useEffect(() => {
-    console.log('[useWorkout] Setting up real-time listener');
+    console.log('[useWorkout] Loading workouts...');
     
+    // Initial load without subscription (subscription requires PocketBase auth)
+    getWorkouts().then(workouts => {
+      console.log('[useWorkout] Loaded', workouts.length, 'workouts');
+      const mapped: Workout[] = workouts.map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        stations: w.stations || [],
+        createdAt: w.createdAt ? new Date(w.createdAt) : new Date()
+      }));
+      setSavedWorkouts(mapped);
+    }).catch(err => {
+      console.error('[useWorkout] Error loading workouts:', err);
+    });
+
+    // Set up real-time listener (won't work without PocketBase auth but doesn't break)
     const unsubscribe = subscribeToWorkouts((workouts) => {
       console.log('[useWorkout] Received', workouts.length, 'workouts from listener');
-      const mapped: Workout[] = workouts.map(w => ({
+      const mapped: Workout[] = workouts.map((w: any) => ({
         id: w.id,
         name: w.name,
         stations: w.stations || [],

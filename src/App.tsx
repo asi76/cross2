@@ -358,18 +358,18 @@ function App() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Create a proper duplicated workout with new ID
+                        // Create a proper duplicated workout - PocketBase will generate ID
                         const copy = {
-                          ...JSON.parse(JSON.stringify(workout)),
-                          id: 'workout-' + Date.now(),
                           name: workout.name + ' (copia)',
-                          createdAt: new Date().toISOString()
+                          stations: workout.stations || [],
+                          createdAt: new Date().toISOString(),
+                          savedAt: new Date().toISOString()
                         };
-                        // Save to Firebase database only
+                        // Save to PocketBase
                         createWorkout(copy).then(() => {
-                          alert('Copia creata e salvata! Ricarica la pagina.');
+                          alert('Copia creata e salvata!');
                         }).catch((error) => {
-                          alert('Errore nel salvare la copia al database: ' + error.message);
+                          alert('Errore nel salvare la copia: ' + error.message);
                         });
                       }}
                       className="p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors"
