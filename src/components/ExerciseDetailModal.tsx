@@ -53,7 +53,7 @@ export function ExerciseDetailModal({
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(propMode === 'edit' || propMode === 'create');
   const [localGifUrl, setLocalGifUrl] = useState<string | null>(gifUrl);
-  const [localGroupId, setLocalGroupId] = useState<string>(exercise.group_id || '');
+  const [localGroupId, setLocalGroupId] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync local GIF URL with prop
@@ -79,7 +79,9 @@ export function ExerciseDetailModal({
     setEditDifficulty(exercise.difficulty || 'intermediate');
     setEditTipo(exercise.tipo || 'anaerobico');
     setEditDescription(exercise.description || '');
-    setLocalGroupId(exercise.group_id || '');
+    // Convert muscleGroup value (e.g. 'upper-push') to group ID
+    const group = groups.find(g => g.name.toLowerCase().replace(/ /g, '-') === exercise.muscleGroup);
+    setLocalGroupId(group?.id || '');
     setIsEditing(propMode === 'edit' || propMode === 'create');
   }, [exercise, propMode]);
 
@@ -680,7 +682,7 @@ export function ExerciseDetailModal({
                 <div>
                   <h3 className="text-base font-medium text-zinc-400 mb-2">Gruppo</h3>
                   <span className={`px-3 py-1 rounded-full text-base font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20`}>
-                    {groups.find(g => g.id === exercise.group_id)?.label || 'Nessun gruppo'}
+                    {groups.find(g => g.name.toLowerCase().replace(/ /g, '-') === exercise.muscleGroup)?.label || 'Nessun gruppo'}
                   </span>
                 </div>
                 {/* Tags */}
