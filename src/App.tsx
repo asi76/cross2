@@ -56,7 +56,6 @@ function App() {
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
   const [expandedWorkoutId, setExpandedWorkoutId] = useState<string | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('forza');
   const [viewingExercise, setViewingExercise] = useState<any>(null);
   const [viewingExerciseData, setViewingExerciseData] = useState<any>(null);
@@ -69,18 +68,20 @@ function App() {
     }
   }, [role, loadSavedWorkouts]);
 
-  // Scroll expanded card just below the sticky header (works up and down)
-  useEffect(() => {
-    if (!expandedWorkoutId) return;
-    const timer = setTimeout(() => {
-      const cardEl = cardRefs.current.get(expandedWorkoutId);
-      const headerEl = headerRef.current;
-      if (!cardEl || !headerEl) return;
-      cardEl.style.scrollMarginTop = `${headerEl.offsetHeight + 10}px`;
-      cardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [expandedWorkoutId]);
+  const toggleCard = (workoutId: string) => {
+    const isOpening = expandedWorkoutId !== workoutId;
+    setExpandedWorkoutId(isOpening ? workoutId : null);
+    if (isOpening) {
+      setTimeout(() => {
+        const element = document.getElementById(`workout-header-${workoutId}`);
+        if (element && headerRef.current) {
+          const rect = element.getBoundingClientRect();
+          const top = rect.top + window.scrollY - headerRef.current.offsetHeight - 10;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      }, 50);
+    }
+  };
 
   // Persist current view to localStorage
   useEffect(() => {
@@ -332,29 +333,16 @@ function App() {
           </div>
         ) : (
           <div className="space-y-4">
-            {savedWorkouts.map((workout, idx) => (
-              <motion.div
+            {savedWorkouts.map((workout) => (
+              <div
                 key={workout.id}
-                ref={(el) => {
-                  if (el) cardRefs.current.set(workout.id, el);
-                  else cardRefs.current.delete(workout.id);
-                }}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className={`bg-zinc-900 rounded-xl overflow-hidden transition-colors ${
-                  expandedWorkoutId === workout.id
-                    ? 'w-full'
-                    : ''
-                }`}
+                className="bg-zinc-900 rounded-xl overflow-hidden"
               >
                 {/* Workout Header - clickable to expand */}
-                <div 
+                <div
+                  id={`workout-header-${workout.id}`}
                   className="flex items-center justify-between p-4 cursor-pointer"
-                  onClick={() => {
-                    setExpandedWorkoutId(expandedWorkoutId === workout.id ? null : workout.id);
-                  }}
+                  onClick={() => toggleCard(workout.id)}
                 >
                   <div className="flex items-center gap-3 flex-1">
                     {expandedWorkoutId === workout.id ? (
@@ -432,14 +420,8 @@ function App() {
                 </div>
 
                 {/* Expanded Content */}
-                <AnimatePresence>
-                  {expandedWorkoutId === workout.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
+                {expandedWorkoutId === workout.id && (
+                  <div>
                       {/* Category Tabs - same style as CreateWorkout */}
                       <div className="flex gap-2 p-4">
                         {WORKOUT_CATEGORIES.map((cat) => {
@@ -463,8 +445,8 @@ function App() {
                         })}
                       </div>
 
-                      {/* Exercise List - fixed height container, no dumbbell icon */}
-                      <div className="p-4 min-h-[200px]">
+                      {/* Exercise List - fixed height showing ~6 exercises */}
+                      <div className="px-4 pb-4 overflow-y-auto max-h-[420px]">
                         {(() => {
                           const muscleCount = getMuscleCountForWorkout(workout);
                           return getExercisesByCategory(workout, selectedCategoryId).map((ex: any, index: number) => {
@@ -517,10 +499,9 @@ function App() {
                           });
                         })()}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
