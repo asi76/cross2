@@ -63,12 +63,24 @@ export function SavedWorkouts() {
                   </div>
                   <div className="flex flex-wrap gap-2 mt-3">
                     {workout.stations.map((station, i) => (
-                      <span
+                      <div
                         key={station.id}
-                        className="text-xs bg-zinc-800 text-zinc-300 px-2 py-1 rounded"
+                        className="flex flex-col gap-1 bg-zinc-800/50 px-2 py-1.5 rounded-lg min-w-[120px]"
                       >
-                        {i + 1}. {station.exercise?.name || muscleGroupLabels[station.muscleGroup]}
-                      </span>
+                        <span className="text-xs text-zinc-300 flex items-center gap-1">
+                          <span className="text-zinc-500 font-mono">{i + 1}.</span>
+                          {station.exercise?.name || muscleGroupLabels[station.muscleGroup]}
+                        </span>
+                        {station.exercise?.muscles && station.exercise.muscles.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {station.exercise.muscles.slice(0, 3).map((muscle: string, mi: number) => (
+                              <span key={mi} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-400">
+                                {muscle}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>

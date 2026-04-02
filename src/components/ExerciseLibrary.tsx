@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronDown, ChevronUp, Plus, Trash2, ArrowRightLeft, X, ArrowLeft, Edit3, RefreshCw, LogOut, Download, Upload, Image, Search, GripVertical } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, Trash2, ArrowRightLeft, X, ArrowLeft, Edit3, RefreshCw, LogOut, Download, Upload, Image, Search, GripVertical, ImageOff } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { createExercise, updateExercise, deleteExercise as deleteExerciseFromDb, getGifMappings, createGroup, deleteGroup as deleteGroupFromDb, updateGroup } from '../pbService';
@@ -100,7 +100,11 @@ function SortableGroup({
             {group.name}
           </span>
           <span className="text-base text-zinc-400">
-            {exerciseCount} ex{missingGifs > 0 ? ` (${missingGifs} foto mancanti)` : ''}
+            {exerciseCount} ex{missingGifs > 0 && (
+              <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+                ({missingGifs})
+              </span>
+            )}
           </span>
         </div>
         <div className="flex items-center gap-2">

@@ -203,6 +203,23 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                   <span key={i} className={`text-xs px-1.5 py-0.5 rounded ${getMuscleColor(m)}`}>{m}</span>
                 ))}
               </div>
+              <div className="flex items-center justify-between mt-1">
+                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                  exerciseData?.tipo === 'aerobico'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'bg-orange-500/20 text-orange-400'
+                }`}>
+                  {exerciseData?.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
+                </span>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                  exerciseData?.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
+                  exerciseData?.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-red-500/20 text-red-400'
+                }`}>
+                  {exerciseData?.difficulty === 'beginner' ? 'Principiante' :
+                   exerciseData?.difficulty === 'intermediate' ? 'Intermedi' : 'Avanzato'}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
