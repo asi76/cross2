@@ -101,7 +101,7 @@ function SortableGroup({
           </span>
           <span className="text-base text-zinc-400">
             {exerciseCount} ex{missingGifs > 0 && (
-              <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+              <span className="ml-1 text-base px-1.5 py-0.5 rounded bg-red-500/20 text-white">
                 ({missingGifs})
               </span>
             )}
