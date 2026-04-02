@@ -446,7 +446,7 @@ function App() {
                       </div>
 
                       {/* Exercise List - fixed height showing ~6 exercises */}
-                      <div className="px-4 pb-4 overflow-y-auto max-h-[460px]">
+                      <div className="px-4 pb-4 overflow-y-auto max-h-[540px]">
                         {(() => {
                           const muscleCount = getMuscleCountForWorkout(workout);
                           return getExercisesByCategory(workout, selectedCategoryId).map((ex: any, index: number) => {
