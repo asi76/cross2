@@ -218,7 +218,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                     {exerciseData.muscleGroup}
                   </span>
                 )}
-                {exerciseData?.muscles?.slice(0, 3).map((m: string, i: number) => (
+                {exerciseData?.muscles?.slice(0, 4).map((m: string, i: number) => (
                   <span key={i} className={`text-xs px-1.5 py-0.5 rounded ${getMuscleColor(m)}`}>{m}</span>
                 ))}
               </div>

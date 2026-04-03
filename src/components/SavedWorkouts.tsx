@@ -73,7 +73,7 @@ export function SavedWorkouts() {
                         </span>
                         {station.exercise?.muscles && station.exercise.muscles.length > 0 && (
                           <div className="flex flex-wrap gap-1">
-                            {station.exercise.muscles.slice(0, 3).map((muscle: string, mi: number) => (
+                            {station.exercise.muscles.slice(0, 4).map((muscle: string, mi: number) => (
                               <span key={mi} className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-zinc-400">
                                 {muscle}
                               </span>
