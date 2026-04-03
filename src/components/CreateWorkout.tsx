@@ -156,7 +156,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       transform: CSS.Transform.toString(transform),
       transition,
     };
-    const exerciseData = getExerciseById(ex.exerciseId);
+    const exerciseData = getExerciseById(ex.exerciseId, ex.exerciseName);
     const exerciseGroup = groups.find(g => g.id === ex.groupId);
     const groupLabel = exerciseGroup?.label || 'Nessun gruppo';
 
@@ -164,7 +164,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     const muscleCount: Record<string, number> = {};
     workoutCategories.forEach(cat => {
       cat.exercises.forEach((e: any) => {
-        const data = getExerciseById(e.exerciseId);
+        const data = getExerciseById(e.exerciseId, e.exerciseName);
         data?.muscles?.forEach((m: string) => {
           muscleCount[m] = (muscleCount[m] || 0) + 1;
         });
@@ -709,7 +709,15 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     }
   };
 
-  const getExerciseById = (id: string) => exercises.find(e => e.id === id);
+  // Find exercise by ID first, then by name as fallback (in case of old workout with stale IDs)
+  const getExerciseById = (id: string, fallbackName?: string) => {
+    const found = exercises.find(e => e.id === id);
+    if (found) return found;
+    if (fallbackName) {
+      return exercises.find(e => e.name.toLowerCase() === fallbackName.toLowerCase());
+    }
+    return undefined;
+  };
 
   return (
     <div className="max-w-4xl mx-auto p-4">
