@@ -471,6 +471,11 @@ function App() {
                                     {ex.exerciseName || ex.exerciseId}
                                   </span>
                                   <div className="flex flex-wrap gap-1 mt-1">
+                                    {exerciseData?.muscleGroup && exerciseData?.muscleGroup !== 'non-assegnati' && (
+                                      <span key="group" className="px-2 py-0.5 rounded text-xs bg-purple-500/30 text-purple-300 border border-purple-500/40 capitalize">
+                                        {exerciseData.muscleGroup}
+                                      </span>
+                                    )}
                                     {exerciseData?.muscles?.map((m: string, i: number) => (
                                       <span key={i} className={`px-2 py-0.5 rounded text-xs ${getMuscleColor(m, muscleCount)}`}>{m}</span>
                                     ))}
@@ -555,8 +560,13 @@ function App() {
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-zinc-400 mb-2">Muscoli</h3>
+                    <h3 className="text-sm font-medium text-zinc-400 mb-2">Gruppo</h3>
                     <div className="flex flex-wrap gap-2">
+                      {viewingExerciseData?.muscleGroup && viewingExerciseData?.muscleGroup !== 'non-assegnati' && (
+                        <span className="px-2 py-1 rounded text-sm bg-purple-500/30 text-purple-300 border border-purple-500/40 capitalize">
+                          {viewingExerciseData.muscleGroup}
+                        </span>
+                      )}
                       {viewingExerciseData?.muscles?.map((muscle: string, idx: number) => (
                         <span key={idx} className="px-2 py-1 rounded text-sm bg-white/20 text-white border border-white/30">
                           {muscle}
