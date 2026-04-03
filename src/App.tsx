@@ -134,6 +134,19 @@ function App() {
     return 'bg-green-500/30 text-green-300 border border-green-500/40';
   };
 
+  const getGroupColor = (group: string) => {
+    const colors: Record<string, string> = {
+      chest: 'bg-red-500/30 text-red-300 border-red-500/40',
+      back: 'bg-blue-500/30 text-blue-300 border-blue-500/40',
+      legs: 'bg-green-500/30 text-green-300 border-green-500/40',
+      arms: 'bg-orange-500/30 text-orange-300 border-orange-500/40',
+      shoulders: 'bg-cyan-500/30 text-cyan-300 border-cyan-500/40',
+      core: 'bg-yellow-500/30 text-yellow-300 border-yellow-500/40',
+      cardio: 'bg-purple-500/30 text-purple-300 border-purple-500/40',
+    };
+    return colors[group] || 'bg-zinc-500/30 text-zinc-300 border-zinc-500/40';
+  };
+
   const getExerciseById = (id: string, name?: string) => {
     return allExercises.find(e => e.id === id) || (name ? allExercises.find(e => e.name === name) : undefined);
   };
@@ -472,7 +485,7 @@ function App() {
                                   </span>
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {exerciseData?.muscleGroup && exerciseData?.muscleGroup !== 'non-assegnati' && (
-                                      <span key="group" className="px-2 py-0.5 rounded text-xs bg-purple-500/30 text-purple-300 border border-purple-500/40 capitalize">
+                                      <span key="group" className={`px-2 py-0.5 rounded text-xs border capitalize ${getGroupColor(exerciseData.muscleGroup)}`}>
                                         {exerciseData.muscleGroup}
                                       </span>
                                     )}
@@ -563,7 +576,7 @@ function App() {
                     <h3 className="text-sm font-medium text-zinc-400 mb-2">Gruppo</h3>
                     <div className="flex flex-wrap gap-2">
                       {viewingExerciseData?.muscleGroup && viewingExerciseData?.muscleGroup !== 'non-assegnati' && (
-                        <span className="px-2 py-1 rounded text-sm bg-purple-500/30 text-purple-300 border border-purple-500/40 capitalize">
+                        <span className={`px-2 py-1 rounded text-sm border capitalize ${getGroupColor(viewingExerciseData.muscleGroup)}`}>
                           {viewingExerciseData.muscleGroup}
                         </span>
                       )}
