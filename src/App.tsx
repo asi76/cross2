@@ -587,10 +587,6 @@ function App() {
                       ))}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm px-3 py-1 rounded ${
-                      viewingExerciseData?.tipo === 'aerobico' 
-                        ? 'bg-blue-500/20 text-blue-400' 
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-sm px-3 py-1 rounded-lg ${
                       viewingExerciseData?.tipo === 'aerobico'
@@ -599,7 +595,6 @@ function App() {
                     }`}>
                       {viewingExerciseData?.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
                     </span>
-                    <span className={`text-sm px-3 py-1 rounded ${
                     <span className={`text-sm px-3 py-1 rounded-lg ${
                       viewingExerciseData?.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
                       viewingExerciseData?.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
