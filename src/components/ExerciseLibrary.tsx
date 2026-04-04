@@ -79,7 +79,7 @@ function SortableGroup({
     <div 
       ref={setNodeRef} 
       style={style}
-      className={`glass-card rounded-2xl ${isDragging ? 'shadow-2xl ring-2 ring-blue-500/50' : ''}`}
+      className={`bg-zinc-900 rounded-xl overflow-hidden ${isDragging ? 'shadow-2xl ring-2 ring-blue-500/50' : ''}`}
     >
       {/* Group Header */}
       <button
@@ -709,7 +709,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       {/* Sticky Header - dark black */}
-      <div className="glass-header sticky top-0 z-40 rounded-b-2xl -mx-4 px-4 py-4">
+      <div className="sticky top-0 z-40 bg-zinc-900 backdrop-blur-sm rounded-b-xl border-b-2 border-black/30 -mx-4 px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
