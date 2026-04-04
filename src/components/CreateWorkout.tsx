@@ -20,6 +20,7 @@ interface ExerciseGroup {
 
 interface Exercise {
   id: string;
+  group_id?: string;
   muscleGroup: string;
   name: string;
   muscles: string[];
@@ -111,6 +112,20 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   const currentCategory = workoutCategories.find(c => c.id === selectedCategoryId) || workoutCategories[0];
+
+  const getGroupByExercise = (exercise: Exercise): ExerciseGroup | undefined => {
+    return groups.find(g => g.id === exercise.group_id || g.name === exercise.muscleGroup);
+  };
+
+  const getResolvedGroupId = (exercise: Exercise): string => {
+    return exercise.group_id || getGroupByExercise(exercise)?.id || exercise.muscleGroup || '';
+  };
+
+  const getExercisesForGroup = (groupId: string): Exercise[] => {
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return [];
+    return exercises.filter(e => e.group_id === groupId || e.muscleGroup === group.name);
+  };
 
   // DnD sensors
   const sensors = useSensors(
@@ -321,8 +336,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     const results: {groupId: string; exerciseIds: string[]}[] = [];
     
     groups.forEach(group => {
-      const muscleGroupValue = group.name.toLowerCase().replace(/ /g, '-');
-      const groupExercises = exercises.filter(e => e.muscleGroup === muscleGroupValue);
+      const groupExercises = getExercisesForGroup(group.id);
       const matchingExercises = groupExercises.filter(ex => 
         ex.name.toLowerCase().includes(query)
       );
@@ -427,9 +441,9 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
     // Set initial editing group from the workout category exercise if available
     if (exerciseIndex !== undefined && exerciseIndex !== null) {
       const ex = currentCategory.exercises[exerciseIndex];
-      setEditingGroupId(ex?.groupId || exercise.muscleGroup || '');
+      setEditingGroupId(ex?.groupId || getResolvedGroupId(exercise));
     } else {
-      setEditingGroupId(exercise.muscleGroup || '');
+      setEditingGroupId(getResolvedGroupId(exercise));
     }
     try {
       const gifUrl = await getGifUrl(exercise.id);
@@ -554,10 +568,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
 
       // Get exercises for a group
       const getGroupExercises = (groupId: string): Exercise[] => {
-        const group = groups.find(g => g.id === groupId);
-        if (!group) return [];
-        const muscleGroupValue = group.name.toLowerCase().replace(/ /g, '-');
-        return exercises.filter(e => e.muscleGroup === muscleGroupValue);
+        return getExercisesForGroup(groupId);
       };
 
       // Count muscles in a category
@@ -643,7 +654,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           exercises: shuffledForza.map((ex, idx) => ({
             exerciseId: ex.id,
             exerciseName: ex.name,  // Store name for display
-            groupId: ex.muscleGroup,
+            groupId: getResolvedGroupId(ex),
             muscles: ex.muscles,
             reps: ex.reps || 10,
             sets: 3,
@@ -658,7 +669,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           exercises: cardio1Exercises.map((ex) => ({
             exerciseId: ex.id,
             exerciseName: ex.name,  // Store name for display
-            groupId: ex.muscleGroup,
+            groupId: getResolvedGroupId(ex),
             muscles: ex.muscles,
             time: 45,
             sets: 1,
@@ -673,7 +684,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           exercises: cardio2Exercises.map((ex) => ({
             exerciseId: ex.id,
             exerciseName: ex.name,  // Store name for display
-            groupId: ex.muscleGroup,
+            groupId: getResolvedGroupId(ex),
             muscles: ex.muscles,
             time: 45,
             sets: 1,
@@ -903,7 +914,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                 return searchResult !== undefined;
               })
               .map(exercise => {
-                const group = groups.find(g => g.name.toLowerCase().replace(/ /g, '-') === exercise.muscleGroup);
+                const group = getGroupByExercise(exercise);
                 return (
                   <div
                     key={exercise.id}
@@ -931,7 +942,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                         </div>
                       </div>
                       <button
-                        onClick={() => handleAddExercise(exercise, exercise.muscleGroup)}
+                        onClick={() => handleAddExercise(exercise, getResolvedGroupId(exercise))}
                         className="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors ml-2"
                         title="Aggiungi"
                       >

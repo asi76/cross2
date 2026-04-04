@@ -20,6 +20,7 @@ interface ExerciseGroup {
 
 interface Exercise {
   id: string;
+  group_id?: string;
   muscleGroup: string;
   name: string;
   muscles: string[];
@@ -289,6 +290,16 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     return groupColors.find(c => c.id === colorId)?.class || groupColors[0].class;
   };
 
+  const getGroupByExercise = (exercise: Exercise): ExerciseGroup | undefined => {
+    return groups.find(g => g.id === exercise.group_id || g.name === exercise.muscleGroup);
+  };
+
+  const getExercisesForGroup = (groupId: string): Exercise[] => {
+    const group = groups.find(g => g.id === groupId);
+    if (!group) return [];
+    return exercises.filter(e => e.group_id === groupId || e.muscleGroup === group.name);
+  };
+
   // Open edit group modal
   const handleEditGroup = (group: ExerciseGroup) => {
     setEditingGroup(group);
@@ -303,9 +314,11 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     if (!editingGroup || !editGroupName.trim()) return;
     
     try {
+      const nextGroupName = editGroupName.trim();
       const colorClass = groupColors.find(c => c.id === editGroupColor)?.class || groupColors[0].class;
       await updateGroup(editingGroup.id, {
-        label: editGroupName.trim(),
+        name: nextGroupName,
+        label: nextGroupName,
         color_class: colorClass
       });
       refreshGroups();
@@ -318,13 +331,8 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   };
 
   // Get exercises for a specific group (sorted alphabetically)
-  // Groups use 'name' (e.g. "Upper Push") and exercises use 'muscleGroup' (e.g. "upper-push")
   const getExercisesByGroup = (groupId: string): Exercise[] => {
-    const group = groups.find(g => g.id === groupId);
-    if (!group) return [];
-    const muscleGroupValue = group.name;
-    return exercises
-      .filter(e => e.muscleGroup === muscleGroupValue)
+    return getExercisesForGroup(groupId)
       .sort((a, b) => a.name.localeCompare(b.name));
   };
 
@@ -360,7 +368,10 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   // Move exercise to another group
   const moveExercise = async (exerciseId: string, newGroupId: string) => {
     const newGroup = groups.find(g => g.id === newGroupId);
-    await updateExercise(exerciseId, { muscleGroup: newGroup?.name || '' });
+    await updateExercise(exerciseId, {
+      group_id: newGroupId,
+      muscleGroup: newGroup?.name || ''
+    });
     setShowGroupSelector(null);
     setMoveExerciseId(null);
     refreshExercises();
@@ -371,10 +382,10 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     setCreateGroupId(groupId);
     setSelectedExercise(null);
     const group = groups.find(g => g.id === groupId);
-    const muscleGroupValue = group?.name || '';
     setCreateExerciseForm({
       id: '',
-      muscleGroup: muscleGroupValue,
+      group_id: groupId,
+      muscleGroup: group?.name || '',
       name: '',
       muscles: [],
       reps: null,
@@ -389,9 +400,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   const deleteGroup = async (groupId: string) => {
     try {
       // First delete all exercises in the group
-      const group = groups.find(g => g.id === groupId);
-      const muscleGroupValue = group?.name || '';
-      const exercisesInGroup = exercises.filter(e => e.muscleGroup === muscleGroupValue);
+      const exercisesInGroup = getExercisesForGroup(groupId);
       for (const ex of exercisesInGroup) {
         await deleteExerciseFromDb(ex.id);
       }
@@ -454,10 +463,10 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
       if (modalMode === 'create' && createGroupId) {
         const newId = `${createGroupId}-${Date.now()}`;
         const group = groups.find(g => g.id === createGroupId);
-        const muscleGroupValue = group?.name || '';
         await createExercise({
           id: newId,
-          muscleGroup: muscleGroupValue,
+          group_id: createGroupId,
+          muscleGroup: group?.name || '',
           name: exerciseData.name || '',
           muscles: exerciseData.muscles || [],
           reps: exerciseData.reps || null,
@@ -503,8 +512,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     const results: {groupId: string; exerciseIds: string[]}[] = [];
     
     groups.forEach(group => {
-      const muscleGroupValue = group.name;
-      const groupExercises = exercises.filter(e => e.muscleGroup === muscleGroupValue);
+      const groupExercises = getExercisesForGroup(group.id);
       const matchingExercises = groupExercises.filter(ex => 
         ex.name.toLowerCase().includes(query)
       );
@@ -815,8 +823,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                 return searchResult !== undefined;
               })
               .map(exercise => {
-                const muscleGroupToGroupName = (mg: string) => mg.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                const group = groups.find(g => g.name === exercise.muscleGroup);
+                const group = getGroupByExercise(exercise);
                 return (
                   <div
                     key={exercise.id}
@@ -880,8 +887,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
           >
             <div className="space-y-3">
               {groups.map(group => {
-                const muscleGroupValue = group.name;
-                const groupExercises = exercises.filter(e => e.muscleGroup === muscleGroupValue);
+                const groupExercises = getExercisesForGroup(group.id);
                 const missingGifs = groupExercises.length - groupExercises.filter(e => exerciseGifs[e.id]).length;
                 return (
                   <SortableGroup
