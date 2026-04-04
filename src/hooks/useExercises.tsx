@@ -83,8 +83,7 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
     // Find the group to get its name (which equals muscleGroup value in PocketBase)
     const group = groups.find(g => g.id === groupId);
     if (!group) return [];
-    const muscleGroupValue = group.name.toLowerCase().replace(/ /g, '-');
-    return exercises.filter(e => e.muscleGroup === muscleGroupValue);
+    return exercises.filter(e => e.muscleGroup === group.name);
   }, [exercises, groups]);
 
   const getGroupById = useCallback((groupId: string): ExerciseGroup | undefined => {
