@@ -506,23 +506,6 @@ function App() {
                                     ))}
                                   </div>
                                 </div>
-                                <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
-                                  <span className={`text-xs px-2 py-0.5 rounded-lg ${
-                                    exerciseData?.tipo === 'aerobico'
-                                      ? 'bg-blue-500/20 text-blue-400'
-                                      : 'bg-orange-500/20 text-orange-400'
-                                  }`}>
-                                    {exerciseData?.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
-                                  </span>
-                                  <span className={`text-xs px-2 py-0.5 rounded-lg ${
-                                    exerciseData?.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
-                                    exerciseData?.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
-                                    'bg-red-500/20 text-red-400'
-                                  }`}>
-                                    {exerciseData?.difficulty === 'beginner' ? 'Principiante' :
-                                     exerciseData?.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzato'}
-                                  </span>
-                                </div>
                               </div>
                             </div>
                             );
