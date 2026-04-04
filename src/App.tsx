@@ -498,11 +498,20 @@ function App() {
                                   <span className={`text-xs px-2 py-0.5 rounded ${
                                     exerciseData?.tipo === 'aerobico' 
                                       ? 'bg-blue-500/20 text-blue-400' 
+                                      <span key={i} className="px-2 py-0.5 rounded text-xs bg-white/20 text-white">{m}</span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-1 ml-2 shrink-0">
+                                  <span className={`text-xs px-2 py-0.5 rounded-lg ${
+                                    exerciseData?.tipo === 'aerobico'
+                                      ? 'bg-blue-500/20 text-blue-400'
                                       : 'bg-orange-500/20 text-orange-400'
                                   }`}>
                                     {exerciseData?.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
                                   </span>
                                   <span className={`text-xs px-2 py-0.5 rounded ${
+                                  <span className={`text-xs px-2 py-0.5 rounded-lg ${
                                     exerciseData?.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
                                     exerciseData?.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
                                     'bg-red-500/20 text-red-400'
@@ -591,11 +600,16 @@ function App() {
                     <span className={`text-sm px-3 py-1 rounded ${
                       viewingExerciseData?.tipo === 'aerobico' 
                         ? 'bg-blue-500/20 text-blue-400' 
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-sm px-3 py-1 rounded-lg ${
+                      viewingExerciseData?.tipo === 'aerobico'
+                        ? 'bg-blue-500/20 text-blue-400'
                         : 'bg-orange-500/20 text-orange-400'
                     }`}>
                       {viewingExerciseData?.tipo === 'aerobico' ? 'Aerobico' : 'Anaerobico'}
                     </span>
                     <span className={`text-sm px-3 py-1 rounded ${
+                    <span className={`text-sm px-3 py-1 rounded-lg ${
                       viewingExerciseData?.difficulty === 'beginner' ? 'bg-green-500/20 text-green-400' :
                       viewingExerciseData?.difficulty === 'intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
                       'bg-red-500/20 text-red-400'

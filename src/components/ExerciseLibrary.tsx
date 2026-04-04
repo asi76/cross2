@@ -78,20 +78,20 @@ function SortableGroup({
     <div 
       ref={setNodeRef} 
       style={style}
-      className={`bg-zinc-900 rounded-xl ${isDragging ? 'shadow-2xl ring-2 ring-blue-500' : ''}`}
+      className={`glass-card rounded-2xl ${isDragging ? 'shadow-2xl ring-2 ring-blue-500/50' : ''}`}
     >
       {/* Group Header */}
       <button
         id={`group-header-${group.id}`}
         onClick={onToggle}
-        className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.04] transition-colors"
       >
         <div className="flex items-center gap-3">
           {/* Drag Handle */}
           <div 
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 hover:bg-zinc-700 rounded transition-colors"
+            className="cursor-grab active:cursor-grabbing p-1 hover:bg-white/10 rounded transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             <GripVertical className="w-5 h-5 text-zinc-500" />
@@ -123,7 +123,7 @@ function SortableGroup({
               e.stopPropagation();
               onEditGroup();
             }}
-            className="p-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors"
+            className="glass-btn p-2 rounded-lg transition-colors"
             title="Modifica gruppo"
           >
             <Edit3 className="w-4 h-4 text-white" />
@@ -705,12 +705,12 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       {/* Sticky Header - dark black */}
-      <div className="sticky top-0 z-40 bg-zinc-900 backdrop-blur-sm rounded-b-xl border-b-2 border-black/30 -mx-4 px-4 py-4">
+      <div className="glass-header sticky top-0 z-40 rounded-b-2xl -mx-4 px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn p-2 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
@@ -726,7 +726,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
             </button>
             <button
               onClick={() => setShowImportExport(true)}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn p-2 rounded-lg transition-colors"
               title="Importa/Esporta"
             >
               <Download className="w-5 h-5 text-white" />
@@ -736,21 +736,21 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                 setExpandedGroups(new Set());
                 window.scrollTo({ top: 0, behavior: 'instant' });
               }}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn p-2 rounded-lg transition-colors"
               title="Comprimi tutto"
             >
               <ChevronUp className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn p-2 rounded-lg transition-colors"
               title="Refresh"
             >
               <RefreshCw className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={signOut}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn p-2 rounded-lg transition-colors"
               title="Logout"
             >
               <LogOut className="w-5 h-5 text-white" />
@@ -767,7 +767,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Cerca esercizio..."
-              className="w-full px-4 py-2 pl-10 bg-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="w-full px-4 py-2 pl-10 glass-surface rounded-lg text-white/80 placeholder-white/25 focus:outline-none focus:border-white/30"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           </div>
@@ -780,7 +780,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
           {isSearching && (
             <button
               onClick={clearSearch}
-              className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg font-medium transition-colors"
+              className="glass-btn px-4 py-2 text-white/70 rounded-lg font-medium transition-colors"
             >
               X
             </button>
@@ -807,7 +807,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
             Risultati per "{searchQuery}" ({searchResults.reduce((acc, r) => acc + r.exerciseIds.length, 0)} ex)
           </div>
           {searchResults.reduce((acc, r) => acc + r.exerciseIds.length, 0) === 0 ? (
-            <div className="bg-zinc-900 rounded-xl px-5 py-8 text-center text-zinc-500">
+            <div className="glass-card rounded-2xl px-5 py-8 text-center text-white/35">
               Nessun esercizio trovato
             </div>
           ) : (
@@ -822,7 +822,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                 return (
                   <div
                     key={exercise.id}
-                    className="bg-zinc-900 rounded-xl px-5 py-4 hover:bg-zinc-800/30 transition-colors"
+                    className="glass-card rounded-2xl px-5 py-4 hover:bg-white/[0.06] transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -906,7 +906,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                           return <div className="px-5 py-8 text-center text-zinc-500">Nessun esercizio</div>;
                         }
                         return exercisesList.map(exercise => (
-                          <div key={exercise.id} className="px-5 py-4 border-b border-zinc-800/50 last:border-b-0 hover:bg-zinc-800/30 transition-colors">
+                          <div key={exercise.id} className="px-5 py-4 border-b border-white/[0.05] last:border-b-0 hover:bg-white/[0.04] transition-colors">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <div className="flex items-center justify-between">
@@ -951,7 +951,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                                     setMoveExerciseId(exercise.id);
                                     setShowGroupSelector(exercise.id);
                                   }}
-                                  className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+                                  className="glass-btn p-2 rounded-lg transition-colors"
                                   title="Sposta"
                                 >
                                   <ArrowRightLeft className="w-4 h-4 text-zinc-400" />
