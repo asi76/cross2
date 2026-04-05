@@ -212,21 +212,18 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
 
   if (timer.phase === 'complete') {
     return (
-      <div className="min-h-screen bg-dark-bg flex items-center justify-center p-4">
+      <div className="app-shell flex min-h-screen items-center justify-center p-4">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="text-center"
+          className="hero-panel rounded-[32px] px-8 py-10 text-center"
         >
           <div className="bg-green-500/20 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-12 h-12 text-green-500" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Workout Complete!</h1>
           <p className="text-gray-400 mb-8">Great job finishing {workout.name}</p>
-          <button
-            onClick={onComplete}
-            className="px-8 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
-          >
+          <button onClick={onComplete} className="btn-primary rounded-xl px-8 py-3 transition-colors">
             Back to Home
           </button>
         </motion.div>
@@ -235,19 +232,19 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <div className="app-shell">
       <div className="max-w-lg mx-auto p-4">
-        <div className="flex items-center justify-between mb-6">
+        <div className="app-topbar mb-6 flex items-center justify-between rounded-[28px] px-4 py-4">
           <button 
             onClick={onExit}
-            className="p-2 hover:bg-dark-hover rounded-lg text-gray-400"
+            className="glass-btn rounded-xl p-2 text-gray-300"
           >
             <X className="w-6 h-6" />
           </button>
-          <h1 className="text-lg font-medium text-white truncate">{workout.name}</h1>
+          <h1 className="display-font truncate text-2xl uppercase text-white">{workout.name}</h1>
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 hover:bg-dark-hover rounded-lg"
+            className="glass-btn rounded-xl p-2"
           >
             {soundEnabled ? (
               <Volume2 className="w-5 h-5 text-gray-400" />
@@ -262,12 +259,12 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
             <button
               key={s.id}
               onClick={() => goToStation(idx)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                 timer.stationIndex === idx
-                  ? 'bg-blue-500 text-white'
+                  ? 'bg-orange-500 text-white'
                   : idx < timer.stationIndex
                   ? 'bg-green-500/50 text-white'
-                  : 'bg-dark-card text-gray-400'
+                  : 'bg-white/5 text-gray-400'
               }`}
             >
               {s.name.replace('Station ', '')}
@@ -279,12 +276,12 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
           key={`${timer.stationIndex}-${timer.exerciseIndex}`}
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-dark-card border border-dark-border rounded-2xl p-6 mb-6"
+          className="energy-panel rounded-[32px] p-6 mb-6"
         >
           <div className="text-center mb-6">
-            <p className="text-blue-500 text-sm font-medium mb-1">{station?.name}</p>
-            <h2 className="text-2xl font-bold text-white mb-2">{exerciseData?.name}</h2>
-            <p className="text-gray-400 text-sm">{exerciseData?.description}</p>
+            <p className="section-kicker mb-2 text-center">{station?.name}</p>
+            <h2 className="display-font text-4xl uppercase text-white mb-2">{exerciseData?.name}</h2>
+            <p className="text-gray-400 text-sm leading-6">{exerciseData?.description}</p>
           </div>
 
           <div className="relative w-48 h-48 mx-auto mb-6">
@@ -294,7 +291,7 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
                 cy="96"
                 r="88"
                 fill="none"
-                stroke="#2a2a2a"
+                stroke="rgba(255,255,255,0.08)"
                 strokeWidth="8"
               />
               <circle
@@ -302,7 +299,7 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
                 cy="96"
                 r="88"
                 fill="none"
-                stroke={timer.phase === 'rest' ? '#f59e0b' : '#3b82f6'}
+                stroke={timer.phase === 'rest' ? '#ffb21f' : '#a6ff00'}
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 88}`}
@@ -311,10 +308,10 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className={`text-5xl font-bold ${timer.phase === 'rest' ? 'text-amber-500' : 'text-white'}`}>
+              <span className={`display-font text-6xl ${timer.phase === 'rest' ? 'text-amber-400' : 'text-white'}`}>
                 {timer.phase === 'rest' ? 'REST' : formatTime(timer.seconds)}
               </span>
-              <span className="text-gray-500 text-sm">
+              <span className="text-gray-500 text-sm uppercase tracking-[0.18em]">
                 Set {timer.setIndex + 1} of {exercise?.sets || 1}
               </span>
             </div>
@@ -323,13 +320,13 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
           <div className="flex items-center justify-center gap-4 mb-6">
             <button
               onClick={resetExercise}
-              className="p-3 bg-dark-hover rounded-full hover:bg-dark-border"
+              className="glass-btn rounded-full p-3"
             >
               <RotateCcw className="w-6 h-6 text-gray-400" />
             </button>
             <button
               onClick={togglePause}
-              className="p-6 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors"
+              className="btn-primary rounded-full p-6 transition-colors"
             >
               {timer.isRunning ? (
                 <Pause className="w-8 h-8 text-white" />
@@ -340,7 +337,7 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
             <button
               onClick={() => goToStation(timer.stationIndex + 1)}
               disabled={timer.stationIndex >= workout.stations.length - 1}
-              className="p-3 bg-dark-hover rounded-full hover:bg-dark-border disabled:opacity-30"
+              className="glass-btn rounded-full p-3 disabled:opacity-30"
             >
               <SkipForward className="w-6 h-6 text-gray-400" />
             </button>
@@ -351,7 +348,7 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
               <div
                 key={idx}
                 className={`w-3 h-3 rounded-full ${
-                  idx < getCompletedSets() ? 'bg-green-500' : 'bg-dark-hover'
+                  idx < getCompletedSets() ? 'bg-lime-300' : 'bg-white/10'
                 }`}
               />
             ))}
@@ -361,20 +358,20 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
         {!timer.isRunning && timer.seconds === 0 && (
           <button
             onClick={startWorkout}
-            className="w-full py-4 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors"
+            className="btn-primary w-full rounded-2xl py-4 transition-colors"
           >
             Start
           </button>
         )}
 
-        <div className="mt-6">
-          <h3 className="text-gray-400 text-base mb-3">Up Next</h3>
+        <div className="energy-panel mt-6 rounded-[28px] p-5">
+          <h3 className="display-font text-2xl uppercase text-white mb-3">Up Next</h3>
           <div className="space-y-2">
             {station?.exercises.slice(timer.exerciseIndex + 1).map((ex) => {
               const exData = getExerciseById(ex.exerciseId);
               return (
-                <div key={ex.exerciseId} className="flex items-center gap-3 text-gray-400">
-                  <Dumbbell className="w-5 h-5" />
+                <div key={ex.exerciseId} className="flex items-center gap-3 text-gray-300">
+                  <Dumbbell className="w-5 h-5 text-orange-300" />
                   <span className="text-base font-medium">{exData?.name}</span>
                   <span className="text-gray-600">•</span>
                   <span className="text-base">{ex.sets} × {ex.reps}</span>

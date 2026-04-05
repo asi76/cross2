@@ -79,7 +79,7 @@ function SortableGroup({
     <div 
       ref={setNodeRef} 
       style={style}
-      className={`bg-zinc-900 rounded-xl overflow-hidden ${isDragging ? 'shadow-2xl ring-2 ring-blue-500/50' : ''}`}
+      className={`energy-panel rounded-[24px] overflow-hidden ${isDragging ? 'shadow-2xl ring-2 ring-lime-300/40' : ''}`}
     >
       {/* Group Header */}
       <button
@@ -707,9 +707,10 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
   };
 
   return (
+    <div className="app-shell">
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* Sticky Header - dark black */}
-      <div className="sticky top-0 z-40 bg-zinc-900 backdrop-blur-sm rounded-b-xl border-b-2 border-black/30 -mx-4 px-4 py-4">
+      <div className="sticky top-0 z-40 -mx-4 px-4 py-4">
+        <div className="app-topbar rounded-[28px] px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -718,12 +719,15 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
             >
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h2 className="text-xl font-bold text-white">Libreria Esercizi</h2>
+            <div>
+              <div className="section-kicker mb-1">Exercise System</div>
+              <h2 className="display-font text-3xl uppercase text-white">Libreria esercizi</h2>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowAddGroup(true)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium flex items-center gap-2 transition-colors whitespace-nowrap"
+              className="btn-primary rounded-xl px-4 py-2 font-medium flex items-center gap-2 transition-colors whitespace-nowrap"
             >
               <Plus className="w-5 h-5" />
               <span className="hidden sm:inline">Gruppo</span>
@@ -771,13 +775,13 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Cerca esercizio..."
-              className="w-full px-4 py-2 pl-10 bg-zinc-800 rounded-lg text-white placeholder-zinc-400 border border-zinc-700 focus:outline-none focus:border-zinc-500"
+              className="input-shell w-full rounded-xl px-4 py-2 pl-10"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           </div>
           <button
             onClick={handleSearch}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
+            className="btn-primary rounded-xl px-4 py-2 font-medium transition-colors"
           >
             Cerca
           </button>
@@ -803,15 +807,15 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
           </div>
         )}
       </div>
+      </div>
 
-      {/* Flat Search Results - shown when searching */}
       {isSearching && searchQuery.trim() && (
         <div className="mt-4 space-y-3">
           <div className="text-sm text-zinc-400">
             Risultati per "{searchQuery}" ({searchResults.reduce((acc, r) => acc + r.exerciseIds.length, 0)} ex)
           </div>
           {searchResults.reduce((acc, r) => acc + r.exerciseIds.length, 0) === 0 ? (
-            <div className="glass-card rounded-2xl px-5 py-8 text-center text-white/35">
+            <div className="energy-panel rounded-[24px] px-5 py-8 text-center text-white/35">
               Nessun esercizio trovato
             </div>
           ) : (
@@ -825,7 +829,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                 return (
                   <div
                     key={exercise.id}
-                    className="glass-card rounded-2xl px-5 py-4 hover:bg-white/[0.06] transition-colors"
+                    className="energy-panel rounded-[24px] px-5 py-4 hover:bg-white/[0.06] transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -856,10 +860,10 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleAddToWorkout(exercise)}
-                              className="p-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                              className="rounded-xl border border-cyan-300/15 bg-cyan-300/10 p-2 transition-colors hover:bg-cyan-300/20"
                               title="Aggiungi alla scheda"
                             >
-                              <Plus className="w-4 h-4 text-blue-400" />
+                              <Plus className="w-4 h-4 text-cyan-200" />
                             </button>
                           </div>
                         </div>
@@ -872,7 +876,6 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
         </div>
       )}
 
-      {/* Groups List - only shown when NOT searching */}
       {!isSearching && (
         <DndContext
           sensors={sensors}
@@ -1031,6 +1034,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
       {showImportExport && (
         <ImportExportModal onClose={() => setShowImportExport(false)} />
       )}
+    </div>
     </div>
   );
 }

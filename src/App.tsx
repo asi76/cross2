@@ -174,12 +174,12 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+      <div className="app-shell flex min-h-screen items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         >
-          <Dumbbell className="w-12 h-12 text-blue-400" />
+          <Dumbbell className="w-12 h-12 text-lime-300" />
         </motion.div>
       </div>
     );
@@ -249,25 +249,25 @@ function App() {
 
   // Home view with inline expandable workout cards
   return (
-    <div className="min-h-screen bg-dark-bg">
-      {/* Sticky Header - dark black */}
-      <div ref={headerRef} className="sticky top-0 z-40 bg-zinc-900 backdrop-blur-sm rounded-b-xl border-b-2 border-black/30">
+    <div className="app-shell">
+      <div ref={headerRef} className="sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="app-topbar rounded-[28px] px-4 py-4 sm:px-5">
+            <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-zinc-700 p-2 rounded-xl">
-                <Dumbbell className="w-6 h-6 text-blue-500" />
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5 shadow-lg shadow-black/20">
+                <Dumbbell className="w-6 h-6 text-lime-300" />
               </div>
               <div>
-                <h1 className="text-[1.4rem] font-bold text-white">Crossplanner</h1>
-                <p className="text-gray-400 text-xs">Benvenuto, {user.displayName?.split(' ')[0] || 'Atleta'}</p>
+                <h1 className="display-font text-[1.6rem] font-bold uppercase leading-none text-white">Crossplanner</h1>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">Benvenuto, {user.displayName?.split(' ')[0] || 'Atleta'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {role === 'admin' && (
                 <button
                   onClick={() => setCurrentView('admin')}
-                  className="p-2 bg-zinc-700 rounded-lg text-gray-300 hover:text-white transition-colors"
+                  className="glass-btn rounded-xl p-2 text-gray-300 hover:text-white transition-colors"
                   title="Admin Panel"
                 >
                   <Shield className="w-5 h-5" />
@@ -278,45 +278,74 @@ function App() {
                   setExpandedWorkoutId(null);
                   window.scrollTo({ top: 0, behavior: 'instant' });
                 }}
-                className="p-2 bg-zinc-700 rounded-lg text-gray-300 hover:text-white transition-colors"
+                className="glass-btn rounded-xl p-2 text-gray-300 hover:text-white transition-colors"
                 title="Comprimi tutto"
               >
                 <ChevronUp className="w-5 h-5" />
               </button>
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'instant' }) || window.location.reload()}
-                className="p-2 bg-zinc-700 rounded-lg text-gray-300 hover:text-white transition-colors"
+                className="glass-btn rounded-xl p-2 text-gray-300 hover:text-white transition-colors"
                 title="Aggiorna Pagina"
               >
                 <RefreshCw className="w-5 h-5" />
               </button>
               <button
                 onClick={signOut}
-                className="p-2 bg-zinc-700 rounded-lg text-gray-300 hover:text-white transition-colors"
+                className="glass-btn rounded-xl p-2 text-gray-300 hover:text-white transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
           </div>
+          </div>
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-4xl mx-auto p-4">
+        <section className="hero-panel rounded-[32px] p-6 sm:p-8 mb-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <div className="section-kicker mb-3">Training Command Center</div>
+              <h2 className="display-font text-4xl uppercase leading-[0.92] text-white sm:text-5xl">
+                Costruisci schede con un look piu atletico e una lettura piu rapida.
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+                Interfaccia piu moderna, ritmo visivo piu energico e focus immediato su workout, libreria e progressione.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 sm:min-w-[280px]">
+              <div className="stat-chip rounded-2xl px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Schede</div>
+                <div className="display-font text-3xl text-white">{savedWorkouts.length}</div>
+              </div>
+              <div className="stat-chip rounded-2xl px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Gruppi</div>
+                <div className="display-font text-3xl text-white">{groups.length}</div>
+              </div>
+              <div className="stat-chip rounded-2xl px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Esercizi</div>
+                <div className="display-font text-3xl text-white">{allExercises.length}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div className="grid gap-4 md:grid-cols-2 mb-8">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setCurrentView('create')}
-            className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-5 text-left group flex items-center gap-4"
+            className="action-card action-card--primary rounded-[28px] p-5 text-left group flex items-center gap-4"
           >
-            <div className="bg-blue-500/30 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-2xl border border-white/15 bg-black/15 flex items-center justify-center shrink-0">
               <Plus className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">Crea nuova scheda</h3>
-              <p className="text-blue-200 text-sm">Pianifica una sessione di crosstraining</p>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-white/70">Build</div>
+              <h3 className="display-font text-white font-bold text-2xl uppercase leading-none">Crea nuova scheda</h3>
+              <p className="text-white/80 text-sm mt-1">Pianifica una sessione di crosstraining con un editor piu chiaro.</p>
             </div>
           </motion.button>
 
@@ -324,33 +353,38 @@ function App() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setCurrentView('library')}
-            className="bg-zinc-900 rounded-2xl p-5 text-left group hover:bg-zinc-800 transition-colors flex items-center gap-4"
+            className="action-card rounded-[28px] p-5 text-left group transition-colors flex items-center gap-4"
           >
-            <div className="bg-zinc-700 w-12 h-12 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-zinc-600 transition-colors">
-              <Library className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-2xl border border-cyan-400/20 bg-cyan-400/10 flex items-center justify-center shrink-0 transition-colors">
+              <Library className="w-6 h-6 text-cyan-200" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">Libreria Esercizi</h3>
-              <p className="text-gray-400 text-sm">Consulta, aggiungi e modifica esercizi</p>
+              <div className="text-[11px] uppercase tracking-[0.18em] text-cyan-200/70">Library</div>
+              <h3 className="display-font text-white font-bold text-2xl uppercase leading-none">Libreria esercizi</h3>
+              <p className="text-slate-300 text-sm mt-1">Consulta, aggiungi e modifica esercizi con piu densita visiva.</p>
             </div>
           </motion.button>
         </div>
 
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Save className="w-5 h-5 text-gray-400" />
-            Schede Salvate ({savedWorkouts.length})
-          </h2>
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <div className="section-kicker mb-2">Saved Plans</div>
+            <h2 className="display-font text-3xl uppercase text-white flex items-center gap-2">
+              <Save className="w-6 h-6 text-orange-300" />
+              Schede salvate
+            </h2>
+          </div>
+          <div className="text-sm text-white/45">{savedWorkouts.length} totali</div>
         </div>
 
         {savedWorkouts.length === 0 ? (
-          <div className="bg-zinc-900 rounded-xl p-8 text-center">
-            <Dumbbell className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400 mb-2">Nessuna scheda salvata</p>
-            <p className="text-gray-500 text-sm mb-4">Crea la tua prima scheda</p>
+          <div className="energy-panel rounded-[28px] p-8 text-center">
+            <Dumbbell className="w-12 h-12 text-white/30 mx-auto mb-4" />
+            <p className="display-font text-2xl uppercase text-white mb-2">Nessuna scheda salvata</p>
+            <p className="text-slate-400 text-sm mb-4">Crea la tua prima struttura di allenamento.</p>
             <button
               onClick={() => setCurrentView('create')}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+              className="btn-primary px-5 py-2.5 rounded-xl transition-colors"
             >
               Crea nuova scheda
             </button>
@@ -360,23 +394,22 @@ function App() {
             {savedWorkouts.map((workout) => (
               <div
                 key={workout.id}
-                className="bg-zinc-900 rounded-xl overflow-hidden"
+                className="energy-panel rounded-[28px] overflow-hidden"
               >
-                {/* Workout Header - clickable to expand */}
                 <div
                   id={`workout-header-${workout.id}`}
-                  className="flex items-center justify-between p-4 cursor-pointer"
+                  className="flex items-center justify-between p-5 cursor-pointer"
                   onClick={() => toggleCard(workout.id)}
                 >
                   <div className="flex items-center gap-3 flex-1">
                     {expandedWorkoutId === workout.id ? (
-                      <ChevronUp className="w-5 h-5 text-blue-400" />
+                      <ChevronUp className="w-5 h-5 text-lime-300" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-5 h-5 text-white/40" />
                     )}
                     <div>
-                      <h3 className="text-white font-semibold">{workout.name}</h3>
-                      <span className="text-gray-500 text-sm">
+                      <h3 className="display-font text-2xl uppercase text-white">{workout.name}</h3>
+                      <span className="text-white/40 text-sm">
                         {formatDate(workout.createdAt)} • {' '}
                         {workout.stations.reduce((acc, s) => acc + s.exercises.length, 0)} ex
                       </span>
@@ -400,10 +433,10 @@ function App() {
                           alert('Errore nel salvare la copia: ' + error.message);
                         });
                       }}
-                      className="p-2 bg-green-500/20 hover:bg-green-500/30 rounded-lg transition-colors"
+                      className="rounded-xl border border-emerald-400/15 bg-emerald-400/10 p-2 transition-colors hover:bg-emerald-400/20"
                       title="Duplica"
                     >
-                      <Copy className="w-5 h-5 text-green-400" />
+                      <Copy className="w-5 h-5 text-emerald-300" />
                     </button>
                     <button
                       onClick={(e) => {
@@ -412,7 +445,7 @@ function App() {
                           deleteWorkout(workout.id);
                         }
                       }}
-                      className="p-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-colors"
+                      className="rounded-xl border border-red-400/15 bg-red-400/10 p-2 transition-colors hover:bg-red-400/20"
                       title="Elimina"
                     >
                       <Trash2 className="w-5 h-5 text-red-400" />
@@ -423,10 +456,10 @@ function App() {
                         setEditingWorkout(workout);
                         setCurrentView('create');
                       }}
-                      className="p-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                      className="rounded-xl border border-cyan-300/15 bg-cyan-300/10 p-2 transition-colors hover:bg-cyan-300/20"
                       title="Modifica"
                     >
-                      <Pencil className="w-5 h-5 text-blue-400" />
+                      <Pencil className="w-5 h-5 text-cyan-200" />
                     </button>
                     {expandedWorkoutId === workout.id && (
                       <button
@@ -434,7 +467,7 @@ function App() {
                           e.stopPropagation();
                           setExpandedWorkoutId(null);
                         }}
-                        className="p-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors"
+                        className="glass-btn rounded-xl p-2 transition-colors"
                         title="Chiudi"
                       >
                         <X className="w-5 h-5 text-gray-300" />
@@ -443,10 +476,8 @@ function App() {
                   </div>
                 </div>
 
-                {/* Expanded Content */}
                 {expandedWorkoutId === workout.id && (
-                  <div>
-                      {/* Category Tabs - same style as CreateWorkout */}
+                  <div className="border-t border-white/5">
                       <div className="flex gap-2 p-4">
                         {WORKOUT_CATEGORIES.map((cat) => {
                           const exercises = getExercisesByCategory(workout, cat.id);
@@ -455,12 +486,12 @@ function App() {
                             <button
                               key={cat.id}
                               onClick={() => setSelectedCategoryId(cat.id)}
-                              className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
+                              className={`flex-1 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
                                 isSelected
-                                  ? 'bg-blue-600 text-white'
+                                  ? 'btn-primary'
                                   : exercises.length > 0
-                                    ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
-                                    : 'bg-dark-bg text-gray-500'
+                                    ? 'btn-secondary text-cyan-100 hover:bg-white/10'
+                                    : 'bg-black/20 text-gray-500'
                               }`}
                             >
                               {cat.name} ({exercises.length})
@@ -469,7 +500,6 @@ function App() {
                         })}
                       </div>
 
-                      {/* Exercise List - fixed height showing ~6 exercises */}
                       <div className="px-4 pb-4 overflow-y-auto max-h-[480px]">
                         {(() => {
                           const muscleCount = getMuscleCountForWorkout(workout);
@@ -488,7 +518,7 @@ function App() {
                                   setViewingExerciseGif(gifUrl);
                                 } catch {}
                               }}
-                              className="bg-dark-bg rounded-lg p-3 cursor-pointer hover:bg-zinc-800/50 transition-colors w-full mb-2 last:mb-0"
+                              className="rounded-2xl border border-white/6 bg-black/20 p-3 cursor-pointer transition-colors hover:bg-white/[0.05] w-full mb-2 last:mb-0"
                             >
                               <div className="flex items-start justify-between w-full">
                                 <div>
@@ -527,13 +557,13 @@ function App() {
           onClick={() => setViewingExercise(null)}
         >
           <div 
-            className="bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+            className="energy-panel rounded-[28px] w-full max-w-2xl max-h-[80vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
               <div className="flex items-center gap-3">
-                <Target className="w-5 h-5 text-blue-500" />
-                <h2 className="text-lg font-bold text-white">
+                <Target className="w-5 h-5 text-orange-300" />
+                <h2 className="display-font text-2xl uppercase text-white">
                   {viewingExercise.exerciseName || viewingExercise.exerciseId}
                 </h2>
               </div>

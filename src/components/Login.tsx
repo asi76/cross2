@@ -50,43 +50,66 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-40 bg-zinc-900 backdrop-blur-sm rounded-b-xl border-b-2 border-black/30">
+    <div className="app-shell">
+      <div className="sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <Dumbbell className="w-6 h-6 text-blue-400" />
-            <h1 className="text-xl font-bold text-white">Crossplanner</h1>
+          <div className="app-topbar flex items-center gap-3 rounded-[28px] px-4 py-4">
+            <Dumbbell className="w-6 h-6 text-lime-300" />
+            <h1 className="display-font text-2xl uppercase text-white">Crossplanner</h1>
           </div>
         </div>
       </div>
 
-      {/* Login Content */}
       <div className="flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-5xl"
       >
-        <div className="bg-dark-card border border-dark-border rounded-2xl p-8">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="hero-panel rounded-[32px] p-8">
+            <div className="section-kicker mb-3">Modern Fitness UI</div>
+            <h2 className="display-font text-5xl uppercase leading-[0.9] text-white">
+              Pianifica, salva e lancia workout con un impatto piu deciso.
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-6 text-slate-300">
+              Una dashboard pensata per energia, ritmo e chiarezza operativa: schede, libreria esercizi e sessione live.
+            </p>
+            <div className="mt-8 grid grid-cols-3 gap-3">
+              <div className="stat-chip rounded-2xl px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Focus</div>
+                <div className="display-font text-3xl text-white">3</div>
+              </div>
+              <div className="stat-chip rounded-2xl px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Flow</div>
+                <div className="display-font text-3xl text-white">Fast</div>
+              </div>
+              <div className="stat-chip rounded-2xl px-4 py-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Style</div>
+                <div className="display-font text-3xl text-white">Fit</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="energy-panel rounded-[32px] p-8">
           <div className="flex flex-col items-center mb-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring' }}
-              className="bg-primary/20 p-4 rounded-full mb-4"
+              className="rounded-full border border-white/10 bg-white/5 p-4 mb-4"
             >
-              <Dumbbell className="w-12 h-12 text-blue-400" />
+              <Dumbbell className="w-12 h-12 text-orange-300" />
             </motion.div>
-            <h1 className="text-3xl font-bold text-white mb-2">Crossplanner</h1>
-            <p className="text-gray-400 text-center">Sign in to access your workouts</p>
+            <h1 className="display-font text-4xl uppercase text-white mb-2">Crossplanner</h1>
+            <p className="text-slate-400 text-center">Accedi per entrare nella tua area workout.</p>
           </div>
 
           {isPendingUser ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg"
+              className="mb-6 rounded-2xl border border-yellow-400/20 bg-yellow-400/10 p-4"
             >
               <p className="text-yellow-500 text-center text-sm">
                 Your account is not yet enabled.
@@ -96,7 +119,7 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
               </p>
               <button
                 onClick={handleContactAdmin}
-                className="w-full mt-4 bg-yellow-500/20 border border-yellow-500/30 text-yellow-500 font-medium py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-yellow-500/30 transition-colors"
+                className="w-full mt-4 rounded-xl border border-yellow-400/20 bg-yellow-400/15 px-4 py-2 text-yellow-200 font-medium flex items-center justify-center gap-2 transition-colors hover:bg-yellow-400/20"
               >
                 <Send className="w-4 h-4" />
                 Contact Administrator
@@ -107,7 +130,7 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full bg-white text-gray-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-100 transition-colors disabled:opacity-50"
+            className="w-full rounded-xl bg-white px-4 py-3 text-gray-800 font-semibold flex items-center justify-center gap-3 transition-colors hover:bg-gray-100 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -124,15 +147,16 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
 
           <button
             onClick={handleRequestAccess}
-            className="w-full mt-4 bg-dark-hover border border-dark-border text-gray-300 font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-dark-border transition-colors"
+            className="btn-secondary w-full mt-4 rounded-xl px-4 py-3 font-medium flex items-center justify-center gap-2 transition-colors"
           >
             <Send className="w-4 h-4" />
             Request Access
           </button>
 
-          <p className="text-gray-500 text-xs text-center mt-6">
+          <p className="text-white/35 text-xs text-center mt-6">
             Only approved Google accounts can access this app
           </p>
+          </div>
         </div>
       </motion.div>
 
@@ -150,23 +174,23 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-dark-card border border-dark-border rounded-2xl p-6 w-full max-w-md"
+              className="energy-panel rounded-[28px] p-6 w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <User className="w-5 h-5 text-blue-500" />
+                  <User className="w-5 h-5 text-orange-300" />
                   Request Access
                 </h2>
                 <button
                   onClick={handleCloseModal}
-                  className="p-2 hover:bg-dark-border rounded-lg transition-colors"
+                  className="glass-btn p-2 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 text-gray-400" />
                 </button>
               </div>
 
-              <p className="text-gray-400 mb-4">
+              <p className="text-gray-300 mb-4">
                 Write a message to the administrator explaining why you should have access to the Crossplanner app.
               </p>
 
@@ -177,7 +201,7 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
                   value={requestEmail}
                   onChange={(e) => setRequestEmail(e.target.value)}
                   placeholder="your.email@gmail.com"
-                  className="w-full bg-dark-hover border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                  className="input-shell w-full rounded-xl p-4"
                 />
               </div>
 
@@ -185,20 +209,20 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
                 value={requestMessage}
                 onChange={(e) => setRequestMessage(e.target.value)}
                 placeholder="Hi, I would like to request access to the Crossplanner app because..."
-                className="w-full bg-dark-hover border border-dark-border rounded-lg p-4 text-white placeholder-gray-500 resize-none h-32 mb-4 focus:outline-none focus:border-blue-500"
+                className="input-shell mb-4 h-32 w-full resize-none rounded-xl p-4"
               />
 
               <div className="flex gap-3">
                 <button
                   onClick={handleCloseModal}
-                  className="flex-1 py-3 bg-dark-hover border border-dark-border text-gray-300 rounded-lg font-medium hover:bg-dark-border transition-colors"
+                  className="btn-secondary flex-1 rounded-xl py-3 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmitRequest}
                   disabled={!requestEmail.trim() || !requestMessage.trim() || loading}
-                  className="flex-1 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="btn-primary flex-1 rounded-xl py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />

@@ -727,27 +727,31 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
   };
 
   return (
+    <div className="app-shell">
     <div className="max-w-4xl mx-auto p-4">
-      {/* Sticky Header - dark black */}
-      <div className="sticky top-0 z-40 bg-zinc-900 backdrop-blur-sm rounded-b-xl border-b-2 border-black/30 -mx-4 px-4 pb-2 space-y-2">
+      <div className="sticky top-0 z-40 -mx-4 px-4 pb-2 space-y-2">
+        <div className="app-topbar rounded-[28px] px-4 pb-3 space-y-2">
         {/* Title row */}
         <div className="flex items-center justify-between pt-4">
           <div className="flex items-center gap-4">
             <button
               onClick={() => handleUnsavedChanges(onBack)}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-2 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
-            <h2 className="text-xl font-bold text-white">
+            <div>
+            <div className="section-kicker mb-1">Workout Builder</div>
+            <h2 className="display-font text-3xl font-bold uppercase text-white">
               {editWorkout ? 'Modifica Scheda' : 'Editor scheda'}
             </h2>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleAiAutoFill}
               disabled={isAiLoading}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50"
+              className="glass-btn rounded-xl p-2 transition-colors disabled:opacity-50"
               title="AI Auto-fill"
             >
               {isAiLoading ? (
@@ -761,21 +765,21 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                 setExpandedGroups(new Set());
                 window.scrollTo({ top: 0, behavior: 'instant' });
               }}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-2 transition-colors"
               title="Comprimi tutto"
             >
               <ChevronUp className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-2 transition-colors"
               title="Refresh"
             >
               <RefreshCw className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={() => handleUnsavedChanges(signOut)}
-              className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-2 transition-colors"
               title="Logout"
             >
               <LogOut className="w-5 h-5 text-white" />
@@ -791,11 +795,11 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
             value={workoutName}
             onChange={(e) => setWorkoutName(e.target.value)}
             placeholder="Nome della scheda"
-            className="flex-1 px-4 py-3 bg-zinc-900 rounded-xl text-white placeholder-zinc-500 border border-zinc-700 focus:outline-none focus:border-blue-500"
+            className="input-shell flex-1 rounded-2xl px-4 py-3"
           />
           <button
             onClick={handleSave}
-            className="w-[20%] py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-colors whitespace-nowrap"
+            className="btn-primary min-w-[120px] rounded-2xl px-5 py-3 transition-colors whitespace-nowrap"
           >
             Salva
           </button>
@@ -808,12 +812,12 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               <button
                 key={cat.id}
                 onClick={() => { setSelectedCategoryId(cat.id); window.scrollTo({ top: 0, behavior: 'instant' }); }}
-                className={`flex-1 px-4 py-3 rounded-lg text-base font-semibold transition-colors ${
+                className={`flex-1 px-4 py-3 rounded-xl text-base font-semibold transition-colors ${
                   selectedCategoryId === cat.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'btn-primary'
                     : catData?.exercises.length > 0
-                      ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
-                      : 'bg-dark-bg text-gray-500'
+                      ? 'btn-secondary text-cyan-100 hover:bg-white/10'
+                      : 'bg-black/20 text-gray-500'
                 }`}
               >
                 {cat.name} ({catData?.exercises.length || 0})
@@ -821,11 +825,10 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
             );
           })}
         </div>
+        </div>
       </div>
 
-      {/* Rest of content - scrolls under sticky header with tabs */}
       <div className="space-y-6 mt-3">
-      {/* Hidden duplicate tabs - 2px invisible version to maintain layout */}
       <div className="flex gap-2 h-[2px]">
         {WORKOUT_CATEGORIES.map((cat) => {
           const catData = workoutCategories.find(c => c.id === cat.id);
@@ -835,10 +838,10 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               onClick={() => setSelectedCategoryId(cat.id)}
               className={`flex-1 rounded-lg text-sm font-semibold transition-colors ${
                 selectedCategoryId === cat.id
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-orange-500 text-white'
                   : catData?.exercises.length > 0
-                    ? 'bg-blue-500/20 text-blue-400'
-                    : 'bg-dark-bg text-gray-500'
+                    ? 'bg-cyan-400/30 text-cyan-100'
+                    : 'bg-black/20 text-gray-500'
               }`}
               style={{ height: '2px', padding: 0 }}
             />
@@ -858,7 +861,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
         >
           <div>
             {currentCategory.exercises.length === 0 ? (
-              <p className="text-zinc-500 text-sm">Nessun esercizio. Aggiungi dalla lista sotto.</p>
+              <div className="energy-panel rounded-[24px] px-5 py-6 text-sm text-zinc-400">Nessun esercizio. Aggiungi dalla lista sotto.</div>
             ) : (
               currentCategory.exercises.map((ex: any, index: number) => (
                 <SortableExerciseItem key={`${selectedCategoryId}-${index}`} ex={ex} index={index} />
@@ -870,7 +873,10 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
 
       {/* Exercise Library - Groups collapsible */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Libreria Esercizi</h3>
+        <div>
+          <div className="section-kicker mb-2">Exercise Bank</div>
+          <h3 className="display-font text-3xl uppercase text-white">Libreria esercizi</h3>
+        </div>
         
         {/* Search Row */}
         <div className="flex items-center gap-2">
@@ -881,20 +887,20 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Cerca esercizio..."
-              className="w-full px-4 py-2 pl-10 bg-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="input-shell w-full rounded-xl px-4 py-2 pl-10"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           </div>
           <button
             onClick={handleSearch}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
+            className="btn-primary rounded-xl px-4 py-2 transition-colors"
           >
             Cerca
           </button>
           {isSearching && (
             <button
               onClick={clearSearch}
-              className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg font-medium transition-colors"
+              className="btn-secondary rounded-xl px-4 py-2 transition-colors"
             >
               X
             </button>
@@ -908,7 +914,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           </div>
         )}
         {isSearching && searchResults.length === 0 && searchQuery.trim() && (
-          <div className="bg-zinc-900 rounded-xl px-5 py-8 text-center text-zinc-500">
+          <div className="energy-panel rounded-[24px] px-5 py-8 text-center text-zinc-500">
             Nessun esercizio trovato per "{searchQuery}"
           </div>
         )}
@@ -926,7 +932,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                 return (
                   <div
                     key={exercise.id}
-                    className="bg-zinc-900 rounded-xl px-5 py-4 hover:bg-zinc-800/30 transition-colors"
+                    className="energy-panel rounded-[24px] px-5 py-4 hover:bg-white/[0.04] transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -951,7 +957,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                       </div>
                       <button
                         onClick={() => handleAddExercise(exercise, getResolvedGroupId(exercise))}
-                        className="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors ml-2"
+                        className="btn-primary rounded-xl p-2 transition-colors ml-2"
                         title="Aggiungi"
                       >
                         <Plus className="w-5 h-5 text-white" />
@@ -967,12 +973,12 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
         {!isSearching && (
           <div className="space-y-3">
             {groups.map(group => (
-              <div key={group.id} className="bg-zinc-900 rounded-xl">
+              <div key={group.id} className="energy-panel rounded-[24px]">
                 {/* Group Header */}
                 <button
                   id={`workout-group-header-${group.id}`}
                   onClick={() => toggleGroup(group.id)}
-                  className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
+                  className="w-full px-5 py-4 flex items-center justify-between hover:bg-white/[0.04] transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class}`}>
@@ -1028,9 +1034,9 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                             </div>
                             <button
                               onClick={() => handleAddExercise(exercise, group.id)}
-                              className="p-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors ml-2"
-                              title="Aggiungi"
-                            >
+                            className="btn-primary rounded-xl p-2 transition-colors ml-2"
+                            title="Aggiungi"
+                          >
                               <Plus className="w-5 h-5 text-white" />
                             </button>
                           </div>
@@ -1052,7 +1058,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       {viewingExercise && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => { setViewingExercise(null); setEditingExerciseInModal(false); }}>
           <div 
-            className="bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
+            className="energy-panel rounded-[28px] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - compact */}
@@ -1224,7 +1230,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       {moveExerciseModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setMoveExerciseModal(null)}>
           <div
-            className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden"
+            className="energy-panel rounded-[28px] w-full max-w-md overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4">
@@ -1305,7 +1311,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       {duplicateError && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setDuplicateError(null)}>
           <div
-            className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden"
+            className="energy-panel rounded-[28px] w-full max-w-md overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
@@ -1337,6 +1343,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

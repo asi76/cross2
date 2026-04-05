@@ -1,11 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+html {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top left, rgba(166, 255, 0, 0.14), transparent 30%),
+    radial-gradient(circle at top right, rgba(255, 94, 20, 0.22), transparent 28%),
+    linear-gradient(180deg, #07111a 0%, #08131c 38%, #05080d 100%);
+}
+
 body {
-  background-color: #0f0f0f;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background: transparent;
   color: #ffffff;
   min-height: 100vh;
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+.display-font {
+  font-family: 'Barlow Condensed', 'Space Grotesk', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+::selection {
+  background: rgba(166, 255, 0, 0.28);
+  color: #f8fff0;
 }
 
 /* Dark scrollbar for groups and all overflow areas */
@@ -14,14 +44,152 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #27272a;
+  background: rgba(10, 16, 23, 0.9);
 }
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: rgba(132, 146, 166, 0.42);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: rgba(166, 255, 0, 0.4);
+}
+
+@layer components {
+  .app-shell {
+    position: relative;
+    min-height: 100vh;
+    color: #f7fafc;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(166, 255, 0, 0.09), transparent 24%),
+      radial-gradient(circle at 85% 8%, rgba(255, 94, 20, 0.18), transparent 24%),
+      linear-gradient(180deg, rgba(6, 12, 18, 0.92) 0%, rgba(6, 12, 18, 0.78) 100%);
+  }
+
+  .app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.7), transparent 85%);
+  }
+
+  .app-topbar {
+    background: rgba(7, 13, 20, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      radial-gradient(circle at top right, rgba(166, 255, 0, 0.16), transparent 28%),
+      radial-gradient(circle at bottom left, rgba(255, 94, 20, 0.2), transparent 32%),
+      linear-gradient(135deg, rgba(10, 20, 30, 0.95), rgba(11, 17, 25, 0.84));
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+  }
+
+  .hero-panel::after {
+    content: "";
+    position: absolute;
+    inset: auto -10% -35% 35%;
+    height: 220px;
+    background: radial-gradient(circle, rgba(255, 94, 20, 0.24), transparent 68%);
+    pointer-events: none;
+  }
+
+  .energy-panel,
+  .glass-card {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(12, 21, 31, 0.88), rgba(8, 13, 19, 0.88));
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(14px);
+  }
+
+  .action-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(140deg, rgba(16, 28, 40, 0.95), rgba(9, 14, 21, 0.92));
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .action-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(166, 255, 0, 0.24);
+    box-shadow: 0 22px 48px rgba(0, 0, 0, 0.3);
+  }
+
+  .action-card--primary {
+    background:
+      radial-gradient(circle at top right, rgba(166, 255, 0, 0.22), transparent 30%),
+      linear-gradient(135deg, rgba(255, 94, 20, 0.94), rgba(255, 120, 55, 0.82) 45%, rgba(17, 22, 30, 0.96));
+  }
+
+  .glass-btn {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .glass-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #ff5e14 0%, #ff7d3d 50%, #a6ff00 140%);
+    color: #091018;
+    font-weight: 700;
+    box-shadow: 0 14px 28px rgba(255, 94, 20, 0.24);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.04);
+  }
+
+  .btn-secondary {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    color: #e5edf5;
+  }
+
+  .input-shell {
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(8, 16, 24, 0.76);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .input-shell::placeholder {
+    color: rgba(190, 202, 217, 0.42);
+  }
+
+  .input-shell:focus {
+    outline: none;
+    border-color: rgba(166, 255, 0, 0.36);
+    box-shadow: 0 0 0 3px rgba(166, 255, 0, 0.1);
+  }
+
+  .section-kicker {
+    color: #a6ff00;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .stat-chip {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(233, 240, 247, 0.92);
+  }
 }
 
 /* Modal edit form - smaller elements */
@@ -41,12 +209,12 @@ body {
   width: 6px;
 }
 .modal-scroll::-webkit-scrollbar-track {
-  background: #27272a;
+  background: rgba(10, 16, 23, 0.8);
 }
 .modal-scroll::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: rgba(132, 146, 166, 0.42);
   border-radius: 3px;
 }
 .modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: rgba(166, 255, 0, 0.4);
 }
