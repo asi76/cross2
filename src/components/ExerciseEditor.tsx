@@ -77,25 +77,26 @@ export function ExerciseEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
+    <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className="bg-zinc-900 rounded-2xl border border-zinc-700 w-full max-w-lg max-h-[85vh] overflow-hidden shadow-2xl"
+        className="modal-shell w-full max-w-lg max-h-[85vh] overflow-hidden rounded-[28px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-          <h2 className="text-xl font-bold text-white">
+        <div className="modal-header flex items-center justify-between px-6 py-4">
+          <div>
+            <div className="section-kicker mb-1">Exercise Form</div>
+            <h2 className="display-font text-2xl uppercase text-white">
             {exercise ? 'Modifica Esercizio' : 'Nuovo Esercizio'}
-          </h2>
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="glass-btn rounded-xl p-2 transition-colors"
           >
             <X className="w-5 h-5 text-zinc-400" />
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(85vh-80px)] space-y-4">
           {/* Group */}
           <div>
@@ -103,7 +104,7 @@ export function ExerciseEditor({
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value as MuscleGroup)}
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="input-shell w-full rounded-xl px-4 py-2"
             >
               {groups.map(group => (
                 <option key={group.id} value={group.id}>{group.label}</option>
@@ -119,7 +120,7 @@ export function ExerciseEditor({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="es. Push-Ups"
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="input-shell w-full rounded-xl px-4 py-2"
             />
           </div>
 
@@ -131,7 +132,7 @@ export function ExerciseEditor({
               value={muscles}
               onChange={(e) => setMuscles(e.target.value)}
               placeholder="es. petto, spalle, tricipiti"
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="input-shell w-full rounded-xl px-4 py-2"
             />
           </div>
 
@@ -144,7 +145,7 @@ export function ExerciseEditor({
                 value={reps}
                 onChange={(e) => setReps(e.target.value)}
                 placeholder="es. 10"
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+                className="input-shell w-full rounded-xl px-4 py-2"
               />
             </div>
             <div>
@@ -154,7 +155,7 @@ export function ExerciseEditor({
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
                 placeholder="es. 30"
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+                className="input-shell w-full rounded-xl px-4 py-2"
               />
             </div>
           </div>
@@ -172,7 +173,7 @@ export function ExerciseEditor({
                       ? diff === 'beginner' ? 'bg-green-500 text-white'
                         : diff === 'intermediate' ? 'bg-yellow-500 text-white'
                         : 'bg-red-500 text-white'
-                      : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10'
                   }`}
                 >
                   {diff === 'beginner' ? 'Principiante' 
@@ -184,12 +185,11 @@ export function ExerciseEditor({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-zinc-800">
+        <div className="modal-footer flex items-center justify-between px-6 py-4">
           {exercise && onDelete ? (
             <button
               onClick={handleDelete}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+              className="btn-danger flex items-center gap-2 rounded-xl px-4 py-2 transition-colors"
             >
               <Trash2 className="w-4 h-4" />
               Elimina
@@ -199,7 +199,7 @@ export function ExerciseEditor({
           )}
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
+            className="btn-primary flex items-center gap-2 rounded-xl px-6 py-2 transition-colors"
           >
             <Save className="w-4 h-4" />
             Salva

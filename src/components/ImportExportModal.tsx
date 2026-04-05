@@ -262,31 +262,32 @@ export function ImportExportModal({ exercises = [], groups = [], onClose, onImpo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
+    <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-zinc-900 rounded-2xl border border-zinc-700 w-full max-w-lg overflow-hidden"
+        className="modal-shell w-full max-w-lg overflow-hidden rounded-[28px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+        <div className="modal-header flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-500/20 p-2 rounded-lg">
-              <FileText className="w-5 h-5 text-blue-400" />
+            <div className="rounded-xl bg-cyan-300/10 p-2">
+              <FileText className="w-5 h-5 text-cyan-200" />
             </div>
-            <h2 className="text-lg font-bold text-white">Import / Export</h2>
+            <div>
+              <div className="section-kicker mb-1">Data Transfer</div>
+              <h2 className="display-font text-2xl uppercase text-white">Import / Export</h2>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+            className="glass-btn rounded-xl p-2 transition-colors"
           >
             <X className="w-5 h-5 text-zinc-400" />
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-5 space-y-4">
           {status && (
-            <div className={`p-3 rounded-lg text-sm ${
+            <div className={`modal-section p-3 rounded-xl text-sm ${
               status.type === 'success' ? 'bg-green-500/20 text-green-400' :
               status.type === 'error' ? 'bg-red-500/20 text-red-400' :
               'bg-blue-500/20 text-blue-400'
@@ -305,7 +306,7 @@ export function ImportExportModal({ exercises = [], groups = [], onClose, onImpo
           <button
             onClick={exportAllExercises}
             disabled={isExportingAll || isExportingImages || isImportingExercises || isImportingImages}
-            className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="btn-primary flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isExportingAll ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
             Esporta Esercizi (ZIP completo)
@@ -322,24 +323,22 @@ export function ImportExportModal({ exercises = [], groups = [], onClose, onImpo
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isExportingAll || isExportingImages || isImportingExercises || isImportingImages}
-            className="w-full px-4 py-3 bg-green-600 hover:bg-green-500 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full rounded-xl border border-emerald-400/20 bg-emerald-400/15 px-4 py-3 text-white font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-400/20"
           >
             {isImportingExercises ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
             Importa Esercizi (ZIP)
           </button>
 
-          <div className="border-t border-zinc-700 pt-4">
-            {/* Export Images */}
+          <div className="modal-section rounded-2xl border-t-0 pt-4 px-4 pb-4">
             <button
               onClick={exportImages}
               disabled={isExportingAll || isExportingImages || isImportingExercises || isImportingImages}
-              className="w-full px-4 py-3 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2 mb-3"
+              className="w-full rounded-xl bg-orange-500 px-4 py-3 text-white font-medium transition-colors flex items-center justify-center gap-2 mb-3 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-400"
             >
               {isExportingImages ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
               Esporta Immagini (ZIP)
             </button>
 
-            {/* Import Images */}
             <input
               ref={imageZipInputRef}
               type="file"
@@ -350,7 +349,7 @@ export function ImportExportModal({ exercises = [], groups = [], onClose, onImpo
             <button
               onClick={() => imageZipInputRef.current?.click()}
               disabled={isExportingAll || isExportingImages || isImportingExercises || isImportingImages}
-              className="w-full px-4 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full rounded-xl bg-fuchsia-500/80 px-4 py-3 text-white font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-fuchsia-400"
             >
               {isImportingImages ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
               Importa Immagini (ZIP)

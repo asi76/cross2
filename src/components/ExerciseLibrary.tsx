@@ -565,16 +565,16 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     if (!showGroupSelector) return null;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-        <div className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-            <h2 className="text-lg font-bold text-white">Sposta esercizio</h2>
+      <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="modal-shell w-full max-w-md overflow-hidden rounded-[28px]">
+          <div className="modal-header flex items-center justify-between px-6 py-4">
+            <h2 className="display-font text-2xl uppercase text-white">Sposta esercizio</h2>
             <button
               onClick={() => {
                 setShowGroupSelector(null);
                 setMoveExerciseId(null);
               }}
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-2 transition-colors"
             >
               <X className="w-5 h-5 text-zinc-400" />
             </button>
@@ -584,7 +584,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
               <button
                 key={group.id}
                 onClick={() => moveExerciseId && moveExercise(moveExerciseId, group.id)}
-                className="w-full px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-left transition-colors"
+                className="modal-section w-full rounded-xl px-4 py-3 text-left transition-colors hover:bg-white/[0.06]"
               >
                 <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class || 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30'}`}>
                   {group.label || group.name}
@@ -602,16 +602,16 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     if (!showAddGroup) return null;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-        <div className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-            <h2 className="text-lg font-bold text-white">Aggiungi Gruppo</h2>
+      <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="modal-shell w-full max-w-md overflow-hidden rounded-[28px]">
+          <div className="modal-header flex items-center justify-between px-6 py-4">
+            <h2 className="display-font text-2xl uppercase text-white">Aggiungi gruppo</h2>
             <button
               onClick={() => {
                 setShowAddGroup(false);
                 setNewGroupName('');
               }}
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-2 transition-colors"
             >
               <X className="w-5 h-5 text-zinc-400" />
             </button>
@@ -622,7 +622,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
               placeholder="Nome del gruppo"
-              className="w-full px-4 py-3 bg-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="input-shell w-full rounded-xl px-4 py-3"
               onKeyDown={(e) => e.key === 'Enter' && addGroup()}
             />
             <div>
@@ -643,7 +643,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
             </div>
             <button
               onClick={addGroup}
-              className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
+              className="btn-primary w-full rounded-xl px-4 py-3 transition-colors"
             >
               Salva
             </button>
@@ -658,13 +658,13 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
     if (!editingGroup) return null;
 
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
-        <div className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-            <h2 className="text-lg font-bold text-white">Modifica Gruppo</h2>
+      <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="modal-shell w-full max-w-md overflow-hidden rounded-[28px]">
+          <div className="modal-header flex items-center justify-between px-6 py-4">
+            <h2 className="display-font text-2xl uppercase text-white">Modifica gruppo</h2>
             <button
               onClick={() => setEditingGroup(null)}
-              className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-2 transition-colors"
             >
               <X className="w-5 h-5 text-zinc-400" />
             </button>
@@ -675,7 +675,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
               value={editGroupName}
               onChange={(e) => setEditGroupName(e.target.value)}
               placeholder="Nome del gruppo"
-              className="w-full px-4 py-3 bg-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+              className="input-shell w-full rounded-xl px-4 py-3"
               onKeyDown={(e) => e.key === 'Enter' && saveEditGroup()}
             />
             <div>
@@ -696,7 +696,7 @@ export function ExerciseLibrary({ onBack }: ExerciseLibraryProps) {
             </div>
             <button
               onClick={saveEditGroup}
-              className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
+              className="btn-primary w-full rounded-xl px-4 py-3 transition-colors"
             >
               Salva
             </button>

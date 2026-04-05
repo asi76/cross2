@@ -38,6 +38,29 @@ const WORKOUT_CATEGORIES = [
   { id: 'cardio2', name: 'Cardio 2' }
 ];
 
+const HERO_MESSAGES = [
+  'Ogni scheda ben costruita accende una sessione piu feroce.',
+  'Spingi forte quando serve, recupera bene quando conta.',
+  'Disciplina quotidiana, energia da gara.',
+  'La costanza trasforma il piano in risultati reali.',
+  'Allenati con intenzione, non solo con intensita.',
+  'Ogni ripetizione pulita costruisce potenza utile.',
+  'La forma guida la forza, la forza guida il progresso.',
+  'Il workout migliore e quello che completi con presenza totale.',
+  'Recupero intelligente, esecuzione aggressiva.',
+  'Porta ritmo, precisione e fame in ogni blocco.',
+  'Le grandi performance iniziano da una routine solida.',
+  'Il corpo cambia quando la mente smette di negoziare.',
+  'Volume controllato, focus assoluto.',
+  'L energia cresce quando il piano e chiaro.',
+  'Ogni stazione e un test, ogni test e un upgrade.',
+  'Resistenza mentale prima, potenza fisica subito dopo.',
+  'Allenarsi bene oggi rende piu forte la settimana intera.',
+  'Meno caos, piu performance.',
+  'Costruisci slancio, poi difendilo ogni giorno.',
+  'Muoviti da atleta, pensa da professionista.'
+];
+
 function App() {
   const { user, role, loading, signOut } = useAuth();
   const {
@@ -61,6 +84,7 @@ function App() {
   const [viewingExerciseData, setViewingExerciseData] = useState<any>(null);
   const [viewingExerciseGif, setViewingExerciseGif] = useState<string | null>(null);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+  const [heroMessageIndex, setHeroMessageIndex] = useState(0);
 
   useEffect(() => {
     if (role === 'enabled' || role === 'admin') {
@@ -91,6 +115,14 @@ function App() {
       window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, [currentView]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setHeroMessageIndex((currentIndex) => (currentIndex + 1) % HERO_MESSAGES.length);
+    }, 6000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const handleStartWorkout = (workout: Workout) => {
     setActiveWorkout(workout);
@@ -309,11 +341,20 @@ function App() {
             <div className="max-w-2xl">
               <div className="section-kicker mb-3">Training Command Center</div>
               <h2 className="display-font text-4xl uppercase leading-[0.92] text-white sm:text-5xl">
-                Costruisci schede con un look piu atletico e una lettura piu rapida.
+                Crossplanner spinge il ritmo anche prima di iniziare il workout.
               </h2>
-              <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                Interfaccia piu moderna, ritmo visivo piu energico e focus immediato su workout, libreria e progressione.
-              </p>
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={heroMessageIndex}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35 }}
+                  className="mt-4 max-w-xl text-sm leading-6 text-slate-300 sm:text-base"
+                >
+                  {HERO_MESSAGES[heroMessageIndex]}
+                </motion.p>
+              </AnimatePresence>
             </div>
             <div className="grid grid-cols-3 gap-3 sm:min-w-[280px]">
               <div className="stat-chip rounded-2xl px-4 py-3">

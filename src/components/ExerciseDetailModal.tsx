@@ -335,16 +335,15 @@ export function ExerciseDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
+    <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div 
-        className="bg-zinc-900 rounded-2xl border border-zinc-700 w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl"
+        className="modal-shell w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-[32px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+        <div className="modal-header flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-blue-500" />
-            <h2 className="text-xl font-bold text-white">
+            <Target className="w-5 h-5 text-orange-300" />
+            <h2 className="display-font text-3xl uppercase text-white">
               {isEditing ? (propMode === 'create' ? 'Nuovo Esercizio' : 'Modifica Esercizio') : exercise.name}
             </h2>
           </div>
@@ -353,14 +352,14 @@ export function ExerciseDetailModal({
               <>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="btn-secondary rounded-xl px-4 py-2 text-sm font-medium transition-colors"
                 >
                   Annulla
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5"
+                  className="btn-primary flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-4 h-4" />
                   {isSaving ? 'Salvataggio...' : 'Salva'}
@@ -369,7 +368,7 @@ export function ExerciseDetailModal({
             )}
             <button
               onClick={onClose}
-              className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors"
+              className="glass-btn rounded-xl p-1.5 transition-colors"
             >
               <X className="w-4 h-4 text-zinc-400" />
             </button>
@@ -379,7 +378,7 @@ export function ExerciseDetailModal({
         {/* Content - Two columns on desktop, stacked on mobile portrait */}
         <div className="flex flex-col md:flex-row h-[calc(85vh-80px)]">
           {/* Left - GIF + Upload Area */}
-          <div className={`bg-zinc-900 flex flex-col p-4 ${isEditing ? 'md:w-full' : 'md:w-1/2'} flex-1`}>
+          <div className={`flex flex-col p-4 ${isEditing ? 'md:w-full' : 'md:w-1/2'} flex-1`}>
             {/* GIF Display */}
             <div className="flex-1 flex items-center justify-center min-h-[200px]">
               {localGifUrl && !imageError ? (
@@ -395,7 +394,7 @@ export function ExerciseDetailModal({
                   <button
                     onClick={handleDeleteGif}
                     disabled={isDeleting}
-                    className="absolute top-2 right-2 p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors"
+                    className="btn-danger absolute top-2 right-2 rounded-xl p-2 transition-colors"
                     title="Elimina GIF"
                   >
                     {isDeleting ? (
@@ -423,20 +422,17 @@ export function ExerciseDetailModal({
             {/* Search & Upload Area */}
             <div className="mt-4 space-y-3">
               {/* Search GIF Button */}
-              <button
-                onClick={searchGif}
-                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
+              <button onClick={searchGif} className="btn-primary flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-colors">
                 <Search className="w-4 h-4" />
                 Cerca GIF su Google Immagini
               </button>
 
               {/* Drag & Drop Zone */}
               <div
-                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                className={`modal-section border-2 border-dashed rounded-2xl p-6 text-center transition-colors ${
                   isDragging
                     ? 'border-blue-400 bg-blue-500/10'
-                    : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50'
+                    : 'border-white/10 hover:border-white/20'
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -466,7 +462,7 @@ export function ExerciseDetailModal({
                     </p>
                     <button
                       onClick={openFilePicker}
-                      className="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                      className="btn-secondary mx-auto flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
                     >
                       <Image className="w-4 h-4" />
                       Sfoglia
@@ -479,7 +475,7 @@ export function ExerciseDetailModal({
 
             {/* Edit Form - shown BELOW drag-drop on mobile portrait in edit mode */}
             {isEditing && (
-              <div className="mt-4 p-4 bg-zinc-900/50 rounded-xl border border-zinc-800 overflow-y-auto modal-scroll max-h-[40vh] md:hidden">
+              <div className="modal-section mt-4 max-h-[40vh] overflow-y-auto rounded-2xl p-4 modal-scroll md:hidden">
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-zinc-400 mb-1">Gruppo</label>
@@ -491,7 +487,7 @@ export function ExerciseDetailModal({
                           onMoveGroup(exercise.id, e.target.value);
                         }
                       }}
-                      className="w-full px-3 py-2 bg-zinc-800 text-white border border-zinc-700 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+                      className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                     >
                       {groups.map(g => (
                         <option key={g.id} value={g.id}>{g.label || g.name}</option>
@@ -504,7 +500,7 @@ export function ExerciseDetailModal({
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                       placeholder="Nome esercizio"
                     />
                   </div>
@@ -514,7 +510,7 @@ export function ExerciseDetailModal({
                       type="text"
                       value={editMuscles}
                       onChange={(e) => setEditMuscles(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                       placeholder="Chest, Shoulders"
                     />
                   </div>
@@ -525,7 +521,7 @@ export function ExerciseDetailModal({
                         type="number"
                         value={editReps}
                         onChange={(e) => setEditReps(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                        className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                         placeholder="12"
                       />
                     </div>
@@ -535,7 +531,7 @@ export function ExerciseDetailModal({
                         type="number"
                         value={editDuration}
                         onChange={(e) => setEditDuration(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                        className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                         placeholder="30"
                       />
                     </div>
@@ -571,7 +567,7 @@ export function ExerciseDetailModal({
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
                       rows={3}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm resize-none"
+                    className="input-shell w-full rounded-xl px-3 py-2 text-sm resize-none"
                       placeholder="Descrizione esercizio..."
                     />
                   </div>
@@ -581,7 +577,7 @@ export function ExerciseDetailModal({
           </div>
 
           {/* Right - Description / Edit Form - hidden on mobile in edit mode, shown on desktop or view mode */}
-          <div className={`hidden md:block md:w-1/2 p-6 overflow-y-auto modal-scroll ${isEditing ? 'md:border-l md:border-zinc-800' : ''}`}>
+          <div className={`hidden md:block md:w-1/2 p-6 overflow-y-auto modal-scroll ${isEditing ? 'md:border-l md:border-white/6' : ''}`}>
             {isEditing ? (
               /* Edit/Create Form - original compact style with group at top */
               <div className="modal-edit-form space-y-3">
@@ -596,7 +592,7 @@ export function ExerciseDetailModal({
                         onMoveGroup(exercise.id, e.target.value);
                       }
                     }}
-                    className="w-full px-3 py-2 bg-zinc-800 text-white border border-zinc-700 rounded-lg focus:outline-none focus:border-blue-500 text-sm"
+                    className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                   >
                     {groups.map(g => (
                       <option key={g.id} value={g.id}>{g.label || g.name}</option>
@@ -609,7 +605,7 @@ export function ExerciseDetailModal({
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                    className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                     placeholder="Nome esercizio"
                   />
                 </div>
@@ -619,7 +615,7 @@ export function ExerciseDetailModal({
                     type="text"
                     value={editMuscles}
                     onChange={(e) => setEditMuscles(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                    className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                     placeholder="Chest, Shoulders"
                   />
                 </div>
@@ -630,7 +626,7 @@ export function ExerciseDetailModal({
                       type="number"
                       value={editReps}
                       onChange={(e) => setEditReps(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                       placeholder="12"
                     />
                   </div>
@@ -640,7 +636,7 @@ export function ExerciseDetailModal({
                       type="number"
                       value={editDuration}
                       onChange={(e) => setEditDuration(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 text-sm"
+                      className="input-shell w-full rounded-xl px-3 py-2 text-sm"
                       placeholder="30"
                     />
                   </div>
@@ -676,7 +672,7 @@ export function ExerciseDetailModal({
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none text-sm"
+                    className="input-shell w-full rounded-xl px-3 py-2 resize-none text-sm"
                     placeholder="Descrizione..."
                   />
                 </div>
@@ -739,10 +735,10 @@ export function ExerciseDetailModal({
                 </div>
 
                 {/* Edit and Move Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-800">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/6">
                   <button
                     onClick={() => setShowGroupSelector(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-base transition-colors"
+                    className="btn-secondary flex items-center gap-2 rounded-xl px-4 py-2.5 text-base transition-colors"
                   >
                     <ArrowRightLeft className="w-5 h-5" />
                     Sposta Gruppo
@@ -752,7 +748,7 @@ export function ExerciseDetailModal({
                       setIsEditing(true);
                       if (onEdit) onEdit();
                     }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-base transition-colors"
+                    className="btn-primary flex items-center gap-2 rounded-xl px-4 py-2.5 text-base transition-colors"
                   >
                     <Edit3 className="w-5 h-5" />
                     Modifica
@@ -766,13 +762,13 @@ export function ExerciseDetailModal({
 
       {/* Group Selector Modal */}
       {showGroupSelector && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80">
-          <div className="bg-zinc-900 rounded-2xl border border-zinc-700 w-full max-w-md overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-              <h2 className="text-lg font-bold text-white">Sposta esercizio</h2>
+        <div className="modal-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="modal-shell w-full max-w-md overflow-hidden rounded-[28px]">
+            <div className="modal-header flex items-center justify-between px-6 py-4">
+              <h2 className="display-font text-2xl uppercase text-white">Sposta esercizio</h2>
               <button
                 onClick={() => setShowGroupSelector(false)}
-                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                className="glass-btn rounded-xl p-2 transition-colors"
               >
                 <X className="w-5 h-5 text-zinc-400" />
               </button>
@@ -787,8 +783,8 @@ export function ExerciseDetailModal({
                     }
                     setShowGroupSelector(false);
                   }}
-                  className="w-full px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-left transition-colors"
-                >
+                className="modal-section w-full rounded-xl px-4 py-3 text-left transition-colors hover:bg-white/[0.06]"
+              >
                   <span className={`px-3 py-1 rounded text-sm font-semibold border ${group.color_class}`}>
                     {group.label || group.name}
                   </span>

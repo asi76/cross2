@@ -167,17 +167,17 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50"
+            className="modal-backdrop fixed inset-0 flex items-center justify-center p-4 z-50"
             onClick={handleCloseModal}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="energy-panel rounded-[28px] p-6 w-full max-w-md"
+              className="modal-shell rounded-[28px] p-6 w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="modal-header -mx-6 -mt-6 mb-6 flex items-center justify-between px-6 py-4">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <User className="w-5 h-5 text-orange-300" />
                   Request Access

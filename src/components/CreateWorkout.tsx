@@ -1056,22 +1056,22 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
 
       {/* View-Only Exercise Modal */}
       {viewingExercise && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => { setViewingExercise(null); setEditingExerciseInModal(false); }}>
+        <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { setViewingExercise(null); setEditingExerciseInModal(false); }}>
           <div 
             className="energy-panel rounded-[28px] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - compact */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 shrink-0">
+            <div className="modal-header flex items-center justify-between px-4 py-3 shrink-0">
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-blue-500" />
-                <h2 className="text-base font-semibold text-white">
+                <Target className="w-4 h-4 text-orange-300" />
+                <h2 className="display-font text-2xl uppercase text-white">
                   {editingExerciseInModal ? 'Modifica Esercizio' : viewingExercise.name}
                 </h2>
               </div>
               <button
                 onClick={() => { setViewingExercise(null); setEditingExerciseInModal(false); }}
-                className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors"
+                className="glass-btn rounded-xl p-1.5 transition-colors"
               >
                 <X className="w-4 h-4 text-zinc-400" />
               </button>
@@ -1228,21 +1228,21 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
       )}
       {/* Move Exercise Modal */}
       {moveExerciseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setMoveExerciseModal(null)}>
+        <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setMoveExerciseModal(null)}>
           <div
-            className="energy-panel rounded-[28px] w-full max-w-md overflow-hidden"
+            className="modal-shell rounded-[28px] w-full max-w-md overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-4">
+            <div className="modal-header flex items-center justify-between px-5 py-4">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-500/20 p-2 rounded-lg">
                   <ArrowRightLeft className="w-5 h-5 text-blue-400" />
                 </div>
-                <h2 className="text-lg font-bold text-white">Sposta esercizio</h2>
+                <h2 className="display-font text-2xl uppercase text-white">Sposta esercizio</h2>
               </div>
               <button
                 onClick={() => setMoveExerciseModal(null)}
-                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                className="glass-btn rounded-xl p-2 transition-colors"
               >
                 <X className="w-5 h-5 text-zinc-400" />
               </button>
@@ -1253,10 +1253,10 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                 <button
                   key={cat.id}
                   onClick={() => handleMoveExercise(cat.id)}
-                  className={`w-full px-4 py-3 rounded-lg text-left font-medium transition-colors ${
+                  className={`w-full px-4 py-3 rounded-xl text-left font-medium transition-colors ${
                     cat.id === moveExerciseModal.fromCategory
                       ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-500 text-white'
+                      : 'btn-primary'
                   }`}
                   disabled={cat.id === moveExerciseModal.fromCategory}
                 >
@@ -1309,21 +1309,21 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
 
       {/* Duplicate Error Modal */}
       {duplicateError && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={() => setDuplicateError(null)}>
+        <div className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setDuplicateError(null)}>
           <div
-            className="energy-panel rounded-[28px] w-full max-w-md overflow-hidden"
+            className="modal-shell rounded-[28px] w-full max-w-md overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+            <div className="modal-header flex items-center justify-between px-5 py-4">
               <div className="flex items-center gap-3">
                 <div className="bg-red-500/20 p-2 rounded-lg">
                   <X className="w-5 h-5 text-red-400" />
                 </div>
-                <h2 className="text-lg font-bold text-white">Esercizio gia inserito</h2>
+                <h2 className="display-font text-2xl uppercase text-white">Esercizio gia inserito</h2>
               </div>
               <button
                 onClick={() => setDuplicateError(null)}
-                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                className="glass-btn rounded-xl p-2 transition-colors"
               >
                 <X className="w-5 h-5 text-zinc-400" />
               </button>
@@ -1332,10 +1332,10 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               <p className="text-zinc-300 mb-2">L'esercizio <span className="text-white font-medium">{duplicateError}</span> e' gia presente in una delle tre tabelle.</p>
               <p className="text-zinc-500 text-sm">Rimuovi prima l'esercizio esistente per aggiungerlo a questa tabella.</p>
             </div>
-            <div className="px-5 py-4 flex justify-end">
+            <div className="modal-footer flex justify-end px-5 py-4">
               <button
                 onClick={() => setDuplicateError(null)}
-                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-medium rounded-lg transition-colors"
+                className="btn-danger rounded-xl px-4 py-2 font-medium transition-colors"
               >
                 Chiudi
               </button>
