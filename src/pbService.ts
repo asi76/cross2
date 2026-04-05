@@ -2,12 +2,44 @@ import PocketBase from 'pocketbase';
 
 // PocketBase connection
 const PB_URL = import.meta.env.VITE_POCKETBASE_URL || 'https://pb.fitness.asigo.cc';
+const LEGACY_PB_URLS = [
+  'https://pb.asigo.cc',
+];
 
 // Create a single PocketBase instance
 export const pb = new PocketBase(PB_URL);
 
 // Helper to convert PocketBase record to object with id
 const recordToObj = (record: any) => ({ id: record.id, ...record });
+
+export const normalizeGifUrl = (url?: string | null) => {
+  if (!url) return null;
+
+  const trimmedUrl = url.trim();
+  if (!trimmedUrl) return null;
+
+  try {
+    const parsedUrl = new URL(trimmedUrl);
+    const isPocketBaseFile = parsedUrl.pathname.startsWith('/api/files/');
+    const isLegacyHost = LEGACY_PB_URLS.includes(parsedUrl.origin);
+
+    if (isPocketBaseFile && isLegacyHost) {
+      return `${PB_URL}${parsedUrl.pathname}${parsedUrl.search}`;
+    }
+
+    return trimmedUrl;
+  } catch {
+    return trimmedUrl;
+  }
+};
+
+const gifMappingToObj = (record: any) => {
+  const mapping = recordToObj(record);
+  return {
+    ...mapping,
+    gifUrl: normalizeGifUrl(mapping.gifUrl),
+  };
+};
 
 // ============ GROUPS (exercise_groups) ============
 export const getGroups = async () => {
@@ -118,7 +150,7 @@ export const getGifMapping = async (exerciseId: string) => {
       filter: `exerciseId = '${exerciseId}'`,
     });
     if (records.length > 0) {
-      return recordToObj(records[0]);
+      return gifMappingToObj(records[0]);
     }
     return null;
   } catch {
@@ -131,7 +163,7 @@ export const getGifMappings = async () => {
     return cachedGifMappings;
   }
   const records = await pb.collection('gif_mappings').getFullList();
-  cachedGifMappings = records.map(recordToObj);
+  cachedGifMappings = records.map(gifMappingToObj);
   return cachedGifMappings;
 };
 
@@ -140,6 +172,8 @@ export const clearGifMappingsCache = () => {
 };
 
 export const setGifMapping = async (exerciseId: string, gifUrl: string) => {
+  const normalizedGifUrl = normalizeGifUrl(gifUrl) || '';
+
   // Find existing
   const existing = await pb.collection('gif_mappings').getFullList({
     filter: `exerciseId = '${exerciseId}'`,
@@ -147,12 +181,12 @@ export const setGifMapping = async (exerciseId: string, gifUrl: string) => {
   
   if (existing.length > 0) {
     await pb.collection('gif_mappings').update(existing[0].id, {
-      gifUrl: gifUrl,
+      gifUrl: normalizedGifUrl,
     });
   } else {
     await pb.collection('gif_mappings').create({
       exerciseId: exerciseId,
-      gifUrl: gifUrl,
+      gifUrl: normalizedGifUrl,
     });
   }
   clearGifMappingsCache();
