@@ -359,10 +359,10 @@ function App() {
       </div>
 
       <div className="max-w-4xl mx-auto p-4">
-        <section className="hero-panel rounded-[32px] p-6 sm:p-8 mb-6">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <section className="hero-panel rounded-[32px] p-5 sm:p-6 mb-6">
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <div className="section-kicker mb-3">Training Command Center</div>
+              <div className="section-kicker mb-2">Training Command Center</div>
               <AnimatePresence mode="wait">
                 <motion.h2
                   key={`headline-${heroMessageIndex}`}
@@ -370,7 +370,7 @@ function App() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.35 }}
-                  className="display-font text-3xl uppercase leading-[0.94] text-white sm:text-[2.7rem]"
+                  className="display-font text-2xl uppercase leading-[0.96] text-white sm:text-[2.15rem]"
                 >
                   {HERO_HEADLINES[heroMessageIndex]}
                 </motion.h2>
