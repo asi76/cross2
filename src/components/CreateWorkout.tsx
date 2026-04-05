@@ -237,7 +237,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
               </button>
               <div className="flex flex-wrap gap-1 mt-1">
                 {exerciseGroup && exerciseData?.muscleGroup !== 'non-assegnati' && (
-                  <span key="group" className={`text-xs px-1.5 py-0.5 rounded border capitalize ${getGroupColor(exerciseGroup.name)}`}>
+                  <span key="group" className={`text-xs px-1.5 py-0.5 rounded border capitalize ${exerciseGroup.color_class || getGroupColor(exerciseGroup.name)}`}>
                     {groupLabel}
                   </span>
                 )}
@@ -946,7 +946,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                         </div>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {group && exercise.muscleGroup !== 'non-assegnati' && (
-                            <span key="group" className={`px-2 py-0.5 rounded text-xs border capitalize ${getGroupColor(group.name)}`}>
+                            <span key="group" className={`px-2 py-0.5 rounded text-xs border capitalize ${group.color_class || getGroupColor(group.name)}`}>
                               {group.label || group.name}
                             </span>
                           )}
@@ -1023,7 +1023,7 @@ export function CreateWorkout({ onBack, onSave, editWorkout }: CreateWorkoutProp
                               </div>
                               <div className="flex flex-wrap gap-1 mt-1">
                                 {displayGroup && exercise.muscleGroup !== 'non-assegnati' && (
-                                  <span key="group" className={`px-2 py-0.5 rounded text-xs border capitalize ${getGroupColor(displayGroup.name)}`}>
+                                  <span key="group" className={`px-2 py-0.5 rounded text-xs border capitalize ${displayGroup.color_class || getGroupColor(displayGroup.name)}`}>
                                     {displayGroup.label || displayGroup.name}
                                   </span>
                                 )}

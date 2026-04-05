@@ -600,7 +600,7 @@ function App() {
                                   </span>
                                   <div className="flex flex-wrap gap-1 mt-1">
                                     {exerciseGroup && exerciseData?.muscleGroup !== 'non-assegnati' && (
-                                      <span key="group" className={`px-2 py-0.5 rounded text-xs border capitalize ${getGroupColor(exerciseGroup.name)}`}>
+                                      <span key="group" className={`px-2 py-0.5 rounded text-xs border capitalize ${exerciseGroup.color_class || getGroupColor(exerciseGroup.name)}`}>
                                         {exerciseGroup.label || exerciseGroup.name}
                                       </span>
                                     )}
@@ -674,7 +674,7 @@ function App() {
                     <h3 className="text-sm font-medium text-zinc-400 mb-2">Gruppo</h3>
                     <div className="flex flex-wrap gap-2">
                       {viewingExerciseGroup && viewingExerciseData?.muscleGroup !== 'non-assegnati' && (
-                        <span className={`px-2 py-1 rounded text-sm border capitalize ${getGroupColor(viewingExerciseGroup.name)}`}>
+                        <span className={`px-2 py-1 rounded text-sm border capitalize ${viewingExerciseGroup.color_class || getGroupColor(viewingExerciseGroup.name)}`}>
                           {viewingExerciseGroup.label || viewingExerciseGroup.name}
                         </span>
                       )}
