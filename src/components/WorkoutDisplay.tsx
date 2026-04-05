@@ -7,12 +7,12 @@ import {
   SkipForward,
   Volume2,
   VolumeX,
-  Dumbbell,
   X,
   Check
 } from 'lucide-react';
 import { Workout } from '../data/types';
 import { getExerciseById } from '../data/exercises';
+import { BrandMark } from './BrandMark';
 
 interface WorkoutDisplayProps {
   workout: Workout;
@@ -371,7 +371,7 @@ export const WorkoutDisplay = ({ workout, onComplete, onExit }: WorkoutDisplayPr
               const exData = getExerciseById(ex.exerciseId);
               return (
                 <div key={ex.exerciseId} className="flex items-center gap-3 text-gray-300">
-                  <Dumbbell className="w-5 h-5 text-orange-300" />
+                  <BrandMark className="w-5 h-5" />
                   <span className="text-base font-medium">{exData?.name}</span>
                   <span className="text-gray-600">•</span>
                   <span className="text-base">{ex.sets} × {ex.reps}</span>

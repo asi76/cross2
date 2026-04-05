@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Dumbbell, 
   Plus, 
   Library, 
   Save, 
@@ -29,6 +28,7 @@ import { NotificationModal } from './components/NotificationModal';
 import { Workout } from './data/types';
 import { createWorkout } from './pbService';
 import { getGifUrl } from './data/gifMapping';
+import { BrandMark } from './components/BrandMark';
 
 type View = 'home' | 'create' | 'library' | 'workout' | 'admin';
 
@@ -234,7 +234,7 @@ function App() {
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         >
-          <Dumbbell className="w-12 h-12 text-lime-300" />
+          <BrandMark className="w-12 h-12" />
         </motion.div>
       </div>
     );
@@ -258,7 +258,7 @@ function App() {
           onClick={() => setCurrentView('home')}
           className="fixed bottom-4 left-4 flex items-center gap-2 px-4 py-2 bg-dark-card rounded-lg text-gray-400 hover:text-white transition-colors"
         >
-          <Dumbbell className="w-5 h-5" />
+          <BrandMark className="w-5 h-5" />
           Back to App
         </button>
       </div>
@@ -311,7 +311,7 @@ function App() {
             <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5 shadow-lg shadow-black/20">
-                <Dumbbell className="w-6 h-6 text-lime-300" />
+                <BrandMark className="w-6 h-6" />
               </div>
               <div>
                 <h1 className="display-font text-[1.6rem] font-bold uppercase leading-none text-white">Crossplanner</h1>
@@ -452,7 +452,9 @@ function App() {
 
         {savedWorkouts.length === 0 ? (
           <div className="energy-panel rounded-[28px] p-8 text-center">
-            <Dumbbell className="w-12 h-12 text-white/30 mx-auto mb-4" />
+            <div className="mx-auto mb-4 w-12 h-12 opacity-60">
+              <BrandMark className="w-12 h-12" />
+            </div>
             <p className="display-font text-2xl uppercase text-white mb-2">Nessuna scheda salvata</p>
             <p className="text-slate-400 text-sm mb-4">Crea la tua prima struttura di allenamento.</p>
             <button
@@ -657,7 +659,9 @@ function App() {
                   />
                 ) : (
                   <div className="text-zinc-500 text-center">
-                    <Dumbbell className="w-16 h-16 mx-auto mb-2 opacity-50" />
+                    <div className="mx-auto mb-2 h-16 w-16 opacity-50">
+                      <BrandMark className="w-16 h-16" />
+                    </div>
                     <p className="text-sm">Nessuna immagine</p>
                   </div>
                 )}

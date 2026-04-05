@@ -5,7 +5,9 @@ import {
   signInWithGoogle, 
   logOut, 
   createPendingUser,
+  createPendingAccessRequest,
   ADMIN_EMAIL,
+  APP_ACCESS_SLUG,
   auth,
   getUserRole as getUserRoleFromFirebase
 } from '../firebase/auth';
@@ -18,6 +20,8 @@ interface UseAuthReturn {
   role: UserRole;
   loading: boolean;
   signIn: (requestEmail?: string, requestMessage?: string) => Promise<void>;
+  chooseGoogleAccountForRequest: () => Promise<{ email: string; name: string; photoURL: string | null }>;
+  submitAccessRequest: (payload: { email: string; name?: string; photoURL?: string | null; message: string }) => Promise<{ emailSent: boolean }>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
 }
@@ -29,6 +33,10 @@ async function getUserRole(email: string): Promise<'enabled' | 'pending' | null>
       filter: `email = '${email.toLowerCase()}'`,
     });
     if (records.length > 0) {
+      const apps = Array.isArray(records[0].apps) ? records[0].apps : [];
+      if (apps.length > 0 && !apps.includes(APP_ACCESS_SLUG)) {
+        return null;
+      }
       return records[0].role || 'pending';
     }
     return null;
@@ -48,12 +56,14 @@ async function saveUserToPocketBase(email: string, role: string, extraData: any 
     if (existing.length > 0) {
       await pb.collection('user_profiles').update(existing[0].id, {
         role,
+        apps: Array.from(new Set([...(Array.isArray(existing[0].apps) ? existing[0].apps : []), APP_ACCESS_SLUG])),
         ...extraData
       });
     } else {
       await pb.collection('user_profiles').create({
         email: email.toLowerCase(),
         role,
+        apps: [APP_ACCESS_SLUG],
         name: extraData.name || '',
         ...extraData
       });
@@ -126,17 +136,13 @@ export const useAuth = (): UseAuthReturn => {
 
   const signIn = async (requestEmail?: string, requestMessage?: string) => {
     try {
-      // If email and message provided (Request Access flow), save pending request to PocketBase BEFORE auth
+      // Legacy request-access path. New UI uses submitAccessRequest + chooseGoogleAccountForRequest.
       if (requestEmail && requestMessage) {
-        try {
-          await saveUserToPocketBase(requestEmail, 'pending', {
-            name: requestEmail.split('@')[0],
-            message: requestMessage,
-            requestedAt: new Date().toISOString()
-          });
-        } catch (e) {
-          console.error('Error saving pending request:', e);
-        }
+        await createPendingAccessRequest({
+          email: requestEmail,
+          name: requestEmail.split('@')[0],
+          message: requestMessage
+        });
       }
       
       const firebaseUser = await signInWithGoogle();
@@ -170,6 +176,29 @@ export const useAuth = (): UseAuthReturn => {
     }
   };
 
+  const chooseGoogleAccountForRequest = async () => {
+    const firebaseUser = await signInWithGoogle(true);
+    const selected = {
+      email: firebaseUser.email || '',
+      name: firebaseUser.displayName || '',
+      photoURL: firebaseUser.photoURL || null,
+    };
+
+    await logOut();
+    setUser(null);
+    setRole(null);
+
+    if (!selected.email) {
+      throw new Error('Nessun account Google valido selezionato');
+    }
+
+    return selected;
+  };
+
+  const submitAccessRequest = async (payload: { email: string; name?: string; photoURL?: string | null; message: string }) => {
+    return createPendingAccessRequest(payload);
+  };
+
   const signOut = async () => {
     await logOut();
     setUser(null);
@@ -182,5 +211,5 @@ export const useAuth = (): UseAuthReturn => {
     }
   };
 
-  return { user, role, loading, signIn, signOut, refreshRole };
+  return { user, role, loading, signIn, chooseGoogleAccountForRequest, submitAccessRequest, signOut, refreshRole };
 };

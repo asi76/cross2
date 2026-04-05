@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dumbbell, Loader2, X, Send, User } from 'lucide-react';
+import { Loader2, X, Send, User, Mail } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { BrandMark } from './BrandMark';
 
 interface LoginProps {
   isPendingUser?: boolean;
@@ -9,10 +10,14 @@ interface LoginProps {
 }
 
 export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
-  const { signIn, loading } = useAuth();
+  const { signIn, chooseGoogleAccountForRequest, submitAccessRequest, loading } = useAuth();
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestEmail, setRequestEmail] = useState('');
   const [requestMessage, setRequestMessage] = useState('');
+  const [requestName, setRequestName] = useState('');
+  const [requestPhotoUrl, setRequestPhotoUrl] = useState<string | null>(null);
+  const [isSelectingAccount, setIsSelectingAccount] = useState(false);
+  const [requestStatus, setRequestStatus] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -27,18 +32,39 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
   };
 
   const handleSubmitRequest = async () => {
-    if (requestEmail.trim() && requestMessage.trim()) {
-      // Save pending request to Firestore BEFORE auth
-      await signIn(requestEmail, requestMessage);
-      setShowRequestModal(false);
+    if (!requestEmail.trim() || !requestMessage.trim()) return;
+
+    try {
+      setRequestStatus('Invio richiesta in corso...');
+      const result = await submitAccessRequest({
+        email: requestEmail,
+        name: requestName,
+        photoURL: requestPhotoUrl,
+        message: requestMessage,
+      });
+      setRequestStatus(
+        result.emailSent
+          ? 'Richiesta salvata e inviata via email all’amministratore.'
+          : 'Richiesta salvata e visibile nel pannello admin, ma l’email non è stata inviata.'
+      );
+      if (result.emailSent) {
+        setShowRequestModal(false);
+      }
       setRequestEmail('');
+      setRequestName('');
+      setRequestPhotoUrl(null);
       setRequestMessage('');
+    } catch (error) {
+      console.error('Request access failed:', error);
+      setRequestStatus('Errore nel salvataggio della richiesta.');
     }
   };
 
   const handleCloseModal = () => {
     setShowRequestModal(false);
     setRequestEmail('');
+    setRequestName('');
+    setRequestPhotoUrl(null);
     setRequestMessage('');
   };
 
@@ -49,12 +75,28 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
     setShowRequestModal(true);
   };
 
+  const handleChooseGoogleAccount = async () => {
+    try {
+      setIsSelectingAccount(true);
+      setRequestStatus(null);
+      const selected = await chooseGoogleAccountForRequest();
+      setRequestEmail(selected.email);
+      setRequestName(selected.name);
+      setRequestPhotoUrl(selected.photoURL);
+    } catch (error) {
+      console.error('Google account selection failed:', error);
+      setRequestStatus('Selezione account annullata o non riuscita.');
+    } finally {
+      setIsSelectingAccount(false);
+    }
+  };
+
   return (
     <div className="app-shell">
       <div className="sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="app-topbar flex items-center gap-3 rounded-[28px] px-4 py-4">
-            <Dumbbell className="w-6 h-6 text-lime-300" />
+            <BrandMark className="w-6 h-6" />
             <h1 className="display-font text-2xl uppercase text-white">Crossplanner</h1>
           </div>
         </div>
@@ -99,7 +141,7 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
               transition={{ delay: 0.2, type: 'spring' }}
               className="rounded-full border border-white/10 bg-white/5 p-4 mb-4"
             >
-              <Dumbbell className="w-12 h-12 text-orange-300" />
+              <BrandMark className="w-12 h-12" />
             </motion.div>
             <h1 className="display-font text-4xl uppercase text-white mb-2">Crossplanner</h1>
             <p className="text-slate-400 text-center">Accedi per entrare nella tua area workout.</p>
@@ -194,15 +236,35 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
                 Write a message to the administrator explaining why you should have access to the Crossplanner app.
               </p>
 
-              <div className="mb-4">
-                <label className="block text-gray-400 text-sm mb-2">Your Google Email</label>
-                <input
-                  type="email"
-                  value={requestEmail}
-                  onChange={(e) => setRequestEmail(e.target.value)}
-                  placeholder="your.email@gmail.com"
-                  className="input-shell w-full rounded-xl p-4"
-                />
+              <div className="modal-section mb-4 rounded-2xl p-4">
+                <label className="mb-2 block text-sm text-gray-400">Account Google per la richiesta</label>
+                <button
+                  onClick={handleChooseGoogleAccount}
+                  disabled={isSelectingAccount}
+                  className="btn-secondary flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 transition-colors disabled:opacity-50"
+                >
+                  {isSelectingAccount ? <Loader2 className="h-5 w-5 animate-spin" /> : <Mail className="h-4 w-4" />}
+                  {requestEmail ? 'Cambia account Google' : 'Scegli account Google'}
+                </button>
+                <div className="mt-3 rounded-xl border border-white/6 bg-black/20 px-4 py-3 text-sm text-gray-300">
+                  {requestEmail ? (
+                    <div className="flex items-center gap-3">
+                      {requestPhotoUrl ? (
+                        <img src={requestPhotoUrl} alt={requestEmail} className="h-8 w-8 rounded-full object-cover" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs text-white">
+                          {(requestName || requestEmail).charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-white">{requestName || 'Account Google selezionato'}</div>
+                        <div className="text-white/55">{requestEmail}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-white/45">Nessun account selezionato.</span>
+                  )}
+                </div>
               </div>
 
               <textarea
@@ -211,6 +273,12 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
                 placeholder="Hi, I would like to request access to the Crossplanner app because..."
                 className="input-shell mb-4 h-32 w-full resize-none rounded-xl p-4"
               />
+
+              {requestStatus && (
+                <div className="mb-4 rounded-xl border border-white/6 bg-white/5 px-4 py-3 text-sm text-white/75">
+                  {requestStatus}
+                </div>
+              )}
 
               <div className="flex gap-3">
                 <button
@@ -221,7 +289,7 @@ export const Login = ({ isPendingUser, pendingEmail }: LoginProps) => {
                 </button>
                 <button
                   onClick={handleSubmitRequest}
-                  disabled={!requestEmail.trim() || !requestMessage.trim() || loading}
+                  disabled={!requestEmail.trim() || !requestMessage.trim() || loading || isSelectingAccount}
                   className="btn-primary flex-1 rounded-xl py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (

@@ -19,6 +19,7 @@ import {
   rejectUser, 
   removeUser 
 } from '../firebase/auth';
+import { BrandMark } from './BrandMark';
 
 interface PendingUser {
   id: string;
@@ -110,30 +111,33 @@ export const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-bg p-4 md:p-8">
+    <div className="app-shell min-h-screen p-4 md:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto"
       >
-        <div className="flex items-center gap-3 mb-8">
-          <div className="bg-blue-500/20 p-3 rounded-lg">
-            <Shield className="w-8 h-8 text-blue-500" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-            <p className="text-gray-400">Manage user access</p>
+        <div className="hero-panel mb-8 rounded-[32px] px-6 py-6">
+          <div className="flex items-center gap-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+              <BrandMark className="h-10 w-10" />
+            </div>
+            <div>
+              <div className="section-kicker mb-1">Access Control</div>
+              <h1 className="display-font text-4xl uppercase text-white">Admin Panel</h1>
+              <p className="text-gray-400">Manage user access</p>
+            </div>
           </div>
         </div>
 
-        <div className="bg-dark-card border border-dark-border rounded-xl overflow-hidden">
-          <div className="flex border-b border-dark-border">
+        <div className="energy-panel overflow-hidden rounded-[28px]">
+          <div className="flex border-b border-white/6">
             <button
               onClick={() => setActiveTab('requests')}
               className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 font-medium transition-colors ${
                 activeTab === 'requests'
-                  ? 'bg-dark-hover text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white hover:bg-dark-hover'
+                  ? 'bg-white/5 text-white border-b-2 border-lime-300'
+                  : 'text-gray-400 hover:text-white hover:bg-white/[0.03]'
               }`}
             >
               <Clock className="w-4 h-4" />
@@ -148,8 +152,8 @@ export const AdminPanel = () => {
               onClick={() => setActiveTab('users')}
               className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 font-medium transition-colors ${
                 activeTab === 'users'
-                  ? 'bg-dark-hover text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white hover:bg-dark-hover'
+                  ? 'bg-white/5 text-white border-b-2 border-lime-300'
+                  : 'text-gray-400 hover:text-white hover:bg-white/[0.03]'
               }`}
             >
               <Users className="w-4 h-4" />
@@ -163,7 +167,7 @@ export const AdminPanel = () => {
           <div className="p-6">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                <Loader2 className="w-8 h-8 text-lime-300 animate-spin" />
               </div>
             ) : activeTab === 'requests' ? (
               pendingUsers.length === 0 ? (
@@ -172,7 +176,7 @@ export const AdminPanel = () => {
                   animate={{ opacity: 1 }}
                   className="text-center py-12"
                 >
-                  <div className="bg-dark-hover p-4 rounded-full inline-block mb-4">
+                  <div className="modal-section p-4 rounded-full inline-block mb-4">
                     <Check className="w-8 h-8 text-green-500" />
                   </div>
                   <p className="text-gray-400">No pending requests</p>
@@ -180,22 +184,25 @@ export const AdminPanel = () => {
               ) : (
                 <div className="space-y-4">
                   {pendingUsers.map((user) => (
+                    (() => {
+                      const userKey = user.email || user.id;
+                      return (
                     <motion.div
                       key={user.id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="bg-dark-hover border border-dark-border rounded-lg p-4"
+                      className="modal-section rounded-2xl p-4"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-start gap-4">
-                          <div className="bg-gradient-to-br from-blue-500 to-purple-500 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          <div className="bg-gradient-to-br from-orange-500 to-lime-400 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg">
                             {user.name?.charAt(0).toUpperCase() || user.id.charAt(0).toUpperCase()}
                           </div>
                           <div className="flex-1">
                             <p className="text-white font-semibold text-lg">{user.name || 'Unknown'}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <Mail className="w-4 h-4 text-gray-500" />
-                              <p className="text-gray-400 text-sm">{user.id}</p>
+                              <p className="text-gray-400 text-sm">{user.email || user.id}</p>
                             </div>
                             <p className="text-gray-500 text-xs mt-1">
                               Requested: {formatDate(user.requestedAt)}
@@ -203,7 +210,7 @@ export const AdminPanel = () => {
                             
                             {/* Message Section */}
                             {user.message && (
-                              <div className="mt-3 bg-dark-bg rounded-lg p-3 border border-dark-border">
+                              <div className="mt-3 rounded-xl border border-white/6 bg-black/20 p-3">
                                 <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
                                   <MessageSquare className="w-4 h-4" />
                                   <span className="font-medium">Message:</span>
@@ -216,21 +223,21 @@ export const AdminPanel = () => {
                         
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleApprove(user.id)}
-                            disabled={actionLoading === user.id}
-                            className="p-3 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg transition-colors disabled:opacity-50"
+                            onClick={() => handleApprove(userKey)}
+                            disabled={actionLoading === userKey}
+                            className="p-3 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-xl transition-colors disabled:opacity-50"
                             title="Approve Access"
                           >
-                            {actionLoading === user.id ? (
+                            {actionLoading === userKey ? (
                               <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
                               <Check className="w-5 h-5" />
                             )}
                           </button>
                           <button
-                            onClick={() => handleReject(user.id)}
-                            disabled={actionLoading === user.id}
-                            className="p-3 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition-colors disabled:opacity-50"
+                            onClick={() => handleReject(userKey)}
+                            disabled={actionLoading === userKey}
+                            className="p-3 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl transition-colors disabled:opacity-50"
                             title="Reject Request"
                           >
                             <X className="w-5 h-5" />
@@ -238,6 +245,8 @@ export const AdminPanel = () => {
                         </div>
                       </div>
                     </motion.div>
+                      );
+                    })()
                   ))}
                 </div>
               )
@@ -252,37 +261,42 @@ export const AdminPanel = () => {
             ) : (
               <div className="space-y-4">
                 {enabledUsers.map((user) => (
+                  (() => {
+                    const userKey = user.email || user.id;
+                    return (
                   <motion.div
                     key={user.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="bg-dark-hover border border-dark-border rounded-lg p-4 flex items-center justify-between"
+                    className="modal-section rounded-2xl p-4 flex items-center justify-between"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
+                      <div className="bg-gradient-to-br from-cyan-500 to-blue-500 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
                         {user.name?.charAt(0).toUpperCase() || user.id.charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <p className="text-white font-medium">{user.name || 'Unknown'}</p>
-                        <p className="text-gray-400 text-sm">{user.id}</p>
+                        <p className="text-gray-400 text-sm">{user.email || user.id}</p>
                         <p className="text-gray-500 text-xs mt-1">
                           Approved: {formatDate(user.approvedAt)}
                         </p>
                       </div>
                     </div>
                     <button
-                      onClick={() => handleRemove(user.id)}
-                      disabled={actionLoading === user.id}
-                      className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-lg transition-colors disabled:opacity-50"
+                      onClick={() => handleRemove(userKey)}
+                      disabled={actionLoading === userKey}
+                      className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl transition-colors disabled:opacity-50"
                       title="Remove User"
                     >
-                      {actionLoading === user.id ? (
+                      {actionLoading === userKey ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
                         <UserMinus className="w-5 h-5" />
                       )}
                     </button>
                   </motion.div>
+                    );
+                  })()
                 ))}
               </div>
             )}
@@ -291,7 +305,7 @@ export const AdminPanel = () => {
 
         <button
           onClick={fetchUsers}
-          className="mt-4 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          className="btn-secondary mt-4 flex items-center gap-2 rounded-xl px-4 py-2 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
           Refresh
