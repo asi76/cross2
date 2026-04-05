@@ -38,27 +38,50 @@ const WORKOUT_CATEGORIES = [
   { id: 'cardio2', name: 'Cardio 2' }
 ];
 
+const HERO_HEADLINES = [
+  'Crossplanner trasforma intenzione in ritmo di allenamento.',
+  'Ogni sessione parte meglio quando il piano e gia carico.',
+  'Allenati con una dashboard che spinge come un coach.',
+  'Metti ordine, alza il ritmo, attacca il prossimo blocco.',
+  'Performance vere iniziano da una struttura senza attrito.',
+  'La scheda giusta accende potenza prima ancora del warmup.',
+  'Visual chiari, energia alta, esecuzione piu pulita.',
+  'Ogni workout forte nasce da un sistema forte.',
+  'Preparazione nitida, esecuzione aggressiva.',
+  'Programma con precisione, muoviti con fame.',
+  'Il tuo training flow adesso ha piu impatto e piu spinta.',
+  'Pianificare bene e gia il primo gesto da atleta.',
+  'Dai piu intensita al processo, non solo alla fatica.',
+  'Una UI piu decisa per sessioni piu decise.',
+  'Meno attrito mentale, piu energia operativa.',
+  'Costruisci schede che sembrano gia in movimento.',
+  'Il workout inizia quando il focus entra in schermata.',
+  'Ogni dettaglio qui punta alla prossima prestazione.',
+  'Semplifica il setup e libera intensita per il lavoro vero.',
+  'Dalla pianificazione al timer, tutto spinge in avanti.'
+];
+
 const HERO_MESSAGES = [
-  'Ogni scheda ben costruita accende una sessione piu feroce.',
-  'Spingi forte quando serve, recupera bene quando conta.',
-  'Disciplina quotidiana, energia da gara.',
-  'La costanza trasforma il piano in risultati reali.',
-  'Allenati con intenzione, non solo con intensita.',
-  'Ogni ripetizione pulita costruisce potenza utile.',
-  'La forma guida la forza, la forza guida il progresso.',
-  'Il workout migliore e quello che completi con presenza totale.',
-  'Recupero intelligente, esecuzione aggressiva.',
-  'Porta ritmo, precisione e fame in ogni blocco.',
-  'Le grandi performance iniziano da una routine solida.',
-  'Il corpo cambia quando la mente smette di negoziare.',
-  'Volume controllato, focus assoluto.',
-  'L energia cresce quando il piano e chiaro.',
-  'Ogni stazione e un test, ogni test e un upgrade.',
-  'Resistenza mentale prima, potenza fisica subito dopo.',
-  'Allenarsi bene oggi rende piu forte la settimana intera.',
-  'Meno caos, piu performance.',
-  'Costruisci slancio, poi difendilo ogni giorno.',
-  'Muoviti da atleta, pensa da professionista.'
+  'Carica la mente, poi carica il ferro.',
+  'Ogni blocco chiaro ti lascia piu energia per spingere davvero.',
+  'Recupera con intelligenza, esegui con cattiveria sportiva.',
+  'Precisione nel setup, ferocia nell esecuzione.',
+  'Il focus cresce quando tutto il resto smette di distrarre.',
+  'Allenati per ripetere bene oggi e dominare meglio domani.',
+  'Una scheda pulita rende piu forti anche le decisioni veloci.',
+  'Disciplina visiva, disciplina fisica.',
+  'Ogni ripetizione forte nasce da una scelta chiara.',
+  'Spingi sul lavoro, non sul caos.',
+  'La costanza ama i sistemi che scorrono bene.',
+  'Tieni alto il ritmo, ma ancora piu alta la qualita.',
+  'Quando il piano e leggibile, la testa attacca meglio.',
+  'Più ordine nel processo, piu intensita nel risultato.',
+  'Ogni sessione merita la stessa fame del primo set.',
+  'Costruisci slancio adesso e difendilo fino all ultima reps.',
+  'Energia alta, pause utili, esecuzione pulita.',
+  'L atleta cresce dove il sistema smette di rallentarlo.',
+  'Muoviti con intenzione e lascia che il ritmo faccia il resto.',
+  'Dal primo click all ultimo round, resta in avanzamento.'
 ];
 
 function App() {
@@ -340,9 +363,18 @@ function App() {
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <div className="section-kicker mb-3">Training Command Center</div>
-              <h2 className="display-font text-4xl uppercase leading-[0.92] text-white sm:text-5xl">
-                Crossplanner spinge il ritmo anche prima di iniziare il workout.
-              </h2>
+              <AnimatePresence mode="wait">
+                <motion.h2
+                  key={`headline-${heroMessageIndex}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35 }}
+                  className="display-font text-3xl uppercase leading-[0.94] text-white sm:text-[2.7rem]"
+                >
+                  {HERO_HEADLINES[heroMessageIndex]}
+                </motion.h2>
+              </AnimatePresence>
               <AnimatePresence mode="wait">
                 <motion.p
                   key={heroMessageIndex}
